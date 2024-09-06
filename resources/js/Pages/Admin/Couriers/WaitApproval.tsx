@@ -78,10 +78,10 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
             header: "Güncelleme Tarihi",
             sortable: true,
             filter: true,
-            filterPlaceholder: "Kayıt Tarihine Göre",
+            filterPlaceholder: "Güncellenme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
-                return <span>{new Date(rowData.created_at).toLocaleDateString()}</span>
+                return <span>{new Date(rowData.updated_at).toLocaleDateString()}</span>
             }
         }
     ];
@@ -116,6 +116,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                         email: {value: null, matchMode: 'contains'},
                         phone: {value: null, matchMode: 'contains'},
                         created_at: {value: null, matchMode: 'contains'},
+                        updated_at: {value: null, matchMode: 'contains'},
                     }}
                     emptyMessage="Kurye bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"
