@@ -10,9 +10,9 @@ import {Toast} from "primereact/toast";
 import {classNames} from "primereact/utils";
 import {InputMask} from "primereact/inputmask";
 import {InputSwitch} from "primereact/inputswitch";
-import {storeCourier} from "@/helpers/Admin/couriers";
+import {storeBusiness} from "@/helpers/Admin/businesses";
 
-const NewCourier = ({auth, csrfToken}: {
+const NewBusinessPage = ({auth, csrfToken}: {
     auth?: any,
     csrfToken?: string
 }) => {
@@ -51,7 +51,7 @@ const NewCourier = ({auth, csrfToken}: {
         onSubmit: (values) => {
             setLoading(true);
             let postData = {...values, account_verification: values.account_verification ? 1 : 0};
-            storeCourier(postData, csrfToken)
+            storeBusiness(postData, csrfToken)
                 .then((response) => {
                     if (response.status) {
                         toast.current?.show({severity: 'success', summary: 'Başarılı', detail: response.message});
@@ -87,15 +87,15 @@ const NewCourier = ({auth, csrfToken}: {
     }, [submitCount]);
     return <PageContainer auth={auth} csrfToken={csrfToken}>
         <MainLayout>
-            <Head title="Yeni Kurye Ekle"/>
+            <Head title="Yeni İşletme Ekle"/>
             <Toast ref={toast}/>
             <div className="card">
-                <span className="text-900 text-xl font-bold mb-4 block">Yeni Kurye Ekle</span>
+                <span className="text-900 text-xl font-bold mb-4 block">Yeni İşletme Ekle</span>
                 <div className="grid">
                     <div className="col-12 lg:col-2">
-                        <div className="text-900 font-medium text-xl mb-3">Kurye Bilgileri</div>
-                        <p className="m-0 p-0 text-600 line-height-3 mr-3">İstatistikler İçin Tüm Bilgileri Tam Bir
-                            Şekilde Doldurunuz.
+                        <div className="text-900 font-medium text-xl mb-3">İşletme Bilgileri</div>
+                        <p className="m-0 p-0 text-600 line-height-3 mr-3">
+                            İşletme Sahibinin bilgilerini giriniz.
                             {errors && Object.keys(errors).length > 0 && <>
                                 <ul className="mt-3">
                                     {Object.keys(errors).map((error, index) => {
@@ -117,7 +117,7 @@ const NewCourier = ({auth, csrfToken}: {
                                     <i className={classNames("pi", {
                                         'pi-times-circle text-red-500 text-sm': !!errors.name,
                                         'pi-check-circle text-green-500 text-sm': !errors.name && submitCount > 0,
-                                    })}></i> Ad Soyad
+                                    })}></i> Ad Soyad (İşletme Sahibi)
                                 </label>
                                 <InputText id="name"
                                            type="text"
@@ -250,7 +250,7 @@ const NewCourier = ({auth, csrfToken}: {
                                 />
                             </div>
                             <div className="col-12">
-                                <Button label="Kurye Ekle"
+                                <Button label="İşletme Ekle"
                                         disabled={!isValid}
                                         loading={loading}
                                         type={"submit"}
@@ -264,5 +264,4 @@ const NewCourier = ({auth, csrfToken}: {
         </MainLayout>
     </PageContainer>
 }
-export default NewCourier;
-
+export default NewBusinessPage;

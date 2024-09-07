@@ -2,21 +2,15 @@ import PageContainer from "@/PageContainer";
 import MainLayout from "@/Layouts/MainLayout";
 import {Head, router} from "@inertiajs/react";
 import {Button} from 'primereact/button';
-import {InputText} from 'primereact/inputtext';
-import React, {ReactNode, useEffect, useState} from 'react';
-import * as Yup from "yup";
-import {useFormik} from "formik";
+import React, { useEffect, useState} from 'react';
 import {Toast} from "primereact/toast";
-import {classNames} from "primereact/utils";
-import {InputMask} from "primereact/inputmask";
-import {InputSwitch} from "primereact/inputswitch";
 import {
-    getCouriers,
-    approveCourier as approveCourierFunc,
-    destroyCourier as destroyCourierFunc,
-    multipleApproveCourier as multipleApproveCourierFunc,
-    multipleDestroyCourier as multipleDestroyCourierFunc
-} from "@/helpers/Admin/couriers";
+    getBusinesses,
+    approveBusiness as approveBusinessFunc,
+    destroyBusiness as destroyBusinessFunc,
+    multipleApproveBusiness as multipleApproveBusinessFunc,
+    multipleDestroyBusiness as multipleDestroyBusinessFunc
+} from "@/helpers/Admin/businesses";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
 import {Message} from "primereact/message";
@@ -26,19 +20,19 @@ import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 
-const WaitApprovalCouriers = ({auth, csrfToken}: {
+const WaitApprovalBusinesses = ({auth, csrfToken}: {
     auth?: any,
     csrfToken?: string
 }) => {
     const [loading, setLoading] = useState(true);
-    const [couriers, setCouriers] = useState([]);
-    const [selectedCouriers, setSelectedCouriers] = useState([] as any[]);
-    const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminCouriersWaitApprovalsColumns");
+    const [businesses, setBusinesses] = useState([]);
+    const [selectedBusinesses, setSelectedBusinesses] = useState([] as any[]);
+    const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminBusinessesWaitApprovalsColumns");
     const [error, setError] = useState(null);
     useEffect(() => {
-        getCouriers("unverified", csrfToken).then(data => {
+        getBusinesses("unverified", csrfToken).then(data => {
             if (data.status) {
-                setCouriers(data.couriers);
+                setBusinesses(data.businesses);
                 setLoading(false);
                 setError(null)
             } else {
@@ -53,17 +47,17 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
     const deleteCourier = (event: any, id: number) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Kuryeyi silmek istediğinize emin misiniz?",
+            message: "İşletmeyi silmek istediğinize emin misiniz?",
             acceptLabel: "Sil",
             acceptClassName: "p-button-danger",
             rejectLabel: "Vazgeç",
             accept() {
                 setLoading(true)
-                destroyCourierFunc(id, csrfToken)
+                destroyBusinessFunc(id, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
-                            setCouriers(couriers.filter((c: any) => c.id !== id));
-                            setSelectedCouriers([]);
+                            setBusinesses(businesses.filter((c: any) => c.id !== id));
+                            setSelectedBusinesses([]);
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
                             toast.current?.show({severity: "error", summary: "Hata", detail: message});
@@ -79,17 +73,17 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
     const approveCourier = (event: any, id: number) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Kurye Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            message: "İşletme Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
             acceptLabel: "Onayla",
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
                 setLoading(true)
-                approveCourierFunc(id, csrfToken)
+                approveBusinessFunc(id, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
-                            setCouriers(couriers.filter((c: any) => c.id !== id));
-                            setSelectedCouriers([]);
+                            setBusinesses(businesses.filter((c: any) => c.id !== id));
+                            setSelectedBusinesses([]);
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
                             toast.current?.show({severity: "error", summary: "Hata", detail: message});
@@ -105,17 +99,17 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
     const multipleApproveCouriers = (event: any, ids: number[]) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Seçilen kuryelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
-            acceptLabel: "Onayla" + ` (${ids.length} Kurye)`,
+            message: "Seçilen işletmelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            acceptLabel: "Onayla" + ` (${ids.length} İşletme)`,
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
                 setLoading(true)
-                multipleApproveCourierFunc(ids, csrfToken)
+                multipleApproveBusinessFunc(ids, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
-                            setCouriers(couriers.filter((c: any) => !ids.includes(c.id)));
-                            setSelectedCouriers([]);
+                            setBusinesses(businesses.filter((c: any) => !ids.includes(c.id)));
+                            setSelectedBusinesses([]);
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
                             toast.current?.show({severity: "error", summary: "Hata", detail: message});
@@ -131,17 +125,17 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
     const multipleDestroyCouriers = (event: any, ids: number[]) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Seçilen kuryeler silinecektir. Silmek istediğinize emin misiniz?",
-            acceptLabel: "Sil" + ` (${ids.length} Kurye)`,
+            message: "Seçilen işletmeler silinecektir. Silmek istediğinize emin misiniz?",
+            acceptLabel: "Sil" + ` (${ids.length} İşletme)`,
             acceptClassName: "p-button-danger",
             rejectLabel: "Vazgeç",
             accept() {
                 setLoading(true)
-                multipleDestroyCourierFunc(ids, csrfToken)
+                multipleDestroyBusinessFunc(ids, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
-                            setCouriers(couriers.filter((c: any) => !ids.includes(c.id)));
-                            setSelectedCouriers([]);
+                            setBusinesses(businesses.filter((c: any) => !ids.includes(c.id)));
+                            setSelectedBusinesses([]);
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
                             toast.current?.show({severity: "error", summary: "Hata", detail: message});
@@ -162,7 +156,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
         },
         {
             field: "name",
-            header: "Adı Soyadı",
+            header: "Ad Soyad (İşletme Sahibi)",
             hidden: !selectedColumns.includes("name"),
             sortable: true,
             filter: true,
@@ -224,7 +218,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                                   position: "top"
                               }}
                               onClick={(event) => {
-                                  router.visit(route("admin.couriers.edit", {id: rowData.id}))
+                                  router.visit(route("admin.businesses.edit", {id: rowData.id}))
                               }}
                 />
                     <Button size={"small"} icon={"pi pi-trash"} severity={"danger"} tooltip={"Sil"}
@@ -243,25 +237,25 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
     const renderHeader = () => {
         return <>
             <Toolbar
-                start={selectedCouriers.length > 0 && <>
+                start={selectedBusinesses.length > 0 && <>
                     <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
                             tooltip={"Toplu Onay Yapmanızı Sağlar"} tooltipOptions={{
                         position: "top"
-                    }} label={"Onayla (" + selectedCouriers.length + ")"} severity={"success"}
+                    }} label={"Onayla (" + selectedBusinesses.length + ")"} severity={"success"}
                             onClick={(event) => {
-                                multipleApproveCouriers(event, selectedCouriers.map((c) => c.id));
+                                multipleApproveCouriers(event, selectedBusinesses.map((c) => c.id));
                             }}
                     />
                     <Button size={"small"} icon={"pi pi-trash"} className={"mr-2"}
-                            tooltip={"Seçilen Kuryeleri Silmenizi Sağlar"} tooltipOptions={{
+                            tooltip={"Seçilen İşletmeleri Silmenizi Sağlar"} tooltipOptions={{
                         position: "top"
-                    }} label={"Sil (" + selectedCouriers.length + ")"} severity={"danger"}
+                    }} label={"Sil (" + selectedBusinesses.length + ")"} severity={"danger"}
                             onClick={(event) => {
-                                multipleDestroyCouriers(event, selectedCouriers.map((c) => c.id));
+                                multipleDestroyCouriers(event, selectedBusinesses.map((c) => c.id));
                             }}
                     />
                     <Button size={"small"} icon={"pi pi-filter-slash"} label={"Seçimi Temizle"} severity={"warning"}
-                            onClick={() => setSelectedCouriers([])}/>
+                            onClick={() => setSelectedBusinesses([])}/>
                 </>}
 
                 end={<>
@@ -274,7 +268,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
     const toast = React.useRef<Toast>(null);
     return <PageContainer auth={auth} csrfToken={csrfToken}>
         <MainLayout>
-            <Head title="Onay Bekleyen Kuryeler"/>
+            <Head title="Onay Bekleyen İşletmeler"/>
             <Toast ref={toast}/>
             <OverlayPanel ref={columnsRef} showCloseIcon style={{width: '300px'}}>
                 <div className="flex align-items-center justify-content-start mb-3">
@@ -303,7 +297,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                 </div>
             </OverlayPanel>
             <div className="card">
-                <span className="text-900 text-xl font-bold mb-4 block">Onay Bekleyen Kuryeler</span>
+                <span className="text-900 text-xl font-bold mb-4 block">Onay Bekleyen İşletmeler</span>
                 {error !== null &&
                     <Message
                         className="w-full"
@@ -311,14 +305,14 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                         text={error}
                     />
                 }
-                {!loading && couriers.length === 0 && <Message
+                {!loading && businesses.length === 0 && <Message
                     className={"w-full"}
-                    severity="info" text={"Onay bekleyen kurye bulunamadı."}
+                    severity="info" text={"Onay bekleyen işletme bulunamadı."}
                 />}
                 <DataTable
-                    hidden={!loading && couriers.length === 0 || error !== null}
+                    hidden={!loading && businesses.length === 0 || error !== null}
                     loading={loading}
-                    value={couriers}
+                    value={businesses}
                     removableSort paginator
                     filterDisplay="row"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
@@ -332,11 +326,11 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                         created_at: {value: null, matchMode: 'contains'},
                         updated_at: {value: null, matchMode: 'contains'},
                     }}
-                    emptyMessage="Kurye bulunamadı."
+                    emptyMessage="İşletme bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"
                     selectionMode={"checkbox"}
-                    selection={selectedCouriers}
-                    onSelectionChange={(e) => setSelectedCouriers(e.value)}
+                    selection={selectedBusinesses}
+                    onSelectionChange={(e) => setSelectedBusinesses(e.value)}
                 >
                     {columns.map((col, index) => {
                         return <Column key={index} {...col} />
@@ -346,4 +340,4 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
         </MainLayout>
     </PageContainer>
 }
-export default WaitApprovalCouriers;
+export default WaitApprovalBusinesses;

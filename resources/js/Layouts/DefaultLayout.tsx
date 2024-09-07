@@ -8,6 +8,7 @@ import 'primereact/resources/primereact.css';
 import {router} from "@inertiajs/react";
 import {useContext, useEffect, useState} from "react";
 import AppConfig from "@/layout/AppConfig";
+import {ConfirmPopup} from "primereact/confirmpopup";
 
 addLocale('tr', {
     firstDayOfWeek: 1,
@@ -53,8 +54,8 @@ export default function RootLayout({children, auth = {}, csrfToken = ""}: {
     return (
         <PrimeReactProvider>
             <LayoutProvider auth={auth} csrfToken={csrfToken}>
+                <ConfirmPopup />
                 {children}
-                <AppConfig/>
             </LayoutProvider>
         </PrimeReactProvider>
     );

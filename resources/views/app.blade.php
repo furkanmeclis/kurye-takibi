@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link id="theme-link" href="/theme/theme-light/indigo/theme.css" rel="stylesheet"/>
-
-        <!-- Scripts -->
-        @routes
-        @viteReactRefresh
-        @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
-        @inertiaHead
-    </head>
-    <body>
-        @inertia
-    </body>
+    <!-- begin:Theme Styles -->
+    <link id="theme-link" href="/theme/theme-light/yellow/theme.css" rel="stylesheet"/>
+    <!-- end:Theme Styles -->
+    <!-- begin:Theme Scripts -->
+    @routes
+    @viteReactRefresh
+    @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
+    @inertiaHead
+    <!-- end:Theme Scripts -->
+</head>
+<body>
+@inertia
+</body>
 </html>

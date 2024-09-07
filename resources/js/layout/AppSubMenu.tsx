@@ -44,7 +44,7 @@ const AppSubMenu = (props: MenuProps) => {
         if (accesableRoles.includes("*")) {
             return true;
         }
-        let userRole = auth?.user.role;
+        let userRole = auth?.user?.role;
         if (userRole) {
             return accesableRoles.includes(userRole);
         }

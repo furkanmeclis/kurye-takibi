@@ -25,6 +25,28 @@ const AppMenu = () => {
                 }
             ]
         },
+        {
+            label: 'İşletmeler',
+            icon: 'pi pi-shop',
+            roles: ['admin'],
+            items: [
+                {
+                    label: 'Yeni Ekle',
+                    icon: 'pi pi-fw pi-plus-circle',
+                    to: route("admin.businesses.create"),
+                },
+                {
+                    label: 'Onay Bekleyenler',
+                    icon: 'pi pi-fw pi-clock',
+                    to: route("admin.businesses.waitApproval"),
+                },
+                {
+                    label: 'Tüm İşletmeler',
+                    icon: 'pi pi-fw pi-home',
+                    to: route("admin.businesses.index"),
+                }
+            ]
+        },
     ];
 
     return <AppSubMenu model={model} />;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -10,21 +11,21 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class CouriersController extends \App\Http\Controllers\Controller
+class BusinessesController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('Admin/Couriers/All');
+        return Inertia::render('Admin/Businesses/All');
     }
 
     public function waitApproval(): Response
     {
-        return Inertia::render('Admin/Couriers/WaitApproval');
+        return Inertia::render('Admin/Businesses/WaitApproval');
     }
 
     public function create(): Response
     {
-        return Inertia::render('Admin/Couriers/New');
+        return Inertia::render('Admin/Businesses/New');
     }
 
     public function store(Request $request): \Illuminate\Http\JsonResponse
@@ -36,23 +37,22 @@ class CouriersController extends \App\Http\Controllers\Controller
                 'phone' => 'required|string|max:255|unique:' . User::class,
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
             ]);
-            $newCourier = new User();
-            $newCourier->name = $request->name;
-            $newCourier->email = $request->email;
-            $newCourier->phone = $request->phone;
-            $newCourier->password = Hash::make($request->password);
-            $newCourier->role = 'courier';
+            $newBusiness = new User();
+            $newBusiness->name = $request->name;
+            $newBusiness->email = $request->email;
+            $newBusiness->phone = $request->phone;
+            $newBusiness->password = Hash::make($request->password);
+            $newBusiness->role = 'business';
             if ($request->account_verification == "1") {
-                $newCourier->email_verified_at = now();
-                $newCourier->verified_at = now();
-                $newCourier->verified = 1;
+                $newBusiness->email_verified_at = now();
+                $newBusiness->verified_at = now();
+                $newBusiness->verified = 1;
             } else {
-                $newCourier->email_verified_at = null;
-                $newCourier->verified_at = null;
-                $newCourier->verified = 0;
+                $newBusiness->email_verified_at = null;
+                $newBusiness->verified_at = null;
+                $newBusiness->verified = 0;
             }
-
-            if ($newCourier->save()) {
+            if ($newBusiness->save()) {
                 return response()->json([
                     "status" => true,
                     "message" => "Kayıt Başarıyla Gerçekleşti.",
@@ -76,99 +76,99 @@ class CouriersController extends \App\Http\Controllers\Controller
         }
     }
 
-    public function listCouriers($type): \Illuminate\Http\JsonResponse
+    public function listBusinesses($type): \Illuminate\Http\JsonResponse
     {
-        $couriers = null;
+        $businesses = null;
         if ($type == "all") {
-            $couriers = User::where("role", "courier")->orderBy("created_at", "desc");
+            $businesses = User::where("role", "business")->orderBy("created_at", "desc");
         } elseif ($type == "verified") {
-            $couriers = User::where("role", "courier")->orderBy("created_at", "desc")->where("verified", 1);
+            $businesses = User::where("role", "business")->orderBy("created_at", "desc")->where("verified", 1);
         } elseif ($type == "unverified") {
-            $couriers = User::where("role", "courier")->orderBy("created_at", "desc")->where("verified", 0);
+            $businesses = User::where("role", "business")->orderBy("created_at", "desc")->where("verified", 0);
         }
-        if ($couriers) {
-            $couriers = $couriers->get()->map(function ($courier) {
-                $courier->phone = "0" . str_replace(["(", ")", "-", " "], "", $courier->phone);
-                return $courier;
+        if ($businesses) {
+            $businesses = $businesses->get()->map(function ($business) {
+                $business->phone = "0" . str_replace(["(", ")", "-", " "], "", $business->phone);
+                return $business;
             });
             return response()->json([
                 "status" => true,
-                "couriers" => $couriers
+                "businesses" => $businesses
             ]);
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Kurye Listesi Alınamadı."
+                "message" => "İşletme Listesi Alınamadı."
             ]);
         }
     }
 
     public function showDetails($id): \Illuminate\Http\JsonResponse
     {
-        $courier = User::where('role', 'courier')->where('id', $id)->first();
-        if ($courier) {
+        $business = User::where('role', 'business')->where('id', $id)->first();
+        if ($business) {
             return response()->json([
                 "status" => true,
-                "courier" => $courier
+                "business" => $business
             ]);
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Kurye Bulunamadı."
+                "message" => "İşletme Bulunamadı."
             ]);
         }
     }
 
     public function edit($id)
     {
-        $courier = User::where('role', 'courier')->where('id', $id)->first(["id", "verified"]);
-        if ($courier) {
-            return Inertia::render('Admin/Couriers/Edit', [
-                'courierId' => $courier->id,
+        $business = User::where('role', 'business')->where('id', $id)->first(["id", "verified"]);
+        if ($business) {
+            return Inertia::render('Admin/Businesses/Edit', [
+                'businessId' => $business->id,
             ]);
         } else {
-            return redirect()->route('admin.couriers.index')->with('message', 'Kurye Bulunamadı.')->with('type', 'error')->with("title", "Hata");
+            return redirect()->route('admin.businesses.index')->with('message', 'İşletme Bulunamadı.')->with('type', 'error')->with("title", "Hata");
         }
     }
 
     public function update(Request $request, $id)
     {
-        $courier = User::where('role', 'courier')->where('id', $id)->first();
-        if ($courier) {
+        $business = User::where('role', 'business')->where('id', $id)->first();
+        if ($business) {
             try {
                 $request->validate([
                     'name' => 'required|string|max:255',
-                    'email' => 'required|string|lowercase|email|max:255|unique:' . User::class . ',email,' . $courier->id,
-                    'phone' => 'required|string|max:255|unique:' . User::class . ',phone,' . $courier->id,
+                    'email' => 'required|string|lowercase|email|max:255|unique:' . User::class . ',email,' . $business->id,
+                    'phone' => 'required|string|max:255|unique:' . User::class . ',phone,' . $business->id,
                     'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
                 ]);
-                $courier->name = $request->name;
-                $courier->email = $request->email;
-                $courier->phone = $request->phone;
+                $business->name = $request->name;
+                $business->email = $request->email;
+                $business->phone = $request->phone;
                 if ($request->account_verification == "1") {
-                    if ($courier->verified == 0) {
-                        $courier->verified = 1;
-                        $courier->verified_at = now();
+                    if ($business->verified == 0) {
+                        $business->verified = 1;
+                        $business->verified_at = now();
                     }
                 } else {
-                    if ($courier->verified == 1) {
-                        $courier->verified = 0;
-                        $courier->verified_at = null;
+                    if ($business->verified == 1) {
+                        $business->verified = 0;
+                        $business->verified_at = null;
                     }
                 }
                 if ($request->has("password_change")) {
-                    $courier->password = Hash::make($request->password);
+                    $business->password = Hash::make($request->password);
                 }
-                if ($courier->save()) {
+                if ($business->save()) {
                     return response()->json([
                         "status" => true,
-                        "message" => "Kurye Güncelleme İşlemi Başarılı.",
-                        "courier" => $courier,
+                        "message" => "İşletme Güncelleme İşlemi Başarılı.",
+                        "business" => $business,
                     ]);
                 } else {
                     return response()->json([
                         "status" => false,
-                        "message" => "Kurye Güncelleme İşlemi Başarısız Oldu."
+                        "message" => "İşletme Güncelleme İşlemi Başarısız Oldu."
                     ]);
                 }
 
@@ -186,99 +186,99 @@ class CouriersController extends \App\Http\Controllers\Controller
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Kurye Bulunamadı."
+                "message" => "İşletme Bulunamadı."
             ]);
         }
     }
 
     public function approve($id): \Illuminate\Http\JsonResponse
     {
-        $courier = User::where('role', 'courier')->where('id', $id)->first();
-        if ($courier) {
-            if ($courier->verified == 1) {
+        $business = User::where('role', 'business')->where('id', $id)->first();
+        if ($business) {
+            if ($business->verified == 1) {
                 return response()->json([
                     "status" => false,
-                    "message" => "Kurye Zaten Onaylanmış."
+                    "message" => "İşletme Zaten Onaylanmış."
                 ]);
             } else {
-                $courier->verified = 1;
-                $courier->verified_at = now();
-                if ($courier->save()) {
+                $business->verified = 1;
+                $business->verified_at = now();
+                if ($business->save()) {
                     return response()->json([
                         "status" => true,
-                        "message" => "Kurye Onaylama İşlemi Başarılı."
+                        "message" => "İşletme Onaylama İşlemi Başarılı."
                     ]);
                 } else {
                     return response()->json([
                         "status" => false,
-                        "message" => "Kurye Onaylama İşlemi Başarısız Oldu."
+                        "message" => "İşletme Onaylama İşlemi Başarısız Oldu."
                     ]);
                 }
             }
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Kurye Bulunamadı."
+                "message" => "İşletme Bulunamadı."
             ]);
         }
     }
 
     public function multipleApprove(Request $request): \Illuminate\Http\JsonResponse
     {
-        $couriers = User::where('role', 'courier')->whereIn('id', $request->ids);
-        if ($couriers) {
-            $couriers->update([
+        $businesses = User::where('role', 'business')->whereIn('id', $request->ids);
+        if ($businesses) {
+            $businesses->update([
                 "verified" => 1,
                 "verified_at" => now()
             ]);
             return response()->json([
                 "status" => true,
-                "message" => "Seçilen Kuryeler Onaylandı."
+                "message" => "Seçilen İşletme Onaylandı."
             ]);
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Seçilen Kuryeler Onaylanamadı."
+                "message" => "Seçilen İşletme Onaylanamadı."
             ]);
         }
     }
 
     public function destroy($id): \Illuminate\Http\JsonResponse
     {
-        $courier = User::where('role', 'courier')->where('id', $id)->first();
-        if ($courier) {
-            if ($courier->delete()) {
+        $business = User::where('role', 'business')->where('id', $id)->first();
+        if ($business) {
+            if ($business->delete()) {
                 return response()->json([
                     "status" => true,
-                    "message" => "Kurye Silme İşlemi Başarılı."
+                    "message" => "İşletme Silme İşlemi Başarılı."
                 ]);
             } else {
                 return response()->json([
                     "status" => false,
-                    "message" => "Kurye Silme İşlemi Başarısız Oldu."
+                    "message" => "İşletme Silme İşlemi Başarısız Oldu."
                 ]);
             }
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Kurye Bulunamadı."
+                "message" => "İşletme Bulunamadı."
             ]);
         }
     }
 
     public function multipleDestroy(Request $request): \Illuminate\Http\JsonResponse
     {
-        $couriers = User::where('role', 'courier')->whereIn('id', $request->ids);
-        if ($couriers) {
-            $couriers->delete();
+        $businesses = User::where('role', 'business')->whereIn('id', $request->ids);
+        if ($businesses) {
+            $businesses->delete();
             return response()->json([
                 "status" => true,
-                "message" => "Seçilen Kuryeler Silindi."
+                "message" => "Seçilen İşletmeler Silindi."
             ]);
         } else {
             return response()->json([
                 "status" => false,
-                "message" => "Seçilen Kuryeler Silinemedi."
+                "message" => "Seçilen İşletmeler Silinemedi."
             ]);
         }
     }
