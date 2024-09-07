@@ -12,11 +12,13 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->name('dashboard');
-
+Route::get('/access-denied', function () {
+    return Inertia::render('Auth/AccessDenied');
+})->name('access.denied');
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::prefix('admin')->name("admin.")->group(function () {
+    Route::prefix('admin')->name("admin.")->middleware("only:admin")->group(function () {
         Route::prefix('/couriers')->name("couriers.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\CouriersController::class, 'index'])->name('index');
             Route::get('/wait-approval', [\App\Http\Controllers\Admin\CouriersController::class, 'waitApproval'])->name('waitApproval');
@@ -47,7 +49,5 @@ Route::middleware('auth')->group(function () {
         });
     });
 });
-Route::get('/deneme', function () {
-    return redirect()->route('admin.couriers.index')->with('message', 'Kurye Onaylanmamış.')->with('type', 'error')->with("title", "Hata");
-});
+
 require __DIR__.'/auth.php';
