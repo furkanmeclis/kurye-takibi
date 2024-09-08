@@ -106,7 +106,7 @@ class CouriersController extends \App\Http\Controllers\Controller
 
     public function getWaitApprovalCouriers(): \Illuminate\Http\JsonResponse
     {
-        $couriers = CourierDetails::where("approved", 0)->orderBy("created_at", "desc")->get()->map(function ($details) {
+        $couriers = CourierDetails::where("approved", 0)->where("completed",1)->orderBy("created_at", "desc")->get()->map(function ($details) {
             $details->courier = User::where("id", $details->courier_id)->first();
             return $details;
         });
