@@ -281,7 +281,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                         state: details.state,
                         selectedState: {} as State,
                         zip: details.zip,
-                        country: details.country,
+                        country: "turkey",
                         billing: details.billing,
                         identity: details.identity || '',
                         birth_date: new Date(),
@@ -300,6 +300,8 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                     } else {
                         resetData.selectedCity = cities[0];
                         resetData.selectedState = cities[0].ilceler[0];
+                        resetData.city = cities[0].il_adi;
+                        resetData.state = cities[0].ilceler[0].ilce_adi;
                     }
 
                     if (resetData.billing === 'individual') {
@@ -314,6 +316,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                             resetData.selectedTaxOffice = taxOfficies.find((office) => office.vergi_dairesi === details.tax_office) as VergiDairesi;
                         } else {
                             resetData.selectedTaxOffice = taxOfficies[0];
+                            resetData.tax_office = taxOfficies[0].vergi_dairesi;
                         }
                     }
 
