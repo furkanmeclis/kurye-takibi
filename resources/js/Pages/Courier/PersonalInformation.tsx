@@ -83,7 +83,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
     profileCompleted?: boolean
 }) => {
 
-    const {setBreadcrumbs,setLayoutConfig} = useContext(LayoutContext);
+    const {setBreadcrumbs, setLayoutConfig} = useContext(LayoutContext);
     const [completed, setCompleted] = useState(false);
     const [activeState, setActiveState] = useState(0);
     const toast = React.useRef<Toast>(null);
@@ -292,13 +292,27 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                         selectedTaxOffice: {} as VergiDairesi,
                         vehicle_type: details.vehicle_type,
                     };
-                    resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                    resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
+                    if (resetData?.city !== null) {
+                        resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
+                        resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
+                    } else {
+                        resetData.selectedCity = cities[0];
+                        resetData.selectedState = cities[0].ilceler[0];
+                    }
+
                     if (resetData.billing === 'individual') {
-                        let dateParts = details.birth_date.split(".");
-                        resetData.birth_date = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
+                        if (resetData?.birth_date !== null) {
+                            let dateParts = details.birth_date.split(".");
+                            resetData.birth_date = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
+                        } else {
+                            resetData.birth_date = new Date();
+                        }
                     } else if (resetData.billing === 'company') {
-                        resetData.selectedTaxOffice = taxOfficies.find((office) => office.vergi_dairesi === details.tax_office) as VergiDairesi;
+                        if (resetData?.tax_office !== null) {
+                            resetData.selectedTaxOffice = taxOfficies.find((office) => office.vergi_dairesi === details.tax_office) as VergiDairesi;
+                        } else {
+                            resetData.selectedTaxOffice = taxOfficies[0];
+                        }
                     }
                     setCompleted(details?.completed === 1);
                     resetForm({values: resetData});
@@ -314,7 +328,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
             });
         }
         setBreadcrumbs([]);
-        setLayoutConfig(prevState => ({...prevState,menuMode:"overlay"}));
+        setLayoutConfig(prevState => ({...prevState, menuMode: "overlay"}));
 
     }, []);
 
