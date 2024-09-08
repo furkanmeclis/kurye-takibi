@@ -99,12 +99,22 @@ class ProfileController extends Controller
     public function getPersonalInformation(): \Illuminate\Http\JsonResponse
     {
         $user = auth()->user();
-        $courierDetails = CourierDetails::where('courier_id', $user->id)->firstOrNew(['courier_id' => $user->id]);
+        $courierDetails = CourierDetails::where('courier_id', $user->id)->first();
+        if (!$courierDetails) {
+            $courierDetails = new CourierDetails();
+            $courierDetails->name = $user->name;
+            $courierDetails->email = $user->email;
+            $courierDetails->phone = $user->phone;
+            $courierDetails->courier_id = $user->id;
+            $courierDetails->completed = 0;
+            $courierDetails->approved = 0;
+            $courierDetails->save();
+        }
+
         return response()->json([
             "status" => true,
             "details" => $courierDetails,
             "courier" => $user,
         ]);
-
     }
 }
