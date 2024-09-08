@@ -249,7 +249,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                     });
                 }
             }).catch((err) => {
-                console.log(err)
+                console.error(err)
                 toast.current?.show({
                     severity: 'error',
                     summary: 'Hata',
@@ -292,9 +292,11 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                         selectedTaxOffice: {} as VergiDairesi,
                         vehicle_type: details.vehicle_type,
                     };
-                    if (resetData?.city !== null) {
+                    if (details.city !== null) {
                         resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                        resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
+                        if(details.state !== null) {
+                            resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
+                        }
                     } else {
                         resetData.selectedCity = cities[0];
                         resetData.selectedState = cities[0].ilceler[0];
@@ -314,6 +316,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                             resetData.selectedTaxOffice = taxOfficies[0];
                         }
                     }
+
                     setCompleted(details?.completed === 1);
                     resetForm({values: resetData});
                 }
@@ -406,7 +409,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                     />
                     {activeState === 0 && <>
                         <div>
-                            {!completed ? <Message
+                            {completed ? <Message
                                 className={"w-full"}
                                 severity={"success"}
                                 text={"Profil Bilgilerinizi Kaydettiniz Ancak *Yönetici Onayı* Beklemektedir. Değiştirmek istediğiniz bilgileri sonraki ekrandan yönetebilirsiniz."}/> : <>
@@ -543,7 +546,8 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                                     'pi-check-circle text-green-500 text-sm': !errors.state && submitCount > 0,
                                 })}></i> İlçe
                             </label>
-                            <Dropdown value={values.selectedState} inputId={"state"} disabled={values.city === null}
+                            <Dropdown value={values.selectedState} inputId={"state"}
+                                      disabled={values.selectedCity === null}
                                       onChange={(e) => {
                                           setFieldValue("state", e.value.ilce_adi);
                                           setFieldValue("selectedState", e.value);
