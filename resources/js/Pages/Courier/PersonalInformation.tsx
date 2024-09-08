@@ -318,6 +318,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                     resetForm({values: resetData});
                 }
             }).catch((err) => {
+                console.log(err)
                 toast.current?.show({
                     severity: 'error',
                     summary: 'Hata',

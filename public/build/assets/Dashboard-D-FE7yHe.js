@@ -1,1 +1,0 @@
-import{j as r}from"./app-DPLiFm8c.js";import{P as i,M as s}from"./PageContainer-CZv6LoJT.js";import"./PersonalInformation-Cd6Z4YY3.js";import"./toast.esm-oiITyh-p.js";import"./inputmask.esm-BKJz1pT0.js";function x({auth:o,csrfToken:t,errors:a}){return r.jsx(i,{auth:o,csrfToken:t,errors:a,children:r.jsx(s,{children:"s"})})}export{x as default};
