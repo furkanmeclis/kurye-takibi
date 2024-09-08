@@ -301,7 +301,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                     }
 
                     if (resetData.billing === 'individual') {
-                        if (resetData?.birth_date !== null) {
+                        if (details?.birth_date !== null) {
                             let dateParts = details.birth_date.split(".");
                             resetData.birth_date = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
                         } else {
