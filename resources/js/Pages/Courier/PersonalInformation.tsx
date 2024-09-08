@@ -294,7 +294,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                     };
                     if (details.city !== null) {
                         resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                        if(details.state !== null) {
+                        if (details.state !== null) {
                             resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
                         }
                     } else {
@@ -761,7 +761,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                                           filterBy={"vergi_dairesi"}
                                           valueTemplate={(option: VergiDairesi) => {
                                               return (
-                                                  <span>{cityNames[option.il_id - 1]} - {option.vergi_dairesi} - {option.say_kodu}</span>
+                                                  <span>{cityNames[option?.il_id - 1]} - {option?.vergi_dairesi} - {option?.say_kodu}</span>
                                               );
                                           }}
                                           itemTemplate={(option: VergiDairesi) => {

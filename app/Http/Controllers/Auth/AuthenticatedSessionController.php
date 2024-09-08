@@ -34,6 +34,7 @@ class AuthenticatedSessionController extends Controller
         try {
             $request->authenticate();
             $request->session()->regenerate();
+            sleep(1);
             return response()->json([
                 'message' => 'Giriş Başarılı!',
                 'status' => true,
