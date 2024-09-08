@@ -223,12 +223,12 @@ const EditCourierPage = ({auth, csrfToken, courierId = 0}: {
 
                     </div>
                     <div className="col-12 lg:col-10">
-                        <BlockUI blocked={blocked} template={<i className="pi pi-exclamation-circle text-red-400"
-                                                                style={{fontSize: '3rem'}}></i>}
+                        <BlockUI blocked={blocked}
+                                 template={<i className="pi pi-exclamation-circle text-red-400"
+                                              style={{fontSize: '3rem'}}></i>}
                                  containerClassName={classNames("", {
                                      'p-3': blocked,
                                      'p-0': !blocked,
-
                                  })}>
                             <form onSubmit={handleSubmit} className="grid formgrid p-fluid">
                                 <div className="field mb-4 col-12 md:col-6 p-input-icon-right">

@@ -1,5 +1,5 @@
 import AppSubMenu from './AppSubMenu';
-import type { MenuModel } from '@/types';
+import type {MenuModel} from '@/types';
 
 const AppMenu = () => {
     const model: MenuModel[] = [
@@ -19,7 +19,7 @@ const AppMenu = () => {
                     to: route("admin.couriers.waitApproval"),
                 },
                 {
-                    label: 'Tüm Kuryeler',
+                    label: 'Kuryeler',
                     icon: 'pi pi-fw pi-users',
                     to: route("admin.couriers.index"),
                 }
@@ -29,6 +29,7 @@ const AppMenu = () => {
             label: 'İşletmeler',
             icon: 'pi pi-shop',
             roles: ['admin'],
+
             items: [
                 {
                     label: 'Yeni Ekle',
@@ -41,15 +42,27 @@ const AppMenu = () => {
                     to: route("admin.businesses.waitApproval"),
                 },
                 {
-                    label: 'Tüm İşletmeler',
+                    label: 'İşletmeler',
                     icon: 'pi pi-fw pi-home',
                     to: route("admin.businesses.index"),
                 }
             ]
         },
+        {
+            label: 'Anasayfa',
+            icon: 'pi pi-home',
+            roles: ['courier'],
+            items: [
+                {
+                    label: 'Anasayfa',
+                    icon: 'pi pi-fw pi-home',
+                    to: route("dashboard"),
+                }
+            ]
+        }
     ];
 
-    return <AppSubMenu model={model} />;
+    return <AppSubMenu model={model}/>;
 };
 
 export default AppMenu;

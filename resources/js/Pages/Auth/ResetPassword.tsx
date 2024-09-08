@@ -11,7 +11,7 @@ import * as Yup from 'yup';
 import {Toast} from "primereact/toast";
 import {Link} from "@inertiajs/react";
 // @ts-ignore
-const ResetPassword: Page = ({csrfToken = '', auth = {},email,token}: LaravelInertiaProps) => {
+const ResetPassword: Page = ({csrfToken = '', auth = {}, email, token}: LaravelInertiaProps) => {
     const [loading, setLoading] = useState(false);
     const toast = useRef<Toast>(null);
     const resetPasswordSchema = Yup.object().shape({
@@ -83,10 +83,13 @@ const ResetPassword: Page = ({csrfToken = '', auth = {},email,token}: LaravelIne
                                        className: 'text-red-500'
                                    }}
                                    disabled={loading}
-                                   invalid={!!errors.email}
                                    readOnly={true}
                                    onChange={handleChange} value={values.email}
-                                   placeholder="Email Adresiniz" className="w-full"/>
+                                   className={classNames('w-full', {
+                                       'p-invalid': !!errors.email,
+                                   })}
+                                   placeholder="Email Adresiniz"
+                        />
                     </span>
                     <span className="p-input-icon-left mb-3">
                         <i className="pi pi-key"></i>
@@ -100,9 +103,12 @@ const ResetPassword: Page = ({csrfToken = '', auth = {},email,token}: LaravelIne
                                        className: 'text-red-500'
                                    }}
                                    disabled={loading}
-                                   invalid={!!errors.password}
                                    onChange={handleChange} value={values.password}
-                                   placeholder="Yeni Şifreniz" className="w-full"/>
+                                   placeholder="Yeni Şifreniz"
+                                   className={classNames('w-full', {
+                                       'p-invalid': !!errors.password,
+                                   })}
+                        />
                     </span>
                     <span className="p-input-icon-left mb-3">
                         <i className="pi pi-key"></i>
@@ -116,9 +122,11 @@ const ResetPassword: Page = ({csrfToken = '', auth = {},email,token}: LaravelIne
                                        className: 'text-red-500'
                                    }}
                                    disabled={loading}
-                                   invalid={!!errors.password_confirmation}
                                    onChange={handleChange} value={values.password_confirmation}
-                                   placeholder="Yeni Şifrenizi Onaylayın" className="w-full"/>
+                                   placeholder="Yeni Şifrenizi Onaylayın"
+                                   className={classNames('w-full', {
+                                       'p-invalid': !!errors.password_confirmation,
+                                   })}/>
                     </span>
                     <span className="text-color-secondary flex justify-content-between mb-4">
                         <Link href={route('auth.login.index')}

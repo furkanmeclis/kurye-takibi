@@ -29,10 +29,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $useProfileCompleted = false;
+        if ($request->user()) {
+            $useProfileCompleted = $request->user()->profile_completed();
+        }
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                'profile_completed' => $useProfileCompleted,
             ],
             'csrfToken' => csrf_token(),
             'flash' => [

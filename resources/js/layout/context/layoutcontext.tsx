@@ -8,7 +8,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
     const [tabs, setTabs] = useState<any>([]);
     const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
     const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
-        ripple: false,
+        ripple: true,
         inputStyle: 'outlined',
         menuMode: 'static',
         colorScheme: 'light',
@@ -105,9 +105,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         newTabs.splice(index, 1);
         setTabs(newTabs);
     };
-    // @ts-ignore
     const [authObject, setAuthObject] = useState(props?.auth);
-    // @ts-ignore
     const [csrfTokenState, setCsrfTokenState] = useState(props?.csrfToken);
     const value = {
         layoutConfig,
@@ -137,7 +135,6 @@ export const LayoutProvider = (props: ChildContainerProps) => {
     return (
         <LayoutContext.Provider value={value as any}>
             <>
-
                 {props.children}
             </>
         </LayoutContext.Provider>

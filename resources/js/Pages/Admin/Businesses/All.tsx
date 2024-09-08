@@ -7,7 +7,9 @@ import {Toast} from "primereact/toast";
 import {
     getBusinesses,
     destroyBusiness as destroyBusinessFunc,
-    multipleDestroyBusiness as multipleDestroyBusinessFunc
+    multipleDestroyBusiness as multipleDestroyBusinessFunc,
+    approveBusiness as approveBusinessFunc,
+    multipleApproveBusiness as multipleApproveBusinessFunc
 } from "@/helpers/Admin/businesses";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
@@ -36,7 +38,8 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const [selectedBusinesses, setSelectedBusinesses] = useState([] as any[]);
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminBusinessesApprovedColumns");
     const [error, setError] = useState(null);
-    useEffect(() => {
+    const getBusinessesData = () => {
+        setLoading(true);
         getBusinesses("all", csrfToken).then(data => {
             if (data.status) {
                 setBusinesses(data.businesses.map((c: any) => {
@@ -54,7 +57,10 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         }).catch(error => {
             setError(error.message);
             setLoading(false);
-        });
+        }).finally(() => setLoading(false))
+    }
+    useEffect(() => {
+        getBusinessesData();
         if (flash?.message) {
             // @ts-ignore
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
@@ -96,6 +102,58 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             accept() {
                 setLoading(true)
                 multipleDestroyBusinessFunc(ids, csrfToken)
+                    .then(({status, message}) => {
+                        if (status) {
+                            setBusinesses(businesses.filter((c: any) => !ids.includes(c.id)));
+                            setSelectedBusinesses([]);
+                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
+                        } else {
+                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                        }
+                    })
+                    .catch(error => {
+                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+                    })
+                    .finally(() => setLoading(false))
+            }
+        });
+    }
+    const approveCourier = (event: any, id: number) => {
+        confirmPopup({
+            target: event.currentTarget,
+            message: "İşletme Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            acceptLabel: "Onayla",
+            acceptClassName: "p-button-success",
+            rejectLabel: "Vazgeç",
+            accept() {
+                setLoading(true)
+                approveBusinessFunc(id, csrfToken)
+                    .then(({status, message}) => {
+                        if (status) {
+                            setBusinesses(businesses.filter((c: any) => c.id !== id));
+                            setSelectedBusinesses([]);
+                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
+                        } else {
+                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                        }
+                    })
+                    .catch(error => {
+                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+                    })
+                    .finally(() => setLoading(false))
+            }
+        });
+    }
+    const multipleApproveCouriers = (event: any, ids: number[]) => {
+        confirmPopup({
+            target: event.currentTarget,
+            message: "Seçilen işletmelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            acceptLabel: "Onayla" + ` (${ids.length} İşletme)`,
+            acceptClassName: "p-button-success",
+            rejectLabel: "Vazgeç",
+            accept() {
+                setLoading(true)
+                multipleApproveBusinessFunc(ids, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
                             setBusinesses(businesses.filter((c: any) => !ids.includes(c.id)));
@@ -199,6 +257,15 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
+                    <Button visible={!rowData.verified} size={"small"} icon={"pi pi-check-circle"} severity={"success"}
+                            tooltip={"Onayla"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={(event) => {
+                                approveCourier(event, rowData.id);
+                            }}
+                    />
                     <Button size={"small"} icon={"pi pi-pencil"} severity={"warning"} tooltip={"Düzenle"}
                             tooltipOptions={{
                                 position: "top"
@@ -223,6 +290,23 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         return <>
             <Toolbar
                 start={selectedBusinesses.length > 0 && <>
+                    <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
+                            tooltip={"Toplu Onay Yapmanızı Sağlar"} tooltipOptions={{
+                        position: "top"
+                    }} visible={selectedBusinesses.map((c) => {
+                        if (c.verified) return null;
+                        return c.id;
+                    }).filter((c) => c !== null).length > 0} label={"Onayla (" + selectedBusinesses.map((c) => {
+                        if (c.verified) return null;
+                        return c.id;
+                    }).filter((c) => c !== null).length + ")"} severity={"success"}
+                            onClick={(event) => {
+                                multipleApproveCouriers(event, selectedBusinesses.map((c) => {
+                                    if (c.verified) return null;
+                                    return c.id;
+                                }).filter((c) => c !== null));
+                            }}
+                    />
                     <Button size={"small"} icon={"pi pi-trash"} className={"mr-2"}
                             tooltip={"Seçilen İşletmeleri Silmenizi Sağlar"} tooltipOptions={{
                         position: "top"
@@ -236,7 +320,16 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 </>}
 
                 end={<>
-                    <Button icon={"pi pi-bars"} onClick={(event) => {
+                    <Button size={"small"} icon={"pi pi-sync"} severity={"help"} className={"mr-2"}
+                            tooltip={"Verileri Yenile"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => {
+                                getBusinessesData();
+                            }}
+                    />
+                    <Button size={"small"} icon={"pi pi-bars"} onClick={(event) => {
                         columnsRef.current?.toggle(event)
                     }}/>
                 </>}/>

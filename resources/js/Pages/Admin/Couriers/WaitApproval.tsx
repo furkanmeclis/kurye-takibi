@@ -12,10 +12,10 @@ import {InputMask} from "primereact/inputmask";
 import {InputSwitch} from "primereact/inputswitch";
 import {
     getCouriers,
-    approveCourier as approveCourierFunc,
+    approveDetails as approveDetailsFunc,
     destroyCourier as destroyCourierFunc,
     multipleApproveCourier as multipleApproveCourierFunc,
-    multipleDestroyCourier as multipleDestroyCourierFunc
+    multipleDestroyCourier as multipleDestroyCourierFunc, approveDetails
 } from "@/helpers/Admin/couriers";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
@@ -25,20 +25,23 @@ import {OverlayPanel} from "primereact/overlaypanel";
 import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
+import {getDetailKeysTranslation} from "@/helpers/globalHelper";
+import {Dialog} from "primereact/dialog";
 
 const WaitApprovalCouriers = ({auth, csrfToken}: {
     auth?: any,
     csrfToken?: string
 }) => {
     const [loading, setLoading] = useState(true);
+    const [visible, setVisible] = useState(false);
     const [couriers, setCouriers] = useState([]);
-    const [selectedCouriers, setSelectedCouriers] = useState([] as any[]);
-    const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminCouriersWaitApprovalsColumns");
+    const [selectedCourier, setSelectedCourier] = useState(null);
+    const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "details_button", "created_at", "actions"], "adminCouriersWaitApprovalDetailsColumns");
     const [error, setError] = useState(null);
     useEffect(() => {
-        getCouriers("unverified", csrfToken).then(data => {
+        getCouriers("waitApprovals", csrfToken).then(data => {
             if (data.status) {
-                setCouriers(data.couriers);
+                setCouriers(data.details);
                 setLoading(false);
                 setError(null)
             } else {
@@ -50,46 +53,19 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
             setLoading(false);
         });
     }, []);
-    const deleteCourier = (event: any, id: number) => {
-        confirmPopup({
-            target: event.currentTarget,
-            message: "Kuryeyi silmek istediğinize emin misiniz?",
-            acceptLabel: "Sil",
-            acceptClassName: "p-button-danger",
-            rejectLabel: "Vazgeç",
-            accept() {
-                setLoading(true)
-                destroyCourierFunc(id, csrfToken)
-                    .then(({status, message}) => {
-                        if (status) {
-                            setCouriers(couriers.filter((c: any) => c.id !== id));
-                            setSelectedCouriers([]);
-                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
-                        } else {
-                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                        }
-                    })
-                    .catch(error => {
-                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-                    })
-                    .finally(() => setLoading(false))
-            }
-        });
-    }
     const approveCourier = (event: any, id: number) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Kurye Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            message: "Kurye Bilgileri Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
             acceptLabel: "Onayla",
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
                 setLoading(true)
-                approveCourierFunc(id, csrfToken)
+                approveDetailsFunc(id, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
-                            setCouriers(couriers.filter((c: any) => c.id !== id));
-                            setSelectedCouriers([]);
+                            setCouriers(couriers.filter((c: any) => c.courier.id !== id));
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
                             toast.current?.show({severity: "error", summary: "Hata", detail: message});
@@ -98,68 +74,16 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                     .catch(error => {
                         toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
                     })
-                    .finally(() => setLoading(false))
+                    .finally(() => {
+                        setLoading(false)
+                        setVisible(false)
+                    })
             }
         });
     }
-    const multipleApproveCouriers = (event: any, ids: number[]) => {
-        confirmPopup({
-            target: event.currentTarget,
-            message: "Seçilen kuryelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
-            acceptLabel: "Onayla" + ` (${ids.length} Kurye)`,
-            acceptClassName: "p-button-success",
-            rejectLabel: "Vazgeç",
-            accept() {
-                setLoading(true)
-                multipleApproveCourierFunc(ids, csrfToken)
-                    .then(({status, message}) => {
-                        if (status) {
-                            setCouriers(couriers.filter((c: any) => !ids.includes(c.id)));
-                            setSelectedCouriers([]);
-                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
-                        } else {
-                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                        }
-                    })
-                    .catch(error => {
-                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-                    })
-                    .finally(() => setLoading(false))
-            }
-        });
-    }
-    const multipleDestroyCouriers = (event: any, ids: number[]) => {
-        confirmPopup({
-            target: event.currentTarget,
-            message: "Seçilen kuryeler silinecektir. Silmek istediğinize emin misiniz?",
-            acceptLabel: "Sil" + ` (${ids.length} Kurye)`,
-            acceptClassName: "p-button-danger",
-            rejectLabel: "Vazgeç",
-            accept() {
-                setLoading(true)
-                multipleDestroyCourierFunc(ids, csrfToken)
-                    .then(({status, message}) => {
-                        if (status) {
-                            setCouriers(couriers.filter((c: any) => !ids.includes(c.id)));
-                            setSelectedCouriers([]);
-                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
-                        } else {
-                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                        }
-                    })
-                    .catch(error => {
-                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-                    })
-                    .finally(() => setLoading(false))
-            }
-        });
-    }
+
     let columns: ColumnProps[] = [
-        {
-            selectionMode: "multiple",
-            headerStyle: {width: '3rem'},
-            header: ""
-        },
+
         {
             field: "name",
             header: "Adı Soyadı",
@@ -167,14 +91,16 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
             sortable: true,
             filter: true,
             filterPlaceholder: "Ad'a Göre",
-        }, {
+        },
+        {
             field: "email",
             header: "Email Adresi",
             hidden: !selectedColumns.includes("email"),
             sortable: true,
             filter: true,
             filterPlaceholder: "Email'e Göre",
-        }, {
+        },
+        {
             field: "phone",
             header: "Telefon Numarası",
             hidden: !selectedColumns.includes("phone"),
@@ -183,27 +109,37 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
             filterPlaceholder: "Telefon Numarası'na Göre",
         },
         {
-            field: "created_at",
-            header: "Kayıt Tarihi",
-            hidden: !selectedColumns.includes("created_at"),
-            sortable: true,
-            filter: true,
-            filterPlaceholder: "Kayıt Tarihine Göre",
-            filterType: "date",
+            field: "details_button",
+            header: "Kurye Bilgileri",
+            hidden: !selectedColumns.includes("details_button"),
+            align: "center",
             body: (rowData: any) => {
-                return <span>{new Date(rowData.created_at).toLocaleString()}</span>
+                return <>
+                    <Button icon={"pi pi-file"} tooltip={"Kurye Bilgileri"}
+                            severity={"info"}
+                            size={"small"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={(event) => {
+                                setSelectedCourier(rowData);
+                                setVisible(true);
+                            }}
+
+                    />
+                </>
             }
         },
         {
-            field: "updated_at",
-            header: "Güncelleme Tarihi",
-            hidden: !selectedColumns.includes("updated_at"),
+            field: "created_at",
+            header: "Bilgileri Ekleme Tarihi",
+            hidden: !selectedColumns.includes("created_at"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Güncellenme Tarihine Göre",
+            filterPlaceholder: "Bilgileri Ekleme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
-                return <span>{new Date(rowData.updated_at).toLocaleString()}</span>
+                return <span>{new Date(rowData.created_at).toLocaleString()}</span>
             }
         },
         {
@@ -217,22 +153,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                                 position: "top"
                             }}
                             onClick={(event) => {
-                                approveCourier(event, rowData.id);
-                            }}
-                    /><Button size={"small"} icon={"pi pi-pencil"} severity={"warning"} tooltip={"Düzenle"}
-                              tooltipOptions={{
-                                  position: "top"
-                              }}
-                              onClick={(event) => {
-                                  router.visit(route("admin.couriers.edit", {id: rowData.id}))
-                              }}
-                />
-                    <Button size={"small"} icon={"pi pi-trash"} severity={"danger"} tooltip={"Sil"}
-                            tooltipOptions={{
-                                position: "top"
-                            }}
-                            onClick={(event) => {
-                                deleteCourier(event, rowData.id);
+                                approveCourier(event, rowData.courier.id);
                             }}
                     />
                 </div>
@@ -240,29 +161,28 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
         }
     ];
     const columnsRef = React.useRef<OverlayPanel>(null);
+    const getValuesForDetails = (courier: any) => {
+        let returnData = [] as {
+            label: string,
+            value: any
+        }[];
+        if (courier === null) return returnData;
+        Object.entries(courier).forEach(([key, value]) => {
+            if (typeof value === "string") {
+                // @ts-ignore
+                if (key !== "courier" || key !== "status" || key !== "completed" || key !== "approved" || key !== "latitude" || key !== "longitude" || key !== "id" || key !== "courier_id" || key !== "created_at" || key !== "updated_at") {
+                    returnData.push({
+                        label: getDetailKeysTranslation(String(key)),
+                        value: value
+                    });
+                }
+            }
+        });
+        return returnData;
+    }
     const renderHeader = () => {
         return <>
             <Toolbar
-                start={selectedCouriers.length > 0 && <>
-                    <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
-                            tooltip={"Toplu Onay Yapmanızı Sağlar"} tooltipOptions={{
-                        position: "top"
-                    }} label={"Onayla (" + selectedCouriers.length + ")"} severity={"success"}
-                            onClick={(event) => {
-                                multipleApproveCouriers(event, selectedCouriers.map((c) => c.id));
-                            }}
-                    />
-                    <Button size={"small"} icon={"pi pi-trash"} className={"mr-2"}
-                            tooltip={"Seçilen Kuryeleri Silmenizi Sağlar"} tooltipOptions={{
-                        position: "top"
-                    }} label={"Sil (" + selectedCouriers.length + ")"} severity={"danger"}
-                            onClick={(event) => {
-                                multipleDestroyCouriers(event, selectedCouriers.map((c) => c.id));
-                            }}
-                    />
-                    <Button size={"small"} icon={"pi pi-filter-slash"} label={"Seçimi Temizle"} severity={"warning"}
-                            onClick={() => setSelectedCouriers([])}/>
-                </>}
 
                 end={<>
                     <Button icon={"pi pi-bars"} onClick={(event) => {
@@ -303,7 +223,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                 </div>
             </OverlayPanel>
             <div className="card">
-                <span className="text-900 text-xl font-bold mb-4 block">Onay Bekleyen Kuryeler</span>
+                <span className="text-900 text-xl font-bold mb-4 block">Onay Bekleyen Kuryeler (Kurye Bilgileri Onay Ekranı)</span>
                 {error !== null &&
                     <Message
                         className="w-full"
@@ -334,14 +254,45 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                     }}
                     emptyMessage="Kurye bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"
-                    selectionMode={"checkbox"}
-                    selection={selectedCouriers}
-                    onSelectionChange={(e) => setSelectedCouriers(e.value)}
                 >
                     {columns.map((col, index) => {
                         return <Column key={index} {...col} />
                     })}
                 </DataTable>
+                <Dialog
+                    header={"Kurye Bilgileri"}
+                    draggable={false}
+                    footer={<div className={"gap-2"}>
+                        <Button size={"small"} icon={"pi pi-times"} label={"Kapat"} severity={"danger"}
+                                tooltip={"Kapat"}
+                                tooltipOptions={{
+                                    position: "top"
+                                }}
+                                onClick={() => setVisible(false)}
+                        />
+                        <Button size={"small"} icon={"pi pi-check-circle"} label={"Bilgileri Onayla"}
+                                severity={"success"} tooltip={"Onayla"}
+                                tooltipOptions={{
+                                    position: "top"
+                                }}
+                                onClick={(event) => {
+                                    // @ts-ignore
+                                    approveCourier(event, selectedCourier?.courier?.id);
+                                }}
+                        />
+                    </div>}
+                    onHide={() => setVisible(false)} visible={visible} style={{width: '50vw'}}
+                    breakpoints={{'960px': '75vw', '641px': '100vw'}}>
+                    <DataTable value={getValuesForDetails(selectedCourier)}
+                               filters={{
+                                   label: {value: null, matchMode: 'contains'},
+                                   value: {value: null, matchMode: 'contains'}
+                               }}
+                               filterDisplay={"row"} paginator stripedRows rows={5}>
+                        <Column field="label" showFilterMenu={false} filter header="Anahtar"/>
+                        <Column field="value" showFilterMenu={false} filter header="Değer"/>
+                    </DataTable>
+                </Dialog>
             </div>
         </MainLayout>
     </PageContainer>

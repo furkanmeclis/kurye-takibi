@@ -45,4 +45,18 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    public function profile_completed(): bool
+    {
+        if($this->role == "courier"){
+            $details = CourierDetails::where('courier_id', $this->id)->first(["completed","approved"]);
+            if($details){
+                return $details->completed && $details->approved;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
 }

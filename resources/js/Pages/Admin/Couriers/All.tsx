@@ -7,7 +7,9 @@ import {Toast} from "primereact/toast";
 import {
     getCouriers,
     destroyCourier as destroyCourierFunc,
-    multipleDestroyCourier as multipleDestroyCourierFunc
+    multipleDestroyCourier as multipleDestroyCourierFunc,
+    approveCourier as approveCourierFunc,
+    multipleApproveCourier as multipleApproveCourierFunc
 } from "@/helpers/Admin/couriers";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
@@ -32,11 +34,12 @@ interface AllCouriersProps {
 
 const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const [loading, setLoading] = useState(true);
-    const [couriers, setCouriers] = useState([]);
+    const [couriers, setCouriers] = useState<any>([]);
     const [selectedCouriers, setSelectedCouriers] = useState([] as any[]);
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminCouriersApprovedColumns");
     const [error, setError] = useState(null);
-    useEffect(() => {
+    const getCouriersData = () => {
+        setLoading(true);
         getCouriers("all", csrfToken).then(data => {
             if (data.status) {
                 setCouriers(data.couriers.map((c: any) => {
@@ -54,7 +57,11 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         }).catch(error => {
             setError(error.message);
             setLoading(false);
-        });
+        }).finally(() => setLoading(false));
+
+    }
+    useEffect(() => {
+        getCouriersData();
         if (flash?.message) {
             // @ts-ignore
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
@@ -99,6 +106,76 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     .then(({status, message}) => {
                         if (status) {
                             setCouriers(couriers.filter((c: any) => !ids.includes(c.id)));
+                            setSelectedCouriers([]);
+                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
+                        } else {
+                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                        }
+                    })
+                    .catch(error => {
+                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+                    })
+                    .finally(() => setLoading(false))
+            }
+        });
+    }
+    const approveCourier = (event: any, id: number) => {
+        confirmPopup({
+            target: event.currentTarget,
+            message: "Kurye Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            acceptLabel: "Onayla",
+            acceptClassName: "p-button-success",
+            rejectLabel: "Vazgeç",
+            accept() {
+                setLoading(true)
+                approveCourierFunc(id, csrfToken)
+                    .then(({status, message}) => {
+                        if (status) {
+                            setCouriers(couriers.map((c: any) => {
+                                if (c.id === id) {
+                                    return {
+                                        ...c,
+                                        verified: true,
+                                        verified_at: new Date().toISOString()
+                                    }
+                                }
+                                return c;
+                            }));
+                            setSelectedCouriers([]);
+                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
+                        } else {
+                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                        }
+                    })
+                    .catch(error => {
+                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+                    })
+                    .finally(() => setLoading(false))
+            }
+        });
+    }
+    const multipleApproveCouriers = (event: any, ids: number[]) => {
+        confirmPopup({
+            target: event.currentTarget,
+            message: "Seçilen kuryelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
+            acceptLabel: "Onayla" + ` (${ids.length} Kurye)`,
+            acceptClassName: "p-button-success",
+            rejectLabel: "Vazgeç",
+            accept() {
+                setLoading(true)
+                multipleApproveCourierFunc(ids, csrfToken)
+                    .then(({status, message}) => {
+                        if (status) {
+                            setCouriers(couriers.map((c: any) => {
+                                if (ids.includes(c.id)) {
+                                    return {
+                                        ...c,
+                                        verified: true,
+                                        verified_at: new Date().toISOString()
+                                    }
+                                }
+                                return c;
+                            }));
                             setSelectedCouriers([]);
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
@@ -199,6 +276,15 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
+                    <Button size={"small"} icon={"pi pi-check-circle"} severity={"success"} tooltip={"Onayla"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            visible={!rowData.verified}
+                            onClick={(event) => {
+                                approveCourier(event, rowData.id);
+                            }}
+                    />
                     <Button size={"small"} icon={"pi pi-pencil"} severity={"warning"} tooltip={"Düzenle"}
                             tooltipOptions={{
                                 position: "top"
@@ -223,6 +309,25 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         return <>
             <Toolbar
                 start={selectedCouriers.length > 0 && <>
+                    <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
+                            tooltip={"Toplu Onay Yapmanızı Sağlar"} tooltipOptions={{
+                        position: "top"
+                    }}
+                            visible={selectedCouriers.map((c) => {
+                                if (c.verified) return null;
+                                return c.id;
+                            }).filter((c) => c !== null).length > 0}
+                            label={"Onayla (" + selectedCouriers.map((c) => {
+                                if (c.verified) return null;
+                                return c.id;
+                            }).filter((c) => c !== null).length + ")"} severity={"success"}
+                            onClick={(event) => {
+                                multipleApproveCouriers(event, selectedCouriers.map((c) => {
+                                    if (c.verified) return null;
+                                    return c.id;
+                                }).filter((c) => c !== null));
+                            }}
+                    />
                     <Button size={"small"} icon={"pi pi-trash"} className={"mr-2"}
                             tooltip={"Seçilen Kuryeleri Silmenizi Sağlar"} tooltipOptions={{
                         position: "top"
@@ -236,6 +341,15 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 </>}
 
                 end={<>
+                    <Button size={"small"} icon={"pi pi-sync"} severity={"help"} className={"mr-2"}
+                            tooltip={"Verileri Yenile"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => {
+                                getCouriersData();
+                            }}
+                    />
                     <Button icon={"pi pi-bars"} onClick={(event) => {
                         columnsRef.current?.toggle(event)
                     }}/>

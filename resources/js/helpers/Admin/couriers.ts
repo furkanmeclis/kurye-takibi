@@ -12,9 +12,13 @@ export const getCourier = async (id: number, csrfToken: any) => {
         return false;
     }
 }
-export const getCouriers = async (type = "all", csrfToken: any) => {
+
+export const getCouriers = async (type: "verified" | "unverified" | "waitApprovals" | "all", csrfToken: any) => {
     if (csrfToken) {
         let url = route("admin.couriers.listCouriers", type);
+        if (type === "waitApprovals") {
+            url = route("admin.couriers.getWaitApprovalCouriers");
+        }
         let headers = new Headers();
         headers.append("X-CSRF-TOKEN", csrfToken);
         let response = await fetch(url, {
@@ -112,6 +116,20 @@ export const multipleApproveCourier = async (ids: number[], csrfToken: any) => {
             method: "POST",
             headers: headers,
             body: JSON.stringify({ids})
+        });
+        return await response.json();
+    } else {
+        return false;
+    }
+}
+export const approveDetails = async (id: number, csrfToken: any) => {
+    if (csrfToken) {
+        let url = route("admin.couriers.approveDetails", id);
+        let headers = new Headers();
+        headers.append("X-CSRF-TOKEN", csrfToken);
+        let response = await fetch(url, {
+            method: "POST",
+            headers: headers
         });
         return await response.json();
     } else {

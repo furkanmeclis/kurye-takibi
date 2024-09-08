@@ -55,7 +55,7 @@ const AppSubMenu = (props: MenuProps) => {
             <ul className="layout-menu">
                 {props.model.map((item, i) => {
                     // @ts-ignore
-                    return getVisibility(item) && !item.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;
+                    return getVisibility(item) ? !item.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>: null;
                 })}
             </ul>
             <Tooltip ref={tooltipRef} target="li:not(.active-menuitem)>.tooltip-target" />

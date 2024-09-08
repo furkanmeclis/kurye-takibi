@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\CourierDetails;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -99,6 +100,25 @@ class CouriersController extends \App\Http\Controllers\Controller
             return response()->json([
                 "status" => false,
                 "message" => "Kurye Listesi Alınamadı."
+            ]);
+        }
+    }
+
+    public function getWaitApprovalCouriers(): \Illuminate\Http\JsonResponse
+    {
+        $couriers = CourierDetails::where("approved", 0)->orderBy("created_at", "desc")->get()->map(function ($details) {
+            $details->courier = User::where("id", $details->courier_id)->first();
+            return $details;
+        });
+        if ($couriers) {
+            return response()->json([
+                "status" => true,
+                "details" => $couriers
+            ]);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Onay Bekleyen Kurye Listesi Alınamadı."
             ]);
         }
     }
@@ -223,6 +243,36 @@ class CouriersController extends \App\Http\Controllers\Controller
         }
     }
 
+    public function approveDetails($id): \Illuminate\Http\JsonResponse
+    {
+        $courier = CourierDetails::where('courier_id', $id)->first();
+        if ($courier) {
+            if ($courier->approved == 1) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Kurye Zaten Onaylanmış."
+                ]);
+            } else {
+                $courier->approved = 1;
+                if ($courier->save()) {
+                    return response()->json([
+                        "status" => true,
+                        "message" => "Kurye Onaylama İşlemi Başarılı."
+                    ]);
+                } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Kurye Onaylama İşlemi Başarısız Oldu."
+                    ]);
+                }
+            }
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Kurye Bulunamadı."
+            ]);
+        }
+    }
     public function multipleApprove(Request $request): \Illuminate\Http\JsonResponse
     {
         $couriers = User::where('role', 'courier')->whereIn('id', $request->ids);

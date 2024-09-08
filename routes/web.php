@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -23,12 +22,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\CouriersController::class, 'index'])->name('index');
             Route::get('/wait-approval', [\App\Http\Controllers\Admin\CouriersController::class, 'waitApproval'])->name('waitApproval');
             Route::post('/list-couriers/{type}',[\App\Http\Controllers\Admin\CouriersController::class, 'listCouriers'])->name("listCouriers");
+            Route::post('/list-wait-approvals-couriers',[\App\Http\Controllers\Admin\CouriersController::class, 'getWaitApprovalCouriers'])->name("getWaitApprovalCouriers");
             Route::post('/show-details/{id}',[\App\Http\Controllers\Admin\CouriersController::class, 'showDetails'])->name("showDetails");
             Route::get('/create', [\App\Http\Controllers\Admin\CouriersController::class, 'create'])->name('create');
             Route::post('/store', [\App\Http\Controllers\Admin\CouriersController::class, 'store'])->name('store');
             Route::get('/edit-courier/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'edit'])->name('edit');
             Route::put('/update-courier/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'update'])->name('update');
             Route::post('/approve-courier/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'approve'])->name('approve');
+            Route::post('/approve-details/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'approveDetails'])->name('approveDetails');
             Route::post('/multiple-approve-courier', [\App\Http\Controllers\Admin\CouriersController::class, 'multipleApprove'])->name('multipleApprove');
             Route::delete('/destroy-courier/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'destroy'])->name('destroy');
             Route::post('/multiple-destroy-courier', [\App\Http\Controllers\Admin\CouriersController::class, 'multipleDestroy'])->name('multipleDestroy');
@@ -47,6 +48,13 @@ Route::middleware('auth')->group(function () {
             Route::delete('/destroy-business/{id}', [\App\Http\Controllers\Admin\BusinessesController::class, 'destroy'])->name('destroy');
             Route::post('/multiple-destroy-business', [\App\Http\Controllers\Admin\BusinessesController::class, 'multipleDestroy'])->name('multipleDestroy');
         });
+    });
+    Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
+        Route::get('/', function (){
+            return Inertia::render('Courier/Dashboard');
+        })->name('dashboard');
+        Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
+        Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
 });
 
