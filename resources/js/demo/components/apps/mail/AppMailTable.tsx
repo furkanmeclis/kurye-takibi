@@ -1,5 +1,5 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { classNames } from 'primereact/utils';
 import { Dialog } from 'primereact/dialog';
 import { DataTable, DataTableFilterMeta, DataTableRowMouseEvent } from 'primereact/datatable';
@@ -13,6 +13,7 @@ import { Toast } from 'primereact/toast';
 import { MailContext } from './context/mailcontext';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import type { Demo } from '@/types';
+import {router} from "@inertiajs/react";
 
 interface AppMailTableProps {
     mails: Demo.Mail[];
@@ -28,7 +29,6 @@ function AppMailTable(props: AppMailTableProps) {
     const menu = useRef<Menu | null>(null);
     const dt = useRef<DataTable<Demo.Mail[]>>(null);
     const toast = useRef<Toast>(null);
-    const router = useRouter();
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -66,7 +66,7 @@ function AppMailTable(props: AppMailTableProps) {
                 constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }]
             },
             activity: { value: null, matchMode: FilterMatchMode.BETWEEN },
-            verified: { value: null, matchMode: FilterMatchMode.EQUALS }
+            activated: { value: null, matchMode: FilterMatchMode.EQUALS }
         });
         setGlobalFilterValue('');
     };
@@ -90,7 +90,7 @@ function AppMailTable(props: AppMailTableProps) {
     ];
 
     const onRowSelect = (id: number) => {
-        router.push('/apps/mail/detail/' + id);
+        router.visit('/apps/mail/detail/' + id);
     };
 
     const handleStar = (event: React.MouseEvent<HTMLSpanElement, MouseEvent> | React.TouchEvent<HTMLSpanElement>, id: number) => {

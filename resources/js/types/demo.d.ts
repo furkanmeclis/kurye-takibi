@@ -241,7 +241,7 @@ declare namespace Demo {
         status?: string;
         activity?: number;
         balance?: number | string;
-        verified?: boolean;
+        activated?: boolean;
         amount?: number;
         price?: number;
         rating?: number;

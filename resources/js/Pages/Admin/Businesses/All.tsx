@@ -45,7 +45,7 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 setBusinesses(data.businesses.map((c: any) => {
                     return {
                         ...c,
-                        verified: c.verified === 1
+                        activated: c.activated === 1
                     }
                 }));
                 setLoading(false);
@@ -121,8 +121,8 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const approveCourier = (event: any, id: number) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "İşletme Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
-            acceptLabel: "Onayla",
+            message: "İşletme Hesabı Aktifleştirilecektir. Aktifleştirmek istediğinize emin misiniz?",
+            acceptLabel: "Aktifleştir",
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
@@ -147,8 +147,8 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const multipleApproveCouriers = (event: any, ids: number[]) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Seçilen işletmelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
-            acceptLabel: "Onayla" + ` (${ids.length} İşletme)`,
+            message: "Seçilen işletmelerin hesapları aktifleştirilecektir. Aktifleştirmek istediğinize emin misiniz?",
+            acceptLabel: "Aktifleştir" + ` (${ids.length} İşletme)`,
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
@@ -199,9 +199,9 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             filterPlaceholder: "Telefon Numarası'na Göre",
         },
         {
-            field: "verified",
-            header: "Onay Durumu",
-            hidden: !selectedColumns.includes("verified"),
+            field: "activated",
+            header: "Aktiflik Durumu",
+            hidden: !selectedColumns.includes("activated"),
             sortable: true,
             filter: true,
             dataType: "boolean",
@@ -210,21 +210,21 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             },
             body: (rowData) => {
                 return <i className={classNames('pi', {
-                    'pi-check-circle text-green-400': rowData.verified,
-                    'pi-times-circle text-red-400': !rowData.verified
+                    'pi-check-circle text-green-400': rowData.activated,
+                    'pi-times-circle text-red-400': !rowData.activated
                 })}></i>;
             }
         }, {
-            field: "verified_at",
-            header: "Onay Tarihi",
-            hidden: !selectedColumns.includes("verified_at"),
+            field: "activated_at",
+            header: "Aktifleştirme Tarihi",
+            hidden: !selectedColumns.includes("activated_at"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Onay Tarihine Göre",
+            filterPlaceholder: "Aktifleştirme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
-                return <span>{rowData.verified_at === null ?
-                    <i className={"pi pi-times-circle text-red-400"}></i> : new Date(rowData.verified_at).toLocaleString()}</span>
+                return <span>{rowData.activated_at === null ?
+                    <i className={"pi pi-times-circle text-red-400"}></i> : new Date(rowData.activated_at).toLocaleString()}</span>
             }
         },
         {
@@ -257,8 +257,8 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
-                    <Button visible={!rowData.verified} size={"small"} icon={"pi pi-check-circle"} severity={"success"}
-                            tooltip={"Onayla"}
+                    <Button visible={!rowData.activated} size={"small"} icon={"pi pi-check-circle"} severity={"success"}
+                            tooltip={"Aktifleştir"}
                             tooltipOptions={{
                                 position: "top"
                             }}
@@ -291,18 +291,18 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             <Toolbar
                 start={selectedBusinesses.length > 0 && <>
                     <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
-                            tooltip={"Toplu Onay Yapmanızı Sağlar"} tooltipOptions={{
+                            tooltip={"Toplu Aktifleştirme Yapmanızı Sağlar"} tooltipOptions={{
                         position: "top"
                     }} visible={selectedBusinesses.map((c) => {
-                        if (c.verified) return null;
+                        if (c.activated) return null;
                         return c.id;
-                    }).filter((c) => c !== null).length > 0} label={"Onayla (" + selectedBusinesses.map((c) => {
-                        if (c.verified) return null;
+                    }).filter((c) => c !== null).length > 0} label={"Aktifleştir (" + selectedBusinesses.map((c) => {
+                        if (c.activated) return null;
                         return c.id;
                     }).filter((c) => c !== null).length + ")"} severity={"success"}
                             onClick={(event) => {
                                 multipleApproveCouriers(event, selectedBusinesses.map((c) => {
-                                    if (c.verified) return null;
+                                    if (c.activated) return null;
                                     return c.id;
                                 }).filter((c) => c !== null));
                             }}
@@ -395,7 +395,7 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         phone: {value: null, matchMode: 'contains'},
                         created_at: {value: null, matchMode: 'contains'},
                         updated_at: {value: null, matchMode: 'contains'},
-                        verified: {value: null, matchMode: 'equals'}
+                        activated: {value: null, matchMode: 'equals'}
                     }}
                     emptyMessage="İşletme bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"

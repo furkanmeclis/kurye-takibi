@@ -43,11 +43,10 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'phone' => $request->phone,
+                'role' => 'courier'
             ]);
             if($user){
                 event(new Registered($user));
-                Auth::login($user);
-                $hiddenMail = substr($user->email, 0, 3) . str_repeat('*', strlen($user->email) - 6) . substr($user->email, -3);
                 return response()->json([
                     "status" => true,
                     "message" => "Kaydınız Başarıyla Gerçekleşti",

@@ -12,7 +12,7 @@ export const getBusiness = async (id: number, csrfToken: any) => {
         return false;
     }
 }
-export const getBusinesses = async (type: "verified" | "unverified" | "waitApprovals" | "all", csrfToken: any) => {
+export const getBusinesses = async (type: "activated" | "unactivated" | "waitApprovals" | "all", csrfToken: any) => {
     if (csrfToken) {
         let url = route("admin.businesses.listBusinesses", type);
         if (type === "waitApprovals") {

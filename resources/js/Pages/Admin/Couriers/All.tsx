@@ -45,7 +45,7 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 setCouriers(data.couriers.map((c: any) => {
                     return {
                         ...c,
-                        verified: c.verified === 1
+                        activated: c.activated === 1
                     }
                 }));
                 setLoading(false);
@@ -122,8 +122,8 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const approveCourier = (event: any, id: number) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Kurye Hesabı Onaylanacaktır. Onaylamak istediğinize emin misiniz?",
-            acceptLabel: "Onayla",
+            message: "Kurye Hesabı Aktifleştirilecektir. Aktifleştirmek istediğinize emin misiniz?",
+            acceptLabel: "Aktfileştir",
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
@@ -135,8 +135,8 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                                 if (c.id === id) {
                                     return {
                                         ...c,
-                                        verified: true,
-                                        verified_at: new Date().toISOString()
+                                        activated: true,
+                                        activated_at: new Date().toISOString()
                                     }
                                 }
                                 return c;
@@ -157,8 +157,8 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const multipleApproveCouriers = (event: any, ids: number[]) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "Seçilen kuryelerin hesapları onaylanacaktır. Onaylamak istediğinize emin misiniz?",
-            acceptLabel: "Onayla" + ` (${ids.length} Kurye)`,
+            message: "Seçilen kuryelerin hesapları aktifleştirilecektir. Aktifleştirmek istediğinize emin misiniz?",
+            acceptLabel: "Aktifleştir" + ` (${ids.length} Kurye)`,
             acceptClassName: "p-button-success",
             rejectLabel: "Vazgeç",
             accept() {
@@ -170,8 +170,8 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                                 if (ids.includes(c.id)) {
                                     return {
                                         ...c,
-                                        verified: true,
-                                        verified_at: new Date().toISOString()
+                                        activated: true,
+                                        activated_at: new Date().toISOString()
                                     }
                                 }
                                 return c;
@@ -218,9 +218,9 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             filterPlaceholder: "Telefon Numarası'na Göre",
         },
         {
-            field: "verified",
-            header: "Onay Durumu",
-            hidden: !selectedColumns.includes("verified"),
+            field: "activated",
+            header: "Aktiflik Durumu",
+            hidden: !selectedColumns.includes("activated"),
             sortable: true,
             filter: true,
             dataType: "boolean",
@@ -229,21 +229,21 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             },
             body: (rowData) => {
                 return <i className={classNames('pi', {
-                    'pi-check-circle text-green-400': rowData.verified,
-                    'pi-times-circle text-red-400': !rowData.verified
+                    'pi-check-circle text-green-400': rowData.activated,
+                    'pi-times-circle text-red-400': !rowData.activated
                 })}></i>;
             }
         }, {
-            field: "verified_at",
-            header: "Onay Tarihi",
-            hidden: !selectedColumns.includes("verified_at"),
+            field: "activated_at",
+            header: "Aktifleştirme Tarihi",
+            hidden: !selectedColumns.includes("activated_at"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Onay Tarihine Göre",
+            filterPlaceholder: "Aktifleştirme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
-                return <span>{rowData.verified_at === null ?
-                    <i className={"pi pi-times-circle text-red-400"}></i> : new Date(rowData.verified_at).toLocaleString()}</span>
+                return <span>{rowData.activated_at === null ?
+                    <i className={"pi pi-times-circle text-red-400"}></i> : new Date(rowData.activated_at).toLocaleString()}</span>
             }
         },
         {
@@ -276,11 +276,11 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
-                    <Button size={"small"} icon={"pi pi-check-circle"} severity={"success"} tooltip={"Onayla"}
+                    <Button size={"small"} icon={"pi pi-check-circle"} severity={"success"} tooltip={"Aktifleştir"}
                             tooltipOptions={{
                                 position: "top"
                             }}
-                            visible={!rowData.verified}
+                            visible={!rowData.activated}
                             onClick={(event) => {
                                 approveCourier(event, rowData.id);
                             }}
@@ -310,20 +310,20 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             <Toolbar
                 start={selectedCouriers.length > 0 && <>
                     <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
-                            tooltip={"Toplu Onay Yapmanızı Sağlar"} tooltipOptions={{
+                            tooltip={"Toplu Aktifleştirme Yapmanızı Sağlar"} tooltipOptions={{
                         position: "top"
                     }}
                             visible={selectedCouriers.map((c) => {
-                                if (c.verified) return null;
+                                if (c.activated) return null;
                                 return c.id;
                             }).filter((c) => c !== null).length > 0}
-                            label={"Onayla (" + selectedCouriers.map((c) => {
-                                if (c.verified) return null;
+                            label={"Aktifleştir (" + selectedCouriers.map((c) => {
+                                if (c.activated) return null;
                                 return c.id;
                             }).filter((c) => c !== null).length + ")"} severity={"success"}
                             onClick={(event) => {
                                 multipleApproveCouriers(event, selectedCouriers.map((c) => {
-                                    if (c.verified) return null;
+                                    if (c.activated) return null;
                                     return c.id;
                                 }).filter((c) => c !== null));
                             }}
@@ -416,7 +416,7 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         phone: {value: null, matchMode: 'contains'},
                         created_at: {value: null, matchMode: 'contains'},
                         updated_at: {value: null, matchMode: 'contains'},
-                        verified: {value: null, matchMode: 'equals'}
+                        activated: {value: null, matchMode: 'equals'}
                     }}
                     emptyMessage="Kurye bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"

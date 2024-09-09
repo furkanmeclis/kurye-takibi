@@ -25,7 +25,7 @@ interface UserType {
     password: string,
     password_confirmation: string,
     account_verification: boolean,
-    verified_at: string | boolean,
+    activated_at: string | boolean,
 }
 
 const ProfileEdit = ({auth, csrfToken, courierId = 0}: {
@@ -51,8 +51,8 @@ const ProfileEdit = ({auth, csrfToken, courierId = 0}: {
         password_change: false,
         password: '',
         password_confirmation: '',
-        account_verification: auth.user.verified === 1,
-        verified_at: '',
+        account_verification: auth.user.activated === 1,
+        activated_at: '',
     });
     const toast = React.useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
@@ -111,8 +111,8 @@ const ProfileEdit = ({auth, csrfToken, courierId = 0}: {
                             password_change: false,
                             password: '',
                             password_confirmation: '',
-                            account_verification: response.user.verified === 1,
-                            verified_at: response.user.verified_at === null ? false : new Date(response.user.verified_at).toLocaleString(),
+                            account_verification: response.user.activated === 1,
+                            activated_at: response.user.activated_at === null ? false : new Date(response.user.activated_at).toLocaleString(),
                         }
                         if (response.updatePersonalInformation) {
                             setUpdatePersonalInformation(false);

@@ -240,7 +240,7 @@ const NewBusinessPage = ({auth, csrfToken}: {
                             <div className="field mb-4 col-12 md:col-6 p-input-icon-right">
                                 <label htmlFor="account_verification"
                                        className={classNames("font-medium text-900 cursor-pointer select-none")}>
-                                    Hesap Onayı
+                                    Hesap Aktifliği
                                 </label>
                                 <br/>
                                 <InputSwitch

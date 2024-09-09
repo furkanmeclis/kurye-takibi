@@ -13,7 +13,7 @@ export const getCourier = async (id: number, csrfToken: any) => {
     }
 }
 
-export const getCouriers = async (type: "verified" | "unverified" | "waitApprovals" | "all", csrfToken: any) => {
+export const getCouriers = async (type: "activated" | "unactivated" | "waitApprovals" | "all", csrfToken: any) => {
     if (csrfToken) {
         let url = route("admin.couriers.listCouriers", type);
         if (type === "waitApprovals") {

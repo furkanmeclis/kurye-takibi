@@ -47,12 +47,12 @@ class BusinessesController extends Controller
             $newBusiness->role = 'business';
             if ($request->account_verification == "1") {
                 $newBusiness->email_verified_at = now();
-                $newBusiness->verified_at = now();
-                $newBusiness->verified = 1;
+                $newBusiness->activated_at = now();
+                $newBusiness->activated = 1;
             } else {
                 $newBusiness->email_verified_at = null;
-                $newBusiness->verified_at = null;
-                $newBusiness->verified = 0;
+                $newBusiness->activated_at = null;
+                $newBusiness->activated = 0;
             }
             if ($newBusiness->save()) {
                 return response()->json([
@@ -83,10 +83,10 @@ class BusinessesController extends Controller
         $businesses = null;
         if ($type == "all") {
             $businesses = User::where("role", "business")->orderBy("created_at", "desc");
-        } elseif ($type == "verified") {
-            $businesses = User::where("role", "business")->orderBy("created_at", "desc")->where("verified", 1);
-        } elseif ($type == "unverified") {
-            $businesses = User::where("role", "business")->orderBy("created_at", "desc")->where("verified", 0);
+        } elseif ($type == "activated") {
+            $businesses = User::where("role", "business")->orderBy("created_at", "desc")->where("activated", 1);
+        } elseif ($type == "unactivated") {
+            $businesses = User::where("role", "business")->orderBy("created_at", "desc")->where("activated", 0);
         }
         if ($businesses) {
             $businesses = $businesses->get()->map(function ($business) {
@@ -141,7 +141,7 @@ class BusinessesController extends Controller
 
     public function edit($id)
     {
-        $business = User::where('role', 'business')->where('id', $id)->first(["id", "verified"]);
+        $business = User::where('role', 'business')->where('id', $id)->first(["id", "activated"]);
         if ($business) {
             return Inertia::render('Admin/Businesses/Edit', [
                 'businessId' => $business->id,
@@ -166,14 +166,14 @@ class BusinessesController extends Controller
                 $business->email = $request->email;
                 $business->phone = $request->phone;
                 if ($request->account_verification == "1") {
-                    if ($business->verified == 0) {
-                        $business->verified = 1;
-                        $business->verified_at = now();
+                    if ($business->activated == 0) {
+                        $business->activated = 1;
+                        $business->activated_at = now();
                     }
                 } else {
-                    if ($business->verified == 1) {
-                        $business->verified = 0;
-                        $business->verified_at = null;
+                    if ($business->activated == 1) {
+                        $business->activated = 0;
+                        $business->activated_at = null;
                     }
                 }
                 if ($request->has("password_change")) {
@@ -215,14 +215,14 @@ class BusinessesController extends Controller
     {
         $business = User::where('role', 'business')->where('id', $id)->first();
         if ($business) {
-            if ($business->verified == 1) {
+            if ($business->activated == 1) {
                 return response()->json([
                     "status" => false,
                     "message" => "İşletme Zaten Onaylanmış."
                 ]);
             } else {
-                $business->verified = 1;
-                $business->verified_at = now();
+                $business->activated = 1;
+                $business->activated_at = now();
                 if ($business->save()) {
                     return response()->json([
                         "status" => true,
@@ -278,8 +278,8 @@ class BusinessesController extends Controller
         $businesses = User::where('role', 'business')->whereIn('id', $request->ids);
         if ($businesses) {
             $businesses->update([
-                "verified" => 1,
-                "verified_at" => now()
+                "activated" => 1,
+                "activated_at" => now()
             ]);
             return response()->json([
                 "status" => true,

@@ -29,12 +29,18 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      * @throws ValidationException
      */
-    public function store(LoginRequest $request)
+    public function store(LoginRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
             $request->authenticate();
             $request->session()->regenerate();
-            sleep(1);
+            if($request->user()->activated == 0){
+                Auth::guard('web')->logout();
+                return response()->json([
+                    'message' => 'Hesabınız aktif değildir. Lütfen yöneticiler ile iletişime geçiniz.',
+                    'status' => false
+                ]);
+            }
             return response()->json([
                 'message' => 'Giriş Başarılı!',
                 'status' => true,

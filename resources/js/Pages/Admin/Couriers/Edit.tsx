@@ -23,7 +23,7 @@ interface Courier {
     password: string,
     password_confirmation: string,
     account_verification: boolean,
-    verified_at: string | boolean,
+    activated_at: string | boolean,
 }
 
 const EditCourierPage = ({auth, csrfToken, courierId = 0}: {
@@ -49,7 +49,7 @@ const EditCourierPage = ({auth, csrfToken, courierId = 0}: {
         password: '',
         password_confirmation: '',
         account_verification: false,
-        verified_at: '',
+        activated_at: '',
     });
     const toast = React.useRef<Toast>(null);
     const [loading, setLoading] = useState(true);
@@ -108,8 +108,8 @@ const EditCourierPage = ({auth, csrfToken, courierId = 0}: {
                             password_change: false,
                             password: '',
                             password_confirmation: '',
-                            account_verification: response.courier.verified === 1,
-                            verified_at: response.courier.verified_at === null ? false : new Date(response.courier.verified_at).toLocaleString(),
+                            account_verification: response.courier.activated === 1,
+                            activated_at: response.courier.activated_at === null ? false : new Date(response.courier.activated_at).toLocaleString(),
                         }
                         resetForm({
                             values: courierData,
@@ -165,8 +165,8 @@ const EditCourierPage = ({auth, csrfToken, courierId = 0}: {
                         password_change: false,
                         password: '',
                         password_confirmation: '',
-                        account_verification: courierResponse.verified === 1,
-                        verified_at: courierResponse.verified_at === null ? false : new Date(courierResponse.verified_at).toLocaleString(),
+                        account_verification: courierResponse.activated === 1,
+                        activated_at: courierResponse.activated_at === null ? false : new Date(courierResponse.activated_at).toLocaleString(),
                     };
                     // @ts-ignore
                     setCourier(courierData);
@@ -376,8 +376,9 @@ const EditCourierPage = ({auth, csrfToken, courierId = 0}: {
                                 <div className="field mb-4 col-12 md:col-6 p-input-icon-right">
                                     <label htmlFor="account_verification"
                                            className={classNames("font-medium text-900 cursor-pointer select-none")}>
-                                        Hesap Onayı {values.account_verification && values.verified_at !== false &&
-                                        <span className="text-green-500">Onaylandı : {values.verified_at}</span>}
+                                        Hesap Aktifliği {values.account_verification && values.activated_at !== false &&
+                                        <span
+                                            className="text-green-500">Akttifleştirme Tarihi : {values.activated_at}</span>}
                                     </label>
                                     <br/>
                                     <InputSwitch

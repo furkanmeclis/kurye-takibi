@@ -23,7 +23,7 @@ interface BusinessType {
     password: string,
     password_confirmation: string,
     account_verification: boolean,
-    verified_at: string | boolean,
+    activated_at: string | boolean,
 }
 
 const EditBusinessPage = ({auth, csrfToken, businessId = 0}: {
@@ -49,7 +49,7 @@ const EditBusinessPage = ({auth, csrfToken, businessId = 0}: {
         password: '',
         password_confirmation: '',
         account_verification: false,
-        verified_at: '',
+        activated_at: '',
     });
     const toast = React.useRef<Toast>(null);
     const [loading, setLoading] = useState(true);
@@ -108,8 +108,8 @@ const EditBusinessPage = ({auth, csrfToken, businessId = 0}: {
                             password_change: false,
                             password: '',
                             password_confirmation: '',
-                            account_verification: response.business.verified === 1,
-                            verified_at: response.business.verified_at === null ? false : new Date(response.business.verified_at).toLocaleString(),
+                            account_verification: response.business.activated === 1,
+                            activated_at: response.business.activated_at === null ? false : new Date(response.business.activated_at).toLocaleString(),
                         }
                         resetForm({
                             values: businessData,
@@ -165,8 +165,8 @@ const EditBusinessPage = ({auth, csrfToken, businessId = 0}: {
                         password_change: false,
                         password: '',
                         password_confirmation: '',
-                        account_verification: businessResponse.verified === 1,
-                        verified_at: businessResponse.verified_at === null ? false : new Date(businessResponse.verified_at).toLocaleString(),
+                        account_verification: businessResponse.activated === 1,
+                        activated_at: businessResponse.activated_at === null ? false : new Date(businessResponse.activated_at).toLocaleString(),
                     };
                     // @ts-ignore
                     setBusiness(businessData);
@@ -376,8 +376,8 @@ const EditBusinessPage = ({auth, csrfToken, businessId = 0}: {
                                 <div className="field mb-4 col-12 md:col-6 p-input-icon-right">
                                     <label htmlFor="account_verification"
                                            className={classNames("font-medium text-900 cursor-pointer select-none")}>
-                                        Hesap Onayı {values.account_verification && values.verified_at !== false &&
-                                        <span className="text-green-500">Onaylandı : {values.verified_at}</span>}
+                                        Hesap Aktifliği {values.account_verification && values.activated_at !== false &&
+                                        <span className="text-green-500">Aktifleştirme Tarihi : {values.activated_at}</span>}
                                     </label>
                                     <br/>
                                     <InputSwitch

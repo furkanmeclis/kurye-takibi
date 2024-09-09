@@ -13,7 +13,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         menuMode: 'static',
         colorScheme: 'light',
         componentTheme: 'indigo',
-        scale: 12,
+        scale: 14,
         theme: 'indigo',
         menuTheme: 'light',
         layoutTheme: 'colorScheme',

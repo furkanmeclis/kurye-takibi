@@ -45,12 +45,12 @@ class CouriersController extends \App\Http\Controllers\Controller
             $newCourier->role = 'courier';
             if ($request->account_verification == "1") {
                 $newCourier->email_verified_at = now();
-                $newCourier->verified_at = now();
-                $newCourier->verified = 1;
+                $newCourier->activated_at = now();
+                $newCourier->activated = 1;
             } else {
                 $newCourier->email_verified_at = null;
-                $newCourier->verified_at = null;
-                $newCourier->verified = 0;
+                $newCourier->activated_at = null;
+                $newCourier->activated = 0;
             }
 
             if ($newCourier->save()) {
@@ -82,10 +82,10 @@ class CouriersController extends \App\Http\Controllers\Controller
         $couriers = null;
         if ($type == "all") {
             $couriers = User::where("role", "courier")->orderBy("created_at", "desc");
-        } elseif ($type == "verified") {
-            $couriers = User::where("role", "courier")->orderBy("created_at", "desc")->where("verified", 1);
-        } elseif ($type == "unverified") {
-            $couriers = User::where("role", "courier")->orderBy("created_at", "desc")->where("verified", 0);
+        } elseif ($type == "activated") {
+            $couriers = User::where("role", "courier")->orderBy("created_at", "desc")->where("activated", 1);
+        } elseif ($type == "unactivated") {
+            $couriers = User::where("role", "courier")->orderBy("created_at", "desc")->where("activated", 0);
         }
         if ($couriers) {
             $couriers = $couriers->get()->map(function ($courier) {
@@ -106,7 +106,7 @@ class CouriersController extends \App\Http\Controllers\Controller
 
     public function getWaitApprovalCouriers(): \Illuminate\Http\JsonResponse
     {
-        $couriers = CourierDetails::where("approved", 0)->where("completed",1)->orderBy("created_at", "desc")->get()->map(function ($details) {
+        $couriers = CourierDetails::where("approved", 0)->where("completed", 1)->orderBy("created_at", "desc")->get()->map(function ($details) {
             $details->courier = User::where("id", $details->courier_id)->first();
             return $details;
         });
@@ -141,7 +141,7 @@ class CouriersController extends \App\Http\Controllers\Controller
 
     public function edit($id)
     {
-        $courier = User::where('role', 'courier')->where('id', $id)->first(["id", "verified"]);
+        $courier = User::where('role', 'courier')->where('id', $id)->first(["id", "activated"]);
         if ($courier) {
             return Inertia::render('Admin/Couriers/Edit', [
                 'courierId' => $courier->id,
@@ -166,14 +166,14 @@ class CouriersController extends \App\Http\Controllers\Controller
                 $courier->email = $request->email;
                 $courier->phone = $request->phone;
                 if ($request->account_verification == "1") {
-                    if ($courier->verified == 0) {
-                        $courier->verified = 1;
-                        $courier->verified_at = now();
+                    if ($courier->activated == 0) {
+                        $courier->activated = 1;
+                        $courier->activated_at = now();
                     }
                 } else {
-                    if ($courier->verified == 1) {
-                        $courier->verified = 0;
-                        $courier->verified_at = null;
+                    if ($courier->activated == 1) {
+                        $courier->activated = 0;
+                        $courier->activated_at = null;
                     }
                 }
                 if ($request->has("password_change")) {
@@ -215,14 +215,14 @@ class CouriersController extends \App\Http\Controllers\Controller
     {
         $courier = User::where('role', 'courier')->where('id', $id)->first();
         if ($courier) {
-            if ($courier->verified == 1) {
+            if ($courier->activated == 1) {
                 return response()->json([
                     "status" => false,
                     "message" => "Kurye Zaten Onaylanmış."
                 ]);
             } else {
-                $courier->verified = 1;
-                $courier->verified_at = now();
+                $courier->activated = 1;
+                $courier->activated_at = now();
                 if ($courier->save()) {
                     return response()->json([
                         "status" => true,
@@ -273,13 +273,14 @@ class CouriersController extends \App\Http\Controllers\Controller
             ]);
         }
     }
+
     public function multipleApprove(Request $request): \Illuminate\Http\JsonResponse
     {
         $couriers = User::where('role', 'courier')->whereIn('id', $request->ids);
         if ($couriers) {
             $couriers->update([
-                "verified" => 1,
-                "verified_at" => now()
+                "activated" => 1,
+                "activated_at" => now()
             ]);
             return response()->json([
                 "status" => true,
