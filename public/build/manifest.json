@@ -1,24 +1,24 @@
 {
-  "_FullPageLayout-D-H--Dvz.js": {
-    "file": "assets/FullPageLayout-D-H--Dvz.js",
+  "_FullPageLayout-C7z45Xro.js": {
+    "file": "assets/FullPageLayout-C7z45Xro.js",
     "name": "FullPageLayout",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
-  "_PageContainer-DSGVDqa6.js": {
-    "file": "assets/PageContainer-DSGVDqa6.js",
+  "_PageContainer-BdNeVY65.js": {
+    "file": "assets/PageContainer-BdNeVY65.js",
     "name": "PageContainer",
     "imports": [
       "resources/js/app.tsx",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_toast.esm-DmrTv30h.js",
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
-  "_blockui.esm-BeJDGdGV.js": {
-    "file": "assets/blockui.esm-BeJDGdGV.js",
+  "_blockui.esm-DIBvZjT-.js": {
+    "file": "assets/blockui.esm-DIBvZjT-.js",
     "name": "blockui.esm",
     "imports": [
       "resources/js/app.tsx"
@@ -28,97 +28,97 @@
     "file": "assets/businesses-B8cWdWWF.js",
     "name": "businesses"
   },
-  "_checkbox.esm-CwLoQucT.js": {
-    "file": "assets/checkbox.esm-CwLoQucT.js",
+  "_checkbox.esm-BvO80h6o.js": {
+    "file": "assets/checkbox.esm-BvO80h6o.js",
     "name": "checkbox.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "_couriers-BFRc8dnL.js": {
     "file": "assets/couriers-BFRc8dnL.js",
     "name": "couriers"
   },
-  "_dialog.esm-BACwo-7o.js": {
-    "file": "assets/dialog.esm-BACwo-7o.js",
+  "_dialog.esm-CoglO4JC.js": {
+    "file": "assets/dialog.esm-CoglO4JC.js",
     "name": "dialog.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_index.esm-Ddt82mjx.js"
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "_globalHelper-BwHF33TP.js": {
     "file": "assets/globalHelper-BwHF33TP.js",
     "name": "globalHelper"
   },
-  "_index.esm-Ddt82mjx.js": {
-    "file": "assets/index.esm-Ddt82mjx.js",
+  "_index.esm-H1sz6LYB.js": {
+    "file": "assets/index.esm-H1sz6LYB.js",
     "name": "index.esm",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
-  "_inputmask.esm-BmHUkyvb.js": {
-    "file": "assets/inputmask.esm-BmHUkyvb.js",
+  "_inputmask.esm-DkTyA19i.js": {
+    "file": "assets/inputmask.esm-DkTyA19i.js",
     "name": "inputmask.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js"
+      "_toast.esm-DmrTv30h.js"
     ]
   },
-  "_inputswitch.esm-BfKpc3Hs.js": {
-    "file": "assets/inputswitch.esm-BfKpc3Hs.js",
+  "_inputswitch.esm-CXj9XOAl.js": {
+    "file": "assets/inputswitch.esm-CXj9XOAl.js",
     "name": "inputswitch.esm",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
-  "_message.esm-wxyP2Vmm.js": {
-    "file": "assets/message.esm-wxyP2Vmm.js",
+  "_message.esm-B7m32CDq.js": {
+    "file": "assets/message.esm-B7m32CDq.js",
     "name": "message.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_index.esm-Ddt82mjx.js",
-      "_toast.esm-CNW18j1h.js"
+      "_index.esm-H1sz6LYB.js",
+      "_toast.esm-DmrTv30h.js"
     ]
   },
-  "_progressbar.esm-BKXUEOJB.js": {
-    "file": "assets/progressbar.esm-BKXUEOJB.js",
+  "_progressbar.esm-CXMahzQ9.js": {
+    "file": "assets/progressbar.esm-CXMahzQ9.js",
     "name": "progressbar.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js"
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js"
     ],
     "dynamicImports": [
       "node_modules/.pnpm/chart.js@4.4.4/node_modules/chart.js/auto/auto.js"
     ]
   },
-  "_styleclass.esm-CcXE0EGZ.js": {
-    "file": "assets/styleclass.esm-CcXE0EGZ.js",
+  "_styleclass.esm-nfnQ_JLj.js": {
+    "file": "assets/styleclass.esm-nfnQ_JLj.js",
     "name": "styleclass.esm",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
-  "_toast.esm-CNW18j1h.js": {
-    "file": "assets/toast.esm-CNW18j1h.js",
+  "_toast.esm-DmrTv30h.js": {
+    "file": "assets/toast.esm-DmrTv30h.js",
     "name": "toast.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_index.esm-Ddt82mjx.js"
+      "_index.esm-H1sz6LYB.js"
     ]
   },
-  "_tristatecheckbox.esm-DSiRHLxK.js": {
-    "file": "assets/tristatecheckbox.esm-DSiRHLxK.js",
+  "_tristatecheckbox.esm-DNmT7tys.js": {
+    "file": "assets/tristatecheckbox.esm-DNmT7tys.js",
     "name": "tristatecheckbox.esm",
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "node_modules/.pnpm/chart.js@4.4.4/node_modules/chart.js/auto/auto.js": {
@@ -172,302 +172,302 @@
     "src": "resources/css/layout/fonts/lato-v17-latin-ext_latin-regular.woff2"
   },
   "resources/js/Pages/Admin/Businesses/All.tsx": {
-    "file": "assets/All-BKzwSQkN.js",
+    "file": "assets/All-BPMNvPWh.js",
     "name": "All",
     "src": "resources/js/Pages/Admin/Businesses/All.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
       "_businesses-B8cWdWWF.js",
-      "_checkbox.esm-CwLoQucT.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_tristatecheckbox.esm-DSiRHLxK.js",
+      "_checkbox.esm-BvO80h6o.js",
+      "_message.esm-B7m32CDq.js",
+      "_tristatecheckbox.esm-DNmT7tys.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js",
-      "_index.esm-Ddt82mjx.js"
+      "_styleclass.esm-nfnQ_JLj.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Admin/Businesses/Edit.tsx": {
-    "file": "assets/Edit-TVlR5C6z.js",
+    "file": "assets/Edit-DLYzCjGn.js",
     "name": "Edit",
     "src": "resources/js/Pages/Admin/Businesses/Edit.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_inputswitch.esm-CXj9XOAl.js",
       "_businesses-B8cWdWWF.js",
-      "_blockui.esm-BeJDGdGV.js",
+      "_blockui.esm-DIBvZjT-.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Admin/Businesses/New.tsx": {
-    "file": "assets/New-HmwDrwGH.js",
+    "file": "assets/New-ZOQw213A.js",
     "name": "New",
     "src": "resources/js/Pages/Admin/Businesses/New.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_inputswitch.esm-CXj9XOAl.js",
       "_businesses-B8cWdWWF.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Admin/Businesses/WaitApproval.tsx": {
-    "file": "assets/WaitApproval-DGavaOTI.js",
+    "file": "assets/WaitApproval-DBlyxllD.js",
     "name": "WaitApproval",
     "src": "resources/js/Pages/Admin/Businesses/WaitApproval.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
       "_businesses-B8cWdWWF.js",
-      "_checkbox.esm-CwLoQucT.js",
-      "_message.esm-wxyP2Vmm.js",
+      "_checkbox.esm-BvO80h6o.js",
+      "_message.esm-B7m32CDq.js",
       "_globalHelper-BwHF33TP.js",
-      "_dialog.esm-BACwo-7o.js",
+      "_dialog.esm-CoglO4JC.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js",
-      "_index.esm-Ddt82mjx.js"
+      "_styleclass.esm-nfnQ_JLj.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Admin/Couriers/All.tsx": {
-    "file": "assets/All-yROjo8h6.js",
+    "file": "assets/All-CdDnkSkx.js",
     "name": "All",
     "src": "resources/js/Pages/Admin/Couriers/All.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
       "_couriers-BFRc8dnL.js",
-      "_checkbox.esm-CwLoQucT.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_tristatecheckbox.esm-DSiRHLxK.js",
+      "_checkbox.esm-BvO80h6o.js",
+      "_message.esm-B7m32CDq.js",
+      "_tristatecheckbox.esm-DNmT7tys.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js",
-      "_index.esm-Ddt82mjx.js"
+      "_styleclass.esm-nfnQ_JLj.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Admin/Couriers/Edit.tsx": {
-    "file": "assets/Edit-Yd7rml7C.js",
+    "file": "assets/Edit-DtPsBbMW.js",
     "name": "Edit",
     "src": "resources/js/Pages/Admin/Couriers/Edit.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_inputswitch.esm-CXj9XOAl.js",
       "_couriers-BFRc8dnL.js",
-      "_blockui.esm-BeJDGdGV.js",
+      "_blockui.esm-DIBvZjT-.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Admin/Couriers/New.tsx": {
-    "file": "assets/New-C_L1X6jd.js",
+    "file": "assets/New-2xveYg0Z.js",
     "name": "New",
     "src": "resources/js/Pages/Admin/Couriers/New.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_inputswitch.esm-CXj9XOAl.js",
       "_couriers-BFRc8dnL.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Admin/Couriers/WaitApproval.tsx": {
-    "file": "assets/WaitApproval-DMhK2WgC.js",
+    "file": "assets/WaitApproval-CYtX1yCR.js",
     "name": "WaitApproval",
     "src": "resources/js/Pages/Admin/Couriers/WaitApproval.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
       "_couriers-BFRc8dnL.js",
-      "_checkbox.esm-CwLoQucT.js",
-      "_message.esm-wxyP2Vmm.js",
+      "_checkbox.esm-BvO80h6o.js",
+      "_message.esm-B7m32CDq.js",
       "_globalHelper-BwHF33TP.js",
-      "_dialog.esm-BACwo-7o.js",
+      "_dialog.esm-CoglO4JC.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js",
-      "_index.esm-Ddt82mjx.js"
+      "_styleclass.esm-nfnQ_JLj.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Admin/Dashboard.tsx": {
-    "file": "assets/Dashboard-B2V3xF_D.js",
+    "file": "assets/Dashboard-zkm_DWYO.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_progressbar.esm-BKXUEOJB.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_PageContainer-DSGVDqa6.js",
-      "_index.esm-Ddt82mjx.js",
-      "_toast.esm-CNW18j1h.js",
+      "_progressbar.esm-CXMahzQ9.js",
+      "_message.esm-B7m32CDq.js",
+      "_PageContainer-BdNeVY65.js",
+      "_index.esm-H1sz6LYB.js",
+      "_toast.esm-DmrTv30h.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Auth/AccessDenied.tsx": {
-    "file": "assets/AccessDenied-BS3jNdE2.js",
+    "file": "assets/AccessDenied-BJe8865c.js",
     "name": "AccessDenied",
     "src": "resources/js/Pages/Auth/AccessDenied.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_FullPageLayout-D-H--Dvz.js"
+      "_FullPageLayout-C7z45Xro.js"
     ]
   },
   "resources/js/Pages/Auth/ForgotPassword.tsx": {
-    "file": "assets/ForgotPassword-Dr5UvQO-.js",
+    "file": "assets/ForgotPassword-CcA8quH3.js",
     "name": "ForgotPassword",
     "src": "resources/js/Pages/Auth/ForgotPassword.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_FullPageLayout-D-H--Dvz.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_FullPageLayout-C7z45Xro.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Auth/Login.tsx": {
-    "file": "assets/Login-BQYcbUqq.js",
+    "file": "assets/Login-DRUq71iZ.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_FullPageLayout-D-H--Dvz.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_FullPageLayout-C7z45Xro.js",
+      "_inputswitch.esm-CXj9XOAl.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Auth/Register.tsx": {
-    "file": "assets/Register-a4gGZhGE.js",
+    "file": "assets/Register-BPXg35Uo.js",
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_FullPageLayout-D-H--Dvz.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_FullPageLayout-C7z45Xro.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Auth/ResetPassword.tsx": {
-    "file": "assets/ResetPassword-DctT4ed6.js",
+    "file": "assets/ResetPassword-CfpwCpNr.js",
     "name": "ResetPassword",
     "src": "resources/js/Pages/Auth/ResetPassword.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_FullPageLayout-D-H--Dvz.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_FullPageLayout-C7z45Xro.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Business/Dashboard.tsx": {
-    "file": "assets/Dashboard-M9-xOPA7.js",
+    "file": "assets/Dashboard-TOvxtBFc.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Business/Dashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_progressbar.esm-BKXUEOJB.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_PageContainer-DSGVDqa6.js",
-      "_index.esm-Ddt82mjx.js",
-      "_toast.esm-CNW18j1h.js",
+      "_progressbar.esm-CXMahzQ9.js",
+      "_message.esm-B7m32CDq.js",
+      "_PageContainer-BdNeVY65.js",
+      "_index.esm-H1sz6LYB.js",
+      "_toast.esm-DmrTv30h.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Business/PersonalInformation.tsx": {
-    "file": "assets/PersonalInformation-BcPfBcsH.js",
+    "file": "assets/PersonalInformation-ED77fZOX.js",
     "name": "PersonalInformation",
     "src": "resources/js/Pages/Business/PersonalInformation.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/Pages/Courier/Dashboard.tsx": {
-    "file": "assets/Dashboard-BBstbQqE.js",
+    "file": "assets/Dashboard-DnFY5fMb.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Courier/Dashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
+      "_PageContainer-BdNeVY65.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_index.esm-Ddt82mjx.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_message.esm-wxyP2Vmm.js",
+      "_toast.esm-DmrTv30h.js",
+      "_index.esm-H1sz6LYB.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_message.esm-B7m32CDq.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Courier/PersonalInformation.tsx": {
-    "file": "assets/PersonalInformation-B8SBmz56.js",
+    "file": "assets/PersonalInformation-yfbgH-Hy.js",
     "name": "PersonalInformation",
     "src": "resources/js/Pages/Courier/PersonalInformation.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_index.esm-Ddt82mjx.js"
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_message.esm-B7m32CDq.js",
+      "_index.esm-H1sz6LYB.js"
     ],
     "assets": [
       "assets/bicycle-CEGKEMEW.svg",
@@ -476,57 +476,57 @@
     ]
   },
   "resources/js/Pages/Dashboard.tsx": {
-    "file": "assets/Dashboard-CdMWTWRx.js",
+    "file": "assets/Dashboard-D2jTK_lO.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_progressbar.esm-BKXUEOJB.js",
-      "_message.esm-wxyP2Vmm.js",
-      "_PageContainer-DSGVDqa6.js",
-      "_index.esm-Ddt82mjx.js",
-      "_toast.esm-CNW18j1h.js",
+      "_progressbar.esm-CXMahzQ9.js",
+      "_message.esm-B7m32CDq.js",
+      "_PageContainer-BdNeVY65.js",
+      "_index.esm-H1sz6LYB.js",
+      "_toast.esm-DmrTv30h.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
-      "_inputmask.esm-BmHUkyvb.js",
+      "_inputmask.esm-DkTyA19i.js",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js"
+      "_styleclass.esm-nfnQ_JLj.js"
     ]
   },
   "resources/js/Pages/Profile/Edit.tsx": {
-    "file": "assets/Edit-RYAOh770.js",
+    "file": "assets/Edit-CXdT43Z_.js",
     "name": "Edit",
     "src": "resources/js/Pages/Profile/Edit.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_PageContainer-DSGVDqa6.js",
-      "_toast.esm-CNW18j1h.js",
-      "_inputmask.esm-BmHUkyvb.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
-      "_blockui.esm-BeJDGdGV.js",
+      "_PageContainer-BdNeVY65.js",
+      "_toast.esm-DmrTv30h.js",
+      "_inputmask.esm-DkTyA19i.js",
+      "_inputswitch.esm-CXj9XOAl.js",
+      "_blockui.esm-DIBvZjT-.js",
       "_globalHelper-BwHF33TP.js",
       "resources/js/Pages/Courier/PersonalInformation.tsx",
       "resources/js/Pages/Business/PersonalInformation.tsx",
-      "_styleclass.esm-CcXE0EGZ.js",
-      "_index.esm-Ddt82mjx.js",
-      "_message.esm-wxyP2Vmm.js"
+      "_styleclass.esm-nfnQ_JLj.js",
+      "_index.esm-H1sz6LYB.js",
+      "_message.esm-B7m32CDq.js"
     ]
   },
   "resources/js/Pages/Welcome.tsx": {
-    "file": "assets/Welcome-D11KaoF-.js",
+    "file": "assets/Welcome-CkQDNt37.js",
     "name": "Welcome",
     "src": "resources/js/Pages/Welcome.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_styleclass.esm-CcXE0EGZ.js",
-      "_inputswitch.esm-BfKpc3Hs.js",
-      "_index.esm-Ddt82mjx.js"
+      "_styleclass.esm-nfnQ_JLj.js",
+      "_inputswitch.esm-CXj9XOAl.js",
+      "_index.esm-H1sz6LYB.js"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-CbKQlW76.js",
+    "file": "assets/app-U6D2PzfD.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,

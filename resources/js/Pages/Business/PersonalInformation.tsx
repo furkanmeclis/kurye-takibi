@@ -206,7 +206,7 @@ const PersonalInformation = ({
                 delete formData?.tax_office;
             }
             setLoading(true);
-            savePersonalInformation(formData).then((response) => {
+            savePersonalInformation(formData,csrfToken).then((response) => {
                 if (response.status) {
                     let newData = response.details;
                     let resetData = {

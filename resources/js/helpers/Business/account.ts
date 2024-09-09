@@ -1,7 +1,7 @@
-export const savePersonalInformation = async (data: any) => {
+export const savePersonalInformation = async (data: any, csrfToken: any) => {
     let url = route("business.savePersonalInformation");
     let headers = new Headers();
-    let csrfToken = String(document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+
     headers.append("X-CSRF-TOKEN", csrfToken);
     headers.append("Content-Type", "application/json");
     let response = await fetch(url, {
