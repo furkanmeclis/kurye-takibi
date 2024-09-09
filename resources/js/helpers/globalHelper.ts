@@ -22,6 +22,32 @@ export const getDetailKeysTranslation = (key: string) => {
     // @ts-ignore
     return labelTranslations[key];
 }
+export const getDetailsValueTranslation = (key: string, value: any) => {
+    if (key === "billing") {
+        return value === "company" ? "Şirket" : "Bireysel";
+    }
+    if (key === "vehicle_type") {
+        if(value === "motorcycle"){
+            return "Motosiklet";
+        }else if(value === "bicycle"){
+            return "Bisiklet";
+        } else if (value === "car"){
+            return "Araba";
+        }
+        return value;
+    }
+    if(key === "created_at" || key === "updated_at"){
+        return new Date(value).toLocaleString();
+    }
+    if (key === "country") {
+        if (value === "turkey") {
+            return "Türkiye";
+        }
+        return value;
+    }
+    return value;
+
+}
 export const updateProfile = async (data: any, csrfToken: any) => {
     if (csrfToken) {
         let url = route("profile.update");

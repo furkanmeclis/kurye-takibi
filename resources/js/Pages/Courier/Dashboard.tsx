@@ -3,6 +3,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import MainLayout from "@/Layouts/MainLayout";
 import PageContainer from "@/PageContainer";
 import PersonalInformation from "@/Pages/Courier/PersonalInformation";
+import {Head} from "@inertiajs/react";
 
 
 function Dashboard({auth, csrfToken, errors}: {
@@ -13,7 +14,8 @@ function Dashboard({auth, csrfToken, errors}: {
     return (
         <PageContainer auth={auth} csrfToken={csrfToken} errors={errors}>
             <MainLayout>
-                s
+                <Head title="Kurye Anasayfa"/>
+                Kurye Ana Sayfa
             </MainLayout>
         </PageContainer>
     );

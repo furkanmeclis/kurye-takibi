@@ -60,7 +60,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
 
     return (
         <div className="layout-topbar">
-            <Link href={'/'} className="app-logo">
+            <Link href={route("dashboard")} className="app-logo">
                 <img alt="app logo" src={logo()}/>
                 <span className="app-name">{import.meta.env.VITE_APP_NAME}</span>
             </Link>

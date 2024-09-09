@@ -9,7 +9,7 @@ class CourierDetails extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',       // Yeni eklenen alan
+        'courier_id',       // Yeni eklenen alan
         'address',
         'city',
         'state',

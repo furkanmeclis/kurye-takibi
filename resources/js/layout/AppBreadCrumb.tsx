@@ -22,7 +22,7 @@ const AppBreadcrumb = (props: AppBreadcrumbProps) => {
             <nav className="layout-breadcrumb">
                 <ol>
                     <li>
-                        <Link href={'/'} style={{ color: 'inherit' }}>
+                        <Link href={route("dashboard")} style={{ color: 'inherit' }}>
                             <i className="pi pi-home"></i>
                         </Link>
                     </li>

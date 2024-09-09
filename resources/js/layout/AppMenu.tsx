@@ -4,6 +4,18 @@ import type {MenuModel} from '@/types';
 const AppMenu = () => {
     const model: MenuModel[] = [
         {
+            label: "Anasayfa",
+            icon: 'pi pi-home',
+            roles: ["*"],
+            items: [
+                {
+                    label: 'Anasayfa',
+                    icon: 'pi pi-fw pi-home',
+                    to: route("dashboard"),
+                }
+            ]
+        },
+        {
             label: 'Kuryeler',
             icon: 'pi pi-users',
             roles: ['admin'],
@@ -45,18 +57,6 @@ const AppMenu = () => {
                     label: 'İşletmeler',
                     icon: 'pi pi-fw pi-home',
                     to: route("admin.businesses.index"),
-                }
-            ]
-        },
-        {
-            label: 'Anasayfa',
-            icon: 'pi pi-home',
-            roles: ['courier'],
-            items: [
-                {
-                    label: 'Anasayfa',
-                    icon: 'pi pi-fw pi-home',
-                    to: route("dashboard"),
                 }
             ]
         }

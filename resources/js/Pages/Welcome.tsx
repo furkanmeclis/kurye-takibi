@@ -31,7 +31,7 @@ const LandingPage: Page = ({auth, csrfToken, errors}: {
         router.visit(route("auth.register.index"));
     };
     const navigateToLogin = () => {
-        router.visit(route("auth.login.index"));
+        router.visit(route("login"));
     };
 
     const scrollToElement = (el: React.RefObject<HTMLDivElement>) => {

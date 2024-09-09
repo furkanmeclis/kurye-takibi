@@ -35,7 +35,7 @@ const Login: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) => {
             setLoading(true);
             headers.append('Content-Type', 'application/json');
             headers.append('X-CSRF-TOKEN', csrfToken);
-            fetch(route("auth.login.store"), {
+            fetch(route("login"), {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(values)
@@ -49,7 +49,7 @@ const Login: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) => {
                             localStorage.removeItem('loginEmailForRememberMe');
                         }
                         toast.current?.show({severity: 'success', summary: 'Başarılı', detail: response.message});
-                        router.visit(route(response?.redirect || 'auth.login.index'));
+                        router.visit(route(response?.redirect || 'login'));
                     } else {
                         toast.current?.show({severity: 'error', summary: 'Hata', detail: response.message});
                     }
@@ -146,10 +146,10 @@ const Login: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) => {
                         <label htmlFor="remember" className="ml-2">Beni Hatırla</label>
                     </div>
                     <span className="text-color-secondary flex justify-content-between mb-4">
-                        <Link href={route('auth.password.request')}
+                        <Link href={route('password.request')}
                               className="text-color-secondary hover:text-color"
                         >Şifremi Unuttum</Link>
-                        <Link href={route('auth.register.index')}
+                        <Link href={route('register')}
                               className="text-color-secondary hover:text-color"
                         >Kayıt Ol</Link>
                     </span>

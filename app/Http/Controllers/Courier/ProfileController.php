@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
-    public function savePersonalInformation(Request $request)
+    public function savePersonalInformation(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
             $individualFirst = "nullable";

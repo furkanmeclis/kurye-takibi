@@ -1,6 +1,7 @@
 import {useContext, useEffect} from "react";
 import {LayoutContext} from "@/layout/context/layoutcontext";
-import PersonalInformation from "@/Pages/Courier/PersonalInformation";
+import PersonalInformationCourier from "@/Pages/Courier/PersonalInformation";
+import PersonalInformationBusiness from "@/Pages/Business/PersonalInformation";
 import MainLayout from "@/Layouts/MainLayout";
 
 const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false}: {
@@ -20,7 +21,7 @@ const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false
             {auth?.user?.role === "courier" && <>
                 {!profilePage && auth?.profile_completed === false  ?
                     <MainLayout>
-                        <PersonalInformation
+                        <PersonalInformationCourier
                             page={true}
                             profileCompleted={auth?.profile_completed}
                             profileApproved={auth?.profile_approved}
@@ -28,7 +29,18 @@ const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false
                         />
                     </MainLayout> : <>{children}</>}
             </>}
-            {auth?.user?.role !== "courier" && <>
+            {auth?.user?.role === "business" && <>
+                {!profilePage && auth?.profile_completed === false  ?
+                    <MainLayout>
+                        <PersonalInformationBusiness
+                            page={true}
+                            profileCompleted={auth?.profile_completed}
+                            profileApproved={auth?.profile_approved}
+                            csrfToken={csrfToken}
+                        />
+                    </MainLayout> : <>{children}</>}
+            </>}
+            {auth?.user?.role === "admin" && <>
                 {children}
             </>}
         </>

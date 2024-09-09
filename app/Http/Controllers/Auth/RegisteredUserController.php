@@ -51,7 +51,7 @@ class RegisteredUserController extends Controller
                 return response()->json([
                     "status" => true,
                     "message" => "Kaydınız Başarıyla Gerçekleşti",
-                    "redirect" => 'auth.login.index'
+                    "redirect" => 'login'
                 ]);
             }else{
                 return response()->json([

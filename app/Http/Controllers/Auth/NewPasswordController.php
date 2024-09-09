@@ -55,7 +55,7 @@ class NewPasswordController extends Controller
                 return response()->json([
                     "status" => true,
                     "message" => "Şifre sıfırlama işlemi başarılı!",
-                    "redirect" => "auth.login.index"
+                    "redirect" => "login"
                 ]);
             }
             return response()->json([

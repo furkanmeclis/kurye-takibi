@@ -245,6 +245,8 @@ const PersonalInformation = ({
                     } else if (resetData.billing === 'company') {
                         resetData.selectedTaxOffice = taxOfficies.find((office) => office.vergi_dairesi === newData.tax_office) as VergiDairesi;
                     }
+                    setApproved(newData.approved === 1);
+                    setCompleted(newData.completed === 1);
                     resetForm({values: resetData});
                     toast.current?.show({
                         severity: 'success',
@@ -328,7 +330,7 @@ const PersonalInformation = ({
                         resetData.tax_office = taxOfficies[0].vergi_dairesi;
                     }
                 }
-
+                setApproved(details?.approved === 1);
                 setCompleted(details?.completed === 1);
                 resetForm({values: resetData});
             }

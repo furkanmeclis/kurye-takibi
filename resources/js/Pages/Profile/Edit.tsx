@@ -10,11 +10,11 @@ import {Toast} from "primereact/toast";
 import {classNames} from "primereact/utils";
 import {InputMask} from "primereact/inputmask";
 import {InputSwitch} from "primereact/inputswitch";
-import {getCourier, updateCourier} from "@/helpers/Admin/couriers";
 import {BlockUI} from "primereact/blockui";
 import {LayoutContext} from "@/layout/context/layoutcontext";
 import {updateProfile} from "@/helpers/globalHelper";
-import PersonalInformation from "@/Pages/Courier/PersonalInformation";
+import PersonalInformationCourier from "@/Pages/Courier/PersonalInformation";
+import PersonalInformationBusiness from "@/Pages/Business/PersonalInformation";
 
 interface UserType {
     id: string,
@@ -33,7 +33,7 @@ const ProfileEdit = ({auth, csrfToken, courierId = 0}: {
     csrfToken?: string,
     courierId?: number
 }) => {
-    const {setBreadcrumbs} = useContext(LayoutContext);
+    const {setBreadcrumbs, setAuth} = useContext(LayoutContext);
     useEffect(() => {
         setBreadcrumbs(prevState => {
             return [...prevState, {
@@ -120,6 +120,12 @@ const ProfileEdit = ({auth, csrfToken, courierId = 0}: {
                                 setUpdatePersonalInformation(true);
                             }, 1);
                         }
+                        setAuth(prevState => {
+                            return {
+                                ...prevState,
+                                user: response.user,
+                            }
+                        });
                         resetForm({
                             values: userData,
                         });
@@ -352,9 +358,13 @@ const ProfileEdit = ({auth, csrfToken, courierId = 0}: {
                 </div>
             </div>
             {auth?.user?.role === "courier" && updatePersonalInformation &&
-                <PersonalInformation profilePage page={false} profileCompleted={auth?.profile_completed}
-                                     csrfToken={csrfToken}
-                                     profileApproved={auth?.profile_approved}/>}
+                <PersonalInformationCourier profilePage page={false} profileCompleted={auth?.profile_completed}
+                                            csrfToken={csrfToken}
+                                            profileApproved={auth?.profile_approved}/>}
+            {auth?.user?.role === "business" && updatePersonalInformation &&
+                <PersonalInformationBusiness profilePage page={false} profileCompleted={auth?.profile_completed}
+                                             csrfToken={csrfToken}
+                                             profileApproved={auth?.profile_approved}/>}
         </MainLayout>
     </PageContainer>
 }

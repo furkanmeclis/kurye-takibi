@@ -56,6 +56,14 @@ class User extends Authenticatable implements MustVerifyEmail
                     "approved" => $details->approved
                 ];
             }
+        } else if ($this->role == "business") {
+            $details = BusinessDetails::where('business_id', $this->id)->first(["completed", "approved"]);
+            if ($details) {
+                return (object)[
+                    "completed" => $details->completed,
+                    "approved" => $details->approved
+                ];
+            }
         }
         return (object)[
             "completed" => false,

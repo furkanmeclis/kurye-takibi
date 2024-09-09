@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BusinessDetails;
+use App\Models\CourierDetails;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -103,6 +105,24 @@ class BusinessesController extends Controller
         }
     }
 
+    public function getWaitApprovalBusinesses(): \Illuminate\Http\JsonResponse
+    {
+        $businesses = BusinessDetails::where("approved", 0)->where("completed",1)->orderBy("created_at", "desc")->get()->map(function ($details) {
+            $details->business = User::where("id", $details->business_id)->first();
+            return $details;
+        });
+        if ($businesses) {
+            return response()->json([
+                "status" => true,
+                "details" => $businesses
+            ]);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Onay Bekleyen İşletme Listesi Alınamadı."
+            ]);
+        }
+    }
     public function showDetails($id): \Illuminate\Http\JsonResponse
     {
         $business = User::where('role', 'business')->where('id', $id)->first();
@@ -223,6 +243,36 @@ class BusinessesController extends Controller
         }
     }
 
+    public function approveDetails($id): \Illuminate\Http\JsonResponse
+    {
+        $businessDetails = BusinessDetails::where('business_id', $id)->first();
+        if ($businessDetails) {
+            if ($businessDetails->approved == 1) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "İşletme Zaten Onaylanmış."
+                ]);
+            } else {
+                $businessDetails->approved = 1;
+                if ($businessDetails->save()) {
+                    return response()->json([
+                        "status" => true,
+                        "message" => "İşletme Onaylama İşlemi Başarılı."
+                    ]);
+                } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "İşletme Onaylama İşlemi Başarısız Oldu."
+                    ]);
+                }
+            }
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "İşletme Bulunamadı."
+            ]);
+        }
+    }
     public function multipleApprove(Request $request): \Illuminate\Http\JsonResponse
     {
         $businesses = User::where('role', 'business')->whereIn('id', $request->ids);

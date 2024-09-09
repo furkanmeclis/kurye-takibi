@@ -14,15 +14,15 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('auth.register.index');
 
-    Route::post('register', [RegisteredUserController::class, 'store'])->name('auth.register.store');
+    Route::post('register', [RegisteredUserController::class, 'store'])->name('register');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('auth.login.index');
+        ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('auth.login.store');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('auth.password.request');
+        ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
         ->name('password.email');
@@ -35,7 +35,7 @@ Route::middleware('guest')->group(function () {
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
-        ->name('auth.verification.send');
+        ->name('verification.send');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');

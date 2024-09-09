@@ -12,9 +12,12 @@ export const getBusiness = async (id: number, csrfToken: any) => {
         return false;
     }
 }
-export const getBusinesses = async (type = "all", csrfToken: any) => {
+export const getBusinesses = async (type: "verified" | "unverified" | "waitApprovals" | "all", csrfToken: any) => {
     if (csrfToken) {
         let url = route("admin.businesses.listBusinesses", type);
+        if (type === "waitApprovals") {
+            url = route("admin.businesses.getWaitApprovalBusinesses");
+        }
         let headers = new Headers();
         headers.append("X-CSRF-TOKEN", csrfToken);
         let response = await fetch(url, {
@@ -112,6 +115,20 @@ export const multipleApproveBusiness = async (ids: number[], csrfToken: any) => 
             method: "POST",
             headers: headers,
             body: JSON.stringify({ids})
+        });
+        return await response.json();
+    } else {
+        return false;
+    }
+}
+export const approveDetails = async (id: number, csrfToken: any) => {
+    if (csrfToken) {
+        let url = route("admin.businesses.approveDetails", id);
+        let headers = new Headers();
+        headers.append("X-CSRF-TOKEN", csrfToken);
+        let response = await fetch(url, {
+            method: "POST",
+            headers: headers
         });
         return await response.json();
     } else {

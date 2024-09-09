@@ -25,7 +25,7 @@ import {OverlayPanel} from "primereact/overlaypanel";
 import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
-import {getDetailKeysTranslation} from "@/helpers/globalHelper";
+import {getDetailKeysTranslation, getDetailsValueTranslation} from "@/helpers/globalHelper";
 import {Dialog} from "primereact/dialog";
 
 const WaitApprovalCouriers = ({auth, csrfToken}: {
@@ -131,15 +131,15 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
             }
         },
         {
-            field: "created_at",
-            header: "Bilgileri Ekleme Tarihi",
-            hidden: !selectedColumns.includes("created_at"),
+            field: "updated_at",
+            header: "Bilgilerin Güncellenme Tarihi",
+            hidden: !selectedColumns.includes("updated_at"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Bilgileri Ekleme Tarihine Göre",
+            filterPlaceholder: "Bilgilerin Güncellenme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
-                return <span>{new Date(rowData.created_at).toLocaleString()}</span>
+                return <span>{new Date(rowData.updated_at).toLocaleString()}</span>
             }
         },
         {
@@ -173,7 +173,7 @@ const WaitApprovalCouriers = ({auth, csrfToken}: {
                 if (key !== "courier" || key !== "status" || key !== "completed" || key !== "approved" || key !== "latitude" || key !== "longitude" || key !== "id" || key !== "courier_id" || key !== "created_at" || key !== "updated_at") {
                     returnData.push({
                         label: getDetailKeysTranslation(String(key)),
-                        value: value
+                        value: getDetailsValueTranslation(String(key), String(value))
                     });
                 }
             }

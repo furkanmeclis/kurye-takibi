@@ -101,10 +101,10 @@ const ForgotPassword: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) 
                         })}></i>
                     </span>
                     <span className="text-color-secondary flex justify-content-between mb-4">
-                        <Link href={route('auth.login.index')}
+                        <Link href={route('login')}
                               className="text-color-secondary hover:text-color"
                         >Giriş Yap</Link>
-                        <Link href={route('auth.register.index')}
+                        <Link href={route('register')}
                               className="text-color-secondary hover:text-color"
                         >Kayıt Ol</Link>
                     </span>

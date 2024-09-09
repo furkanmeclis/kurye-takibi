@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\BusinessDetails;
 use App\Models\CourierDetails;
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -51,6 +52,14 @@ class ProfileController extends Controller
                 $updatePersonalInformation = false;
                 if ($user->role === "courier") {
                     $details = CourierDetails::firstOrNew(['courier_id' => $user->id]);
+                    $details->name = $user->name;
+                    $details->email = $user->email;
+                    $details->phone = $user->phone;
+                    $details->save();
+                    $updatePersonalInformation = true;
+                }
+                if($user->role === "business"){
+                    $details = BusinessDetails::firstOrNew(['business_id' => $user->id]);
                     $details->name = $user->name;
                     $details->email = $user->email;
                     $details->phone = $user->phone;

@@ -41,7 +41,7 @@ const ResetPassword: Page = ({csrfToken = '', auth = {}, email, token}: LaravelI
                 .then((response) => {
                     if (response.status) {
                         toast.current?.show({severity: 'success', summary: 'Başarılı', detail: response.message});
-                        router.visit(route(response?.redirect || 'auth.login.index'));
+                        router.visit(route(response?.redirect || 'login'));
                     } else {
                         toast.current?.show({severity: 'error', summary: 'Hata', detail: response.message});
                     }
@@ -129,10 +129,10 @@ const ResetPassword: Page = ({csrfToken = '', auth = {}, email, token}: LaravelI
                                    })}/>
                     </span>
                     <span className="text-color-secondary flex justify-content-between mb-4">
-                        <Link href={route('auth.login.index')}
+                        <Link href={route('login')}
                               className="text-color-secondary hover:text-color"
                         >Giriş Yap</Link>
-                        <Link href={route('auth.register.index')}
+                        <Link href={route('register')}
                               className="text-color-secondary hover:text-color"
                         >Kayıt Ol</Link>
                     </span>

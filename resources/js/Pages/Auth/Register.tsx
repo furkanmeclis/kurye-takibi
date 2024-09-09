@@ -41,7 +41,7 @@ const AccessDenied: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) =>
             let headers = new Headers();
             headers.append('Content-Type', 'application/json');
             headers.append('X-CSRF-TOKEN', csrfToken);
-            fetch(route("auth.register.store"), {
+            fetch(route("register"), {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(values)
@@ -50,7 +50,7 @@ const AccessDenied: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) =>
                 .then((response) => {
                     if (response.status) {
                         toast.current?.show({severity: 'success', summary: 'Başarılı', detail: response.message});
-                        router.visit(route(response?.redirect || 'auth.login.index'));
+                        router.visit(route(response?.redirect || 'login'));
                     } else {
                         let cacheErrors = {};
                         if (response?.emailExists && response?.emailExists === true) {
@@ -229,10 +229,10 @@ const AccessDenied: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) =>
                         })}></i>
                     </span>
                     <span className="text-color-secondary flex justify-content-between mb-4">
-                        <Link href={route('auth.password.request')}
+                        <Link href={route('password.request')}
                               className="text-color-secondary hover:text-color"
                         >Şifremi Unuttum</Link>
-                        <Link href={route('auth.login.index')}
+                        <Link href={route('login')}
                               className="text-color-secondary hover:text-color"
                         >Giriş Yap</Link>
                     </span>
