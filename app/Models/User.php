@@ -46,17 +46,20 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function profile_completed(): bool
+    public function profile_completed(): object
     {
-        if($this->role == "courier"){
-            $details = CourierDetails::where('courier_id', $this->id)->first(["completed","approved"]);
-            if($details){
-                return $details->completed && $details->approved;
-            }else{
-                return false;
+        if ($this->role == "courier") {
+            $details = CourierDetails::where('courier_id', $this->id)->first(["completed", "approved"]);
+            if ($details) {
+                return (object)[
+                    "completed" => $details->completed,
+                    "approved" => $details->approved
+                ];
             }
-        }else{
-            return false;
         }
+        return (object)[
+            "completed" => false,
+            "approved" => false
+        ];
     }
 }

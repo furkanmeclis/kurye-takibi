@@ -37,54 +37,48 @@ class ProfileController extends Controller
                 'vehicle_type' => 'required|in:car,motorcycle,bicycle',
             ]);
             $user = auth()->user();
-            if ($user->email != $request->get("email") || $user->phone != $request->get("phone") || $user->name != $request->get("name")) {
+            $courierDetails = CourierDetails::firstOrNew(['courier_id' => $user->id]);
+            $courierDetails->name = $user->name;
+            $courierDetails->email = $user->email;
+            $courierDetails->phone = $user->phone;
+            $courierDetails->courier_id = $user->id;
+            $courierDetails->identity = null;
+            $courierDetails->birth_date = null;
+            $courierDetails->tax_name = null;
+            $courierDetails->tax_number = null;
+            $courierDetails->tax_address = null;
+            $courierDetails->tax_office = null;
+            if ($request->get("billing") == "individual") {
+                $courierDetails->identity = $request->get("identity");
+                $courierDetails->birth_date = $request->get("birth_date");
+            } else {
+                $courierDetails->tax_name = $request->get("tax_name");
+                $courierDetails->tax_number = $request->get("tax_number");
+                $courierDetails->tax_address = $request->get("tax_address");
+                $courierDetails->tax_office = $request->get("tax_office");
+            }
+            $courierDetails->billing = $request->get("billing");
+            $courierDetails->address = $request->get("address");
+            $courierDetails->city = $request->get("city");
+            $courierDetails->state = $request->get("state");
+            $courierDetails->zip = $request->get("zip");
+            $courierDetails->country = $request->get("country");
+            $courierDetails->vehicle_type = $request->get("vehicle_type");
+            $courierDetails->approved = 0;
+            $courierDetails->completed = 1;
+            if ($courierDetails->save()) {
                 return response()->json([
-                    "status" => false,
-                    "message" => "Email,Telefon veya Ad Soyad değişikliğini Profilinizden Yapabilirsiniz.",
+                    "status" => true,
+                    "message" => "Bilgileriniz başarıyla kaydedildi.",
+                    "details" => $courierDetails,
                 ]);
             } else {
-                $courierDetails = CourierDetails::firstOrNew(['courier_id' => $user->id]);
-                $courierDetails->name = $user->name;
-                $courierDetails->email = $user->email;
-                $courierDetails->phone = $user->phone;
-                $courierDetails->courier_id = $user->id;
-                $courierDetails->identity = null;
-                $courierDetails->birth_date = null;
-                $courierDetails->tax_name = null;
-                $courierDetails->tax_number = null;
-                $courierDetails->tax_address = null;
-                $courierDetails->tax_office = null;
-                if ($request->get("billing") == "individual") {
-                    $courierDetails->identity = $request->get("identity");
-                    $courierDetails->birth_date = $request->get("birth_date");
-                } else {
-                    $courierDetails->tax_name = $request->get("tax_name");
-                    $courierDetails->tax_number = $request->get("tax_number");
-                    $courierDetails->tax_address = $request->get("tax_address");
-                    $courierDetails->tax_office = $request->get("tax_office");
-                }
-                $courierDetails->billing = $request->get("billing");
-                $courierDetails->address = $request->get("address");
-                $courierDetails->city = $request->get("city");
-                $courierDetails->state = $request->get("state");
-                $courierDetails->zip = $request->get("zip");
-                $courierDetails->country = $request->get("country");
-                $courierDetails->vehicle_type = $request->get("vehicle_type");
-                $courierDetails->approved = 0;
-                $courierDetails->completed = 1;
-                if ($courierDetails->save()) {
-                    return response()->json([
-                        "status" => true,
-                        "message" => "Bilgileriniz başarıyla kaydedildi.",
-                        "details" => $courierDetails,
-                    ]);
-                } else {
-                    return response()->json([
-                        "status" => false,
-                        "message" => "Bilgileriniz kaydedilirken bir hata oluştu.",
-                    ]);
-                }
+                return response()->json([
+                    "status" => false,
+                    "message" => "Bilgileriniz kaydedilirken bir hata oluştu.",
+                ]);
             }
+
         } catch (ValidationException $e) {
             $emailExists = isset($e->errors()['email']);
             $phoneExists = isset($e->errors()['phone']);

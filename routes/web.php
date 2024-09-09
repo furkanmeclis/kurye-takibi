@@ -16,7 +16,7 @@ Route::get('/access-denied', function () {
 })->name('access.denied');
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::prefix('admin')->name("admin.")->middleware("only:admin")->group(function () {
         Route::prefix('/couriers')->name("couriers.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\CouriersController::class, 'index'])->name('index');

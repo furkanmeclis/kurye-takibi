@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\CourierDetails;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\Rules;
 
 class ProfileController extends Controller
 {
@@ -27,17 +31,56 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): \Illuminate\Http\JsonResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        try {
+            $user = $request->user();
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|lowercase|email|max:255|unique:' . User::class . ',email,' . $user->id,
+                'phone' => 'required|string|max:255|unique:' . User::class . ',phone,' . $user->id,
+                'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+            ]);
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->phone = $request->input('phone');
+            if ($request->has("password_change")) {
+                $user->password = bcrypt($request->input('password'));
+            }
+            if ($user->save()) {
+                $updatePersonalInformation = false;
+                if ($user->role === "courier") {
+                    $details = CourierDetails::firstOrNew(['courier_id' => $user->id]);
+                    $details->name = $user->name;
+                    $details->email = $user->email;
+                    $details->phone = $user->phone;
+                    $details->save();
+                    $updatePersonalInformation = true;
+                }
+                return response()->json([
+                    "status" => true,
+                    "message" => "Profiliniz başarıyla güncellendi.",
+                    "user" => $user,
+                    "updatePersonalInformation" => $updatePersonalInformation,
+                ]);
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Profil güncellenirken bir hata oluştu."
+                ]);
+            }
+        } catch (ValidationException $e) {
+            $emailExists = isset($e->errors()['email']);
+            $phoneExists = isset($e->errors()['phone']);
+            return response()->json([
+                "status" => false,
+                "message" => ucfirst($e->getMessage()),
+                "errors" => $e->errors(),
+                "emailExists" => $emailExists,
+                "phoneExists" => $phoneExists
+            ]);
         }
 
-        $request->user()->save();
-
-        return Redirect::route('profile.edit');
     }
 
     /**

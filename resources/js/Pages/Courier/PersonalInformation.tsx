@@ -78,13 +78,23 @@ interface CourierDetails {
     vehicle_type?: string,
 }
 
-const PersonalInformation = ({page = false, profileCompleted = false}: {
+const PersonalInformation = ({
+                                 page = false,
+                                 profileCompleted = false,
+                                 profilePage = false,
+                                 profileApproved = false,
+                                 csrfToken
+                             }: {
     page: boolean,
-    profileCompleted?: boolean
+    profileCompleted?: boolean,
+    profilePage?: boolean,
+    profileApproved?: any,
+    csrfToken?: any
 }) => {
 
     const {setBreadcrumbs, setLayoutConfig} = useContext(LayoutContext);
     const [completed, setCompleted] = useState(false);
+    const [approved, setApproved] = useState(profileApproved === 1);
     const [activeState, setActiveState] = useState(0);
     const toast = React.useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
@@ -267,92 +277,92 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
         }
     }, [submitCount]);
     useEffect(() => {
-        if (!profileCompleted) {
-            setLoading(true);
-            getPersonalInformation().then(({status, details, courier}) => {
-                if (status) {
-                    let resetData = {
-                        name: details.name,
-                        phone: details.phone,
-                        email: details.email,
-                        address: details.address,
-                        city: details.city,
-                        selectedCity: {} as City,
-                        state: details.state,
-                        selectedState: {} as State,
-                        zip: details.zip,
-                        country: "turkey",
-                        billing: details.billing,
-                        identity: details.identity || '',
-                        birth_date: new Date(),
-                        tax_name: details.tax_name || '',
-                        tax_number: details.tax_number || '',
-                        tax_address: details.tax_address || '',
-                        tax_office: details.tax_office || '',
-                        selectedTaxOffice: {} as VergiDairesi,
-                        vehicle_type: details.vehicle_type,
-                    };
-                    if (details.city !== null) {
-                        resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                        if (details.state !== null) {
-                            resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
-                        }
-                    } else {
-                        resetData.selectedCity = cities[0];
-                        resetData.selectedState = cities[0].ilceler[0];
-                        resetData.city = cities[0].il_adi;
-                        resetData.state = cities[0].ilceler[0].ilce_adi;
+        setLoading(true);
+        getPersonalInformation(csrfToken).then(({status, details, courier}) => {
+            if (status) {
+                let resetData = {
+                    name: details.name,
+                    phone: details.phone,
+                    email: details.email,
+                    address: details.address,
+                    city: details.city,
+                    selectedCity: {} as City,
+                    state: details.state,
+                    selectedState: {} as State,
+                    zip: details.zip,
+                    country: "turkey",
+                    billing: details.billing,
+                    identity: details.identity || '',
+                    birth_date: new Date(),
+                    tax_name: details.tax_name || '',
+                    tax_number: details.tax_number || '',
+                    tax_address: details.tax_address || '',
+                    tax_office: details.tax_office || '',
+                    selectedTaxOffice: {} as VergiDairesi,
+                    vehicle_type: details.vehicle_type,
+                };
+                if (details.city !== null) {
+                    resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
+                    if (details.state !== null) {
+                        resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
                     }
-
-                    if (resetData.billing === 'individual') {
-                        if (details?.birth_date !== null) {
-                            let dateParts = details.birth_date.split(".");
-                            resetData.birth_date = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
-                        } else {
-                            resetData.birth_date = new Date();
-                        }
-                    } else if (resetData.billing === 'company') {
-                        if (resetData?.tax_office !== null) {
-                            resetData.selectedTaxOffice = taxOfficies.find((office) => office.vergi_dairesi === details.tax_office) as VergiDairesi;
-                        } else {
-                            resetData.selectedTaxOffice = taxOfficies[0];
-                            resetData.tax_office = taxOfficies[0].vergi_dairesi;
-                        }
-                    }
-
-                    setCompleted(details?.completed === 1);
-                    resetForm({values: resetData});
+                } else {
+                    resetData.selectedCity = cities[0];
+                    resetData.selectedState = cities[0].ilceler[0];
+                    resetData.city = cities[0].il_adi;
+                    resetData.state = cities[0].ilceler[0].ilce_adi;
                 }
-            }).catch((err) => {
-                console.log(err)
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Hata',
-                    detail: 'Bir hata oluştu lütfen tekrar deneyiniz.'
-                });
-            }).finally(() => {
-                setLoading(false);
+
+                if (resetData.billing === 'individual') {
+                    if (details?.birth_date !== null) {
+                        let dateParts = details.birth_date.split(".");
+                        resetData.birth_date = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
+                    } else {
+                        resetData.birth_date = new Date();
+                    }
+                } else if (resetData.billing === 'company') {
+                    if (resetData?.tax_office !== null) {
+                        resetData.selectedTaxOffice = taxOfficies.find((office) => office.vergi_dairesi === details.tax_office) as VergiDairesi;
+                    } else {
+                        resetData.selectedTaxOffice = taxOfficies[0];
+                        resetData.tax_office = taxOfficies[0].vergi_dairesi;
+                    }
+                }
+
+                setCompleted(details?.completed === 1);
+                resetForm({values: resetData});
+            }
+        }).catch((err) => {
+            console.log(err)
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Hata',
+                detail: 'Bir hata oluştu lütfen tekrar deneyiniz.'
             });
+        }).finally(() => {
+            setLoading(false);
+        });
+
+        if (!profilePage) {
+            setBreadcrumbs([]);
+            setLayoutConfig(prevState => ({...prevState, menuMode: "overlay"}));
         }
-        setBreadcrumbs([]);
-        setLayoutConfig(prevState => ({...prevState, menuMode: "overlay"}));
 
     }, []);
 
     return (
         <div className={"card"}>
             <Toast ref={toast}/>
-            <span
-                className="text-900 text-xl font-bold mb-4 block">Profilinizi Tamamlayın</span>
+            {!profilePage && <span
+                className="text-900 text-xl font-bold mb-4 block">Profilinizi Tamamlayın</span>}
             <div className="grid">
                 <div className="col-12 lg:col-2">
-                    <div className="text-900 font-medium text-xl mb-3">Kişisek Bilgileriniz</div>
+                    <div className="text-900 font-medium text-xl mb-3">Kişisel Bilgileriniz</div>
                     <p className="m-0 p-0 text-600 line-height-3 mr-3">
                         Sistemdeki bilgilerinizin güncel olması gerekmektedir. Lütfen aşağıdaki alanları doldurunuz.
-                        Onay
-                        sürecinden sonra üyeliğiniz aktif edilecektir.
+                        {!profileApproved && "Onay sürecinden sonra üyeliğiniz aktif edilecektir."}
                     </p>
-                    {activeState === 1 && <><Divider/>
+                    {(activeState === 1 || approved) && <><Divider/>
                         <div className="field mb-4 w-full">
                             <label htmlFor="billing" className={classNames("font-medium text-900", {
                                 'text-red-500': !!errors.billing,
@@ -399,7 +409,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
 
                 </div>
                 <div className="col-12 lg:col-10">
-                    <Steps model={[
+                    {!approved && <Steps model={[
                         {
                             label: 'Giriş'
                         },
@@ -408,14 +418,14 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                         }
                     ]} readOnly={false} onSelect={(e) => setActiveState(e.index)} activeIndex={activeState}
 
-                           className={"mb-4"}
-                    />
-                    {activeState === 0 && <>
+                                         className={"mb-4"}
+                    />}
+                    {activeState === 0 && !approved && <>
                         <div>
-                            {completed ? <Message
+                            {completed ? (!approved && <Message
                                 className={"w-full"}
                                 severity={"success"}
-                                text={"Profil Bilgilerinizi Kaydettiniz Ancak *Yönetici Onayı* Beklemektedir. Değiştirmek istediğiniz bilgileri sonraki ekrandan yönetebilirsiniz."}/> : <>
+                                text={"Profil Bilgilerinizi Kaydettiniz Ancak *Yönetici Onayı* Beklemektedir. Değiştirmek istediğiniz bilgileri sonraki ekrandan yönetebilirsiniz."}/>) : <>
                                 <Message
                                     className={"w-full"}
                                     severity={"warn"}
@@ -432,7 +442,7 @@ const PersonalInformation = ({page = false, profileCompleted = false}: {
                             </div>
                         </div>
                     </>}
-                    {activeState === 1 && <form onSubmit={handleSubmit} className="grid formgrid p-fluid">
+                    {(activeState === 1 || approved) && <form onSubmit={handleSubmit} className="grid formgrid p-fluid">
                         <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
                             <label htmlFor="name" className={classNames("font-medium text-900", {
                                 'text-red-500': !!errors.name,

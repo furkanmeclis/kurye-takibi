@@ -22,3 +22,20 @@ export const getDetailKeysTranslation = (key: string) => {
     // @ts-ignore
     return labelTranslations[key];
 }
+export const updateProfile = async (data: any, csrfToken: any) => {
+    if (csrfToken) {
+        let url = route("profile.update");
+        let headers = new Headers();
+        headers.append("X-CSRF-TOKEN", csrfToken);
+        headers.append("Content-Type", "application/json");
+        let response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({...data, _method: "PUT"})
+        });
+        return await response.json();
+    } else {
+        return false;
+    }
+
+}

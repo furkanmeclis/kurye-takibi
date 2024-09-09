@@ -29,7 +29,10 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $useProfileCompleted = false;
+        $useProfileCompleted = (object)[
+            "completed" => false,
+            "approved" => false,
+        ];
         if ($request->user()) {
             $useProfileCompleted = $request->user()->profile_completed();
         }
@@ -37,13 +40,14 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
-                'profile_completed' => $useProfileCompleted,
+                'profile_completed' => $useProfileCompleted->completed,
+                'profile_approved' => $useProfileCompleted->approved,
             ],
             'csrfToken' => csrf_token(),
             'flash' => [
-                'message' => fn () => $request->session()->get('message'),
-                'type' => fn () => $request->session()->get('type'),
-                'title' => fn () => $request->session()->get('title'),
+                'message' => fn() => $request->session()->get('message'),
+                'type' => fn() => $request->session()->get('type'),
+                'title' => fn() => $request->session()->get('title'),
             ],
         ];
     }
