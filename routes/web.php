@@ -64,7 +64,6 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Business\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Business\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
-
         Route::prefix("customers")->name("customers.")->group(function () {
             Route::post('/list-customers', [\App\Http\Controllers\Business\CustomersController::class, 'listCustomers'])->name('listCustomers');
             Route::get('/', [\App\Http\Controllers\Business\CustomersController::class, 'index'])->name('index');
@@ -80,7 +79,12 @@ Route::middleware('auth')->group(function () {
             Route::put('/adress/{id}/update', [\App\Http\Controllers\Business\CustomersController::class, 'updateAdress'])->name('updateAdress');
             Route::delete('/adress/{id}/destroy', [\App\Http\Controllers\Business\CustomersController::class, 'destroyAdress'])->name('destroyAdress');
         });
-
+        Route::prefix("orders")->name("orders.")->group(function (){
+            Route::get('/', [\App\Http\Controllers\Business\OrdersController::class, 'index'])->name('index');
+            Route::post('/list-orders', [\App\Http\Controllers\Business\OrdersController::class, 'listOrders'])->name('listOrders');
+            Route::get('/create', [\App\Http\Controllers\Business\OrdersController::class, 'create'])->name('create');
+            Route::post('/store', [\App\Http\Controllers\Business\OrdersController::class, 'store'])->name('store');
+        });
 
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
@@ -91,5 +95,21 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
 });
-
+Route::get('/send-notification/{message}', function ($mesaj){
+    $beamsClient = new \Pusher\PushNotifications\PushNotifications([
+        "instanceId" => "ada43e68-9d69-43c9-b0f1-ef26f8afcfce",
+        "secretKey" => "A76C90D80D3A507974A237FB68A96AA421ECD689D9FD8ED0B33632B75C0A6684"
+    ]);
+    return response()->json([
+        "status" => true,
+        "client" => $beamsClient->publishToInterests(
+            array("hello"),
+            array("web" => array("notification" => array(
+                "title" => $mesaj,
+                "body" => "Hello, World!",
+                "deep_link" => "https://www.pusher.com",
+            )),
+            ))
+    ]);
+});
 require __DIR__.'/auth.php';

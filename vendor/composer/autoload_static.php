@@ -105,6 +105,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         ),
         'P' => 
         array (
+            'Pusher\\PushNotifications\\' => 25,
             'Pusher\\' => 7,
             'Psy\\' => 4,
             'Psr\\SimpleCache\\' => 16,
@@ -127,6 +128,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'N' => 
         array (
             'NunoMaduro\\Collision\\' => 21,
+            'NotificationChannels\\PusherPushNotifications\\' => 45,
         ),
         'M' => 
         array (
@@ -168,6 +170,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'F' => 
         array (
             'Fruitcake\\Cors\\' => 15,
+            'Firebase\\JWT\\' => 13,
             'Fidry\\CpuCoreCounter\\' => 21,
             'Faker\\' => 6,
         ),
@@ -361,6 +364,10 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         array (
             0 => __DIR__ . '/..' . '/ramsey/collection/src',
         ),
+        'Pusher\\PushNotifications\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/pusher/pusher-push-notifications/src',
+        ),
         'Pusher\\' => 
         array (
             0 => __DIR__ . '/..' . '/pusher/pusher-php-server/src',
@@ -437,6 +444,10 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'NunoMaduro\\Collision\\' => 
         array (
             0 => __DIR__ . '/..' . '/nunomaduro/collision/src',
+        ),
+        'NotificationChannels\\PusherPushNotifications\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laravel-notification-channels/pusher-push-notifications/src',
         ),
         'Monolog\\' => 
         array (
@@ -532,6 +543,10 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         array (
             0 => __DIR__ . '/..' . '/fruitcake/php-cors/src',
         ),
+        'Firebase\\JWT\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+        ),
         'Fidry\\CpuCoreCounter\\' => 
         array (
             0 => __DIR__ . '/..' . '/fidry/cpu-core-counter/src',
@@ -602,6 +617,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\Admin\\BusinessesController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BusinessesController.php',
         'App\\Http\\Controllers\\Admin\\CouriersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CouriersController.php',
         'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
         'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
@@ -612,13 +628,24 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'App\\Http\\Controllers\\Auth\\PasswordResetLinkController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/PasswordResetLinkController.php',
         'App\\Http\\Controllers\\Auth\\RegisteredUserController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/RegisteredUserController.php',
         'App\\Http\\Controllers\\Auth\\VerifyEmailController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/VerifyEmailController.php',
+        'App\\Http\\Controllers\\Business\\CustomersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Business/CustomersController.php',
+        'App\\Http\\Controllers\\Business\\OrdersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Business/OrdersController.php',
+        'App\\Http\\Controllers\\Business\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Business/ProfileController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\Courier\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Courier/ProfileController.php',
         'App\\Http\\Controllers\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfileController.php',
+        'App\\Http\\Middleware\\EnsureUserHasRole' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUserHasRole.php',
         'App\\Http\\Middleware\\HandleInertiaRequests' => __DIR__ . '/../..' . '/app/Http/Middleware/HandleInertiaRequests.php',
         'App\\Http\\Requests\\Auth\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/LoginRequest.php',
         'App\\Http\\Requests\\ProfileUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProfileUpdateRequest.php',
+        'App\\Models\\BusinessDetails' => __DIR__ . '/../..' . '/app/Models/BusinessDetails.php',
+        'App\\Models\\CourierDetails' => __DIR__ . '/../..' . '/app/Models/CourierDetails.php',
+        'App\\Models\\CustomerAdresses' => __DIR__ . '/../..' . '/app/Models/CustomerAdresses.php',
+        'App\\Models\\Customers' => __DIR__ . '/../..' . '/app/Models/Customers.php',
+        'App\\Models\\Orders' => __DIR__ . '/../..' . '/app/Models/Orders.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\EventEmitter' => __DIR__ . '/../..' . '/app/Services/EventEmitter.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
@@ -1485,6 +1512,14 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'Fidry\\CpuCoreCounter\\Finder\\_NProcessorFinder' => __DIR__ . '/..' . '/fidry/cpu-core-counter/src/Finder/_NProcessorFinder.php',
         'Fidry\\CpuCoreCounter\\NumberOfCpuCoreNotFound' => __DIR__ . '/..' . '/fidry/cpu-core-counter/src/NumberOfCpuCoreNotFound.php',
         'Fidry\\CpuCoreCounter\\ParallelisationResult' => __DIR__ . '/..' . '/fidry/cpu-core-counter/src/ParallelisationResult.php',
+        'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
+        'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
+        'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',
+        'Firebase\\JWT\\JWK' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWK.php',
+        'Firebase\\JWT\\JWT' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWT.php',
+        'Firebase\\JWT\\JWTExceptionWithPayloadInterface' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWTExceptionWithPayloadInterface.php',
+        'Firebase\\JWT\\Key' => __DIR__ . '/..' . '/firebase/php-jwt/src/Key.php',
+        'Firebase\\JWT\\SignatureInvalidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/SignatureInvalidException.php',
         'Fruitcake\\Cors\\CorsService' => __DIR__ . '/..' . '/fruitcake/php-cors/src/CorsService.php',
         'Fruitcake\\Cors\\Exceptions\\InvalidOptionException' => __DIR__ . '/..' . '/fruitcake/php-cors/src/Exceptions/InvalidOptionException.php',
         'GrahamCampbell\\ResultType\\Error' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Error.php',
@@ -3719,6 +3754,10 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'Nette\\Utils\\UnknownImageFileException' => __DIR__ . '/..' . '/nette/utils/src/Utils/exceptions.php',
         'Nette\\Utils\\Validators' => __DIR__ . '/..' . '/nette/utils/src/Utils/Validators.php',
         'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+        'NotificationChannels\\PusherPushNotifications\\Exceptions\\CouldNotCreateMessage' => __DIR__ . '/..' . '/laravel-notification-channels/pusher-push-notifications/src/Exceptions/CouldNotCreateMessage.php',
+        'NotificationChannels\\PusherPushNotifications\\PusherChannel' => __DIR__ . '/..' . '/laravel-notification-channels/pusher-push-notifications/src/PusherChannel.php',
+        'NotificationChannels\\PusherPushNotifications\\PusherMessage' => __DIR__ . '/..' . '/laravel-notification-channels/pusher-push-notifications/src/PusherMessage.php',
+        'NotificationChannels\\PusherPushNotifications\\PusherPushNotificationsServiceProvider' => __DIR__ . '/..' . '/laravel-notification-channels/pusher-push-notifications/src/PusherPushNotificationsServiceProvider.php',
         'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Laravel/CollisionServiceProvider.php',
         'NunoMaduro\\Collision\\Adapters\\Laravel\\Commands\\TestCommand' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Laravel/Commands/TestCommand.php',
         'NunoMaduro\\Collision\\Adapters\\Laravel\\ExceptionHandler' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Laravel/ExceptionHandler.php',
@@ -5528,6 +5567,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'Psy\\VersionUpdater\\NoopChecker' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/NoopChecker.php',
         'Psy\\VersionUpdater\\SelfUpdate' => __DIR__ . '/..' . '/psy/psysh/src/VersionUpdater/SelfUpdate.php',
         'Pusher\\ApiErrorException' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/ApiErrorException.php',
+        'Pusher\\PushNotifications\\PushNotifications' => __DIR__ . '/..' . '/pusher/pusher-push-notifications/src/PushNotifications.php',
         'Pusher\\Pusher' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/Pusher.php',
         'Pusher\\PusherCrypto' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherCrypto.php',
         'Pusher\\PusherException' => __DIR__ . '/..' . '/pusher/pusher-php-server/src/PusherException.php',

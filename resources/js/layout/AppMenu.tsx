@@ -77,6 +77,23 @@ const AppMenu = () => {
                     to: route("business.customers.index")
                 }
             ]
+        },
+        {
+            label: "Siparişler",
+            icon: "pi pi-shopping-cart",
+            roles: ["business"],
+            items: [
+                {
+                    label: "Sipariş Ekle",
+                    icon: "pi pi-fw pi-cart-plus",
+                    to: route("business.orders.create")
+                },
+                {
+                    label: "Siparişler",
+                    icon: "pi pi-fw pi-shopping-cart",
+                    to: route("business.orders.index")
+                }
+            ]
         }
     ];
 

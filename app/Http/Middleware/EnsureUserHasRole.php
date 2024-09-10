@@ -24,6 +24,11 @@ class EnsureUserHasRole
         if (Auth::check() && in_array(Auth::user()->role, $this->roles)) {
             return $next($request);
         }
-        return Inertia::render('Auth/AccessDenied');
+
+        if ($request->method() != "GET") {
+            return response()->json(["message" => "Yetkisiz İşlem.Bu İşlemde Sadece Şu Rollere İzin Verilir : " . strtoupper(join(",", $roles)), "status" => false]);
+        } else {
+            return Inertia::render('Auth/AccessDenied');
+        }
     }
 }

@@ -15,8 +15,23 @@
     @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
     @inertiaHead
     <!-- end:Theme Scripts -->
+    <!-- begin:Pusher Beam -->
+    <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
+    <!-- end:Pusher Beam -->
 </head>
 <body>
 @inertia
+<script>
+    const beamsClient = new PusherPushNotifications.Client({
+        instanceId: 'ada43e68-9d69-43c9-b0f1-ef26f8afcfce',
+
+    });
+
+    beamsClient.start()
+        .then(() => beamsClient.getDeviceId())
+        .then(() => beamsClient.addDeviceInterest('hello'))
+        .then(() => console.log('Successfully registered and subscribed!'))
+        .catch(console.error);
+</script>
 </body>
 </html>
