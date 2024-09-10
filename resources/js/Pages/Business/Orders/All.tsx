@@ -2,7 +2,7 @@ import PageContainer from "@/PageContainer";
 import MainLayout from "@/Layouts/MainLayout";
 import {Head, router} from "@inertiajs/react";
 import {Button} from 'primereact/button';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Toast} from "primereact/toast";
 import {
     getBusinesses,
@@ -19,9 +19,10 @@ import {OverlayPanel} from "primereact/overlaypanel";
 import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
-import {TriStateCheckbox} from "primereact/tristatecheckbox";
-import {classNames} from "primereact/utils";
-import {getOrders} from "@/helpers/Business/orders";
+import {destroyOrder, getOrders, getOrderStatuses, updateOrderStatus} from "@/helpers/Business/orders";
+import {Tag} from "primereact/tag";
+import {Dropdown} from "primereact/dropdown";
+import {InputText} from "primereact/inputtext";
 
 interface AllCouriersProps {
     auth?: any,
@@ -35,15 +36,21 @@ interface AllCouriersProps {
 
 const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const [loading, setLoading] = useState(true);
-    const [businesses, setBusinesses] = useState([]);
-    const [selectedBusinesses, setSelectedBusinesses] = useState([] as any[]);
-    const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminBusinessesApprovedColumns");
+    const [orders, setOrders] = useState([]);
+    const [selectedOrders, setSelectedOrders] = useState([] as any[]);
+    const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "phone", "created_at", "actions"], "BusinessesOrdersAllTableColumns");
     const [error, setError] = useState(null);
-    const getBusinessesData = () => {
+    const cancelOrderRef = useRef<OverlayPanel>(null);
+    const [expandedRows, setExpandedRows] = useState([] as any[]);
+    const [cancelOrderState, setCancelOrderState] = useState({
+        orderId: 0,
+        reason: ""
+    } as any);
+    const getOrdersAll = () => {
         setLoading(true);
-        getOrders( csrfToken).then(data => {
+        getOrders(csrfToken).then(data => {
             if (data.status) {
-                setBusinesses(data.orders);
+                setOrders(data.orders);
                 setLoading(false);
                 setError(null)
             } else {
@@ -56,26 +63,25 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         }).finally(() => setLoading(false))
     }
     useEffect(() => {
-        getBusinessesData();
+        getOrdersAll();
         if (flash?.message) {
             // @ts-ignore
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
         }
     }, []);
-    const deleteCourier = (event: any, id: number) => {
+    const deleteOrder = (event: any, id: number) => {
         confirmPopup({
             target: event.currentTarget,
-            message: "İşletmeyi silmek istediğinize emin misiniz?",
+            message: "Siparişi silmek istediğinize emin misiniz?",
             acceptLabel: "Sil",
             acceptClassName: "p-button-danger",
             rejectLabel: "Vazgeç",
             accept() {
                 setLoading(true)
-                destroyBusinessFunc(id, csrfToken)
+                destroyOrder(id, csrfToken)
                     .then(({status, message}) => {
                         if (status) {
-                            setBusinesses(businesses.filter((c: any) => c.id !== id));
-                            setSelectedBusinesses([]);
+                            getOrdersAll();
                             toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
                         } else {
                             toast.current?.show({severity: "error", summary: "Hata", detail: message});
@@ -88,148 +94,171 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             }
         });
     }
-    const multipleDestroyCouriers = (event: any, ids: number[]) => {
-        confirmPopup({
-            target: event.currentTarget,
-            message: "Seçilen İşletmeler silinecektir. Silmek istediğinize emin misiniz?",
-            acceptLabel: "Sil" + ` (${ids.length} İşletme)`,
-            acceptClassName: "p-button-danger",
-            rejectLabel: "Vazgeç",
-            accept() {
-                setLoading(true)
-                multipleDestroyBusinessFunc(ids, csrfToken)
-                    .then(({status, message}) => {
-                        if (status) {
-                            setBusinesses(businesses.filter((c: any) => !ids.includes(c.id)));
-                            setSelectedBusinesses([]);
-                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
-                        } else {
-                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                        }
-                    })
-                    .catch(error => {
-                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-                    })
-                    .finally(() => setLoading(false))
-            }
-        });
+    const openOrder = (id: number) => {
+        setLoading(true);
+        updateOrderStatus(id, "opened", csrfToken)
+            .then(({status, message}) => {
+                if (status) {
+                    getOrdersAll();
+                    toast.current?.show({
+                        severity: "success",
+                        summary: "Başarılı",
+                        detail: message
+                    });
+                } else {
+                    toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                }
+            })
+            .catch(error => {
+                toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+            })
+            .finally(() => setLoading(false))
     }
-    const approveCourier = (event: any, id: number) => {
-        confirmPopup({
-            target: event.currentTarget,
-            message: "İşletme Hesabı Aktifleştirilecektir. Aktifleştirmek istediğinize emin misiniz?",
-            acceptLabel: "Aktifleştir",
-            acceptClassName: "p-button-success",
-            rejectLabel: "Vazgeç",
-            accept() {
-                setLoading(true)
-                approveBusinessFunc(id, csrfToken)
-                    .then(({status, message}) => {
-                        if (status) {
-                            setBusinesses(businesses.filter((c: any) => c.id !== id));
-                            setSelectedBusinesses([]);
-                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
-                        } else {
-                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                        }
-                    })
-                    .catch(error => {
-                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-                    })
-                    .finally(() => setLoading(false))
-            }
-        });
+    const cancelOrder = (id: number, reason: string) => {
+        setLoading(true);
+        updateOrderStatus(id, "canceled", csrfToken, reason)
+            .then(({status, message}) => {
+                if (status) {
+                    getOrdersAll();
+                    toast.current?.show({
+                        severity: "success",
+                        summary: "Başarılı",
+                        detail: message
+                    });
+                    cancelOrderRef.current?.hide();
+                } else {
+                    toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                }
+            })
+            .catch(error => {
+                toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+            })
+            .finally(() => setLoading(false))
     }
-    const multipleApproveCouriers = (event: any, ids: number[]) => {
-        confirmPopup({
-            target: event.currentTarget,
-            message: "Seçilen işletmelerin hesapları aktifleştirilecektir. Aktifleştirmek istediğinize emin misiniz?",
-            acceptLabel: "Aktifleştir" + ` (${ids.length} İşletme)`,
-            acceptClassName: "p-button-success",
-            rejectLabel: "Vazgeç",
-            accept() {
-                setLoading(true)
-                multipleApproveBusinessFunc(ids, csrfToken)
-                    .then(({status, message}) => {
-                        if (status) {
-                            setBusinesses(businesses.filter((c: any) => !ids.includes(c.id)));
-                            setSelectedBusinesses([]);
-                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
-                        } else {
-                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                        }
-                    })
-                    .catch(error => {
-                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-                    })
-                    .finally(() => setLoading(false))
-            }
-        });
-    }
+
     let columns: ColumnProps[] = [
         {
-            selectionMode: "multiple",
-            headerStyle: {width: '3rem'},
-            header: ""
+            expander: true,
+            style: {width: '3rem'},
         },
         {
-            field: "name",
-            header: "Adı Soyadı(İşletme Sahibi)",
-            hidden: !selectedColumns.includes("name"),
+            field: "customer.name",
+            header: "Müşteri Adı Soyadı",
+            hidden: !selectedColumns.includes("customer.name"),
             sortable: true,
             filter: true,
             filterPlaceholder: "Ad'a Göre",
         }, {
-            field: "email",
-            header: "Email Adresi",
-            hidden: !selectedColumns.includes("email"),
+            field: "customer.phone",
+            header: "Müşteri Telefon Numarası",
+            hidden: !selectedColumns.includes("customer.phone"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Email'e Göre",
-        }, {
-            field: "phone",
-            header: "Telefon Numarası",
-            hidden: !selectedColumns.includes("phone"),
-            sortable: true,
-            filter: true,
-            filterPlaceholder: "Telefon Numarası'na Göre",
+            filterPlaceholder: "Müşteri Telefon Numarası'na Göre",
         },
         {
-            field: "activated",
-            header: "Aktiflik Durumu",
-            hidden: !selectedColumns.includes("activated"),
+            field: "customer_note",
+            header: "Sipariş Notu",
+            hidden: !selectedColumns.includes("customer_note"),
             sortable: true,
             filter: true,
-            dataType: "boolean",
-            filterElement: (options) => {
-                return <TriStateCheckbox value={options.value} onChange={(e) => options.filterApplyCallback(e.value)}/>;
-            },
-            body: (rowData) => {
-                return <i className={classNames('pi', {
-                    'pi-check-circle text-green-400': rowData.activated,
-                    'pi-times-circle text-red-400': !rowData.activated
-                })}></i>;
+            filterPlaceholder: "Sipariş Notu'na Göre",
+            body: (rowData: any) => {
+                return rowData.customer_note ?
+                    <span>{rowData.customer_note}</span> :
+                    <span><i className={"pi pi-ban text-red-400"}></i></span>
             }
-        }, {
-            field: "activated_at",
-            header: "Aktifleştirme Tarihi",
-            hidden: !selectedColumns.includes("activated_at"),
+        },
+        {
+            field: "status",
+            header: "Sipariş Durumu",
+            hidden: !selectedColumns.includes("status"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Aktifleştirme Tarihine Göre",
+            filterElement: (options: any) => {
+                // @ts-ignore
+                return <Dropdown options={getOrderStatuses("draft", true)}
+                                 value={options.value}
+                                 filter
+                                 filterBy={"label,value"}
+                                 onChange={(e) => options.filterApplyCallback(e.value)}
+                                 itemTemplate={(option) => <Tag value={option.label} severity={option.severity}/>}
+                                 placeholder="Sipariş Durumu"
+                                 className="p-column-filter w-full"
+                                 showClear
+                />
+            },
+            body: (rowData: any) => {
+                return <Tag
+                    // @ts-ignore
+                    value={String(getOrderStatuses(rowData.status).label)}
+                    // @ts-ignore
+                    severity={String(getOrderStatuses(rowData.status).severity)}
+                />
+            }
+        },
+        {
+            field: "courier_accepted_at",
+            header: "Kurye Teslim Alma Tarihi",
+            hidden: !selectedColumns.includes("courier_accepted_at"),
+            sortable: true,
+            filter: true,
+            filterPlaceholder: "Kurye Teslim Alma Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
-                return <span>{rowData.activated_at === null ?
-                    <i className={"pi pi-times-circle text-red-400"}></i> : new Date(rowData.activated_at).toLocaleString()}</span>
+                return rowData.courier_accepted_at ?
+                    <span>{new Date(rowData.courier_accepted_at).toLocaleString()}</span> :
+                    <span><i className={"pi pi-ban text-red-400"}></i> Teslim Alınmadı</span>
+            }
+        },
+        {
+            field: "delivered_at",
+            header: "Teslim Tarihi",
+            hidden: !selectedColumns.includes("delivered_at"),
+            sortable: true,
+            filter: true,
+            filterPlaceholder: "Teslim Tarihine Göre",
+            filterType: "date",
+            body: (rowData: any) => {
+                return rowData.delivered_at ?
+                    <span>{new Date(rowData.delivered_at).toLocaleString()}</span> :
+                    <span><i className={"pi pi-ban text-red-400"}></i> Teslim Edilmedi</span>
+            }
+        },
+        {
+            field: "cancellation_reason",
+            header: "İptal Nedeni",
+            hidden: !selectedColumns.includes("cancellation_reason"),
+            sortable: true,
+            filter: true,
+            filterPlaceholder: "İptal Nedeni'ne Göre",
+            body: (rowData: any) => {
+                return rowData.cancellation_reason ?
+                    <span>{rowData.cancellation_reason}</span> :
+                    <span><i className={"pi pi-ban text-red-400"}></i> İptal Edilmedi</span>
+            }
+        },
+        {
+            field: "canceled_at",
+            header: "İptal Tarihi",
+            hidden: !selectedColumns.includes("canceled_at"),
+            sortable: true,
+            filter: true,
+            filterPlaceholder: "İptal Tarihine Göre",
+            filterType: "date",
+            body: (rowData: any) => {
+                return rowData.canceled_at ?
+                    <span>{new Date(rowData.canceled_at).toLocaleString()}</span> :
+                    <span><i className={"pi pi-ban text-red-400"}></i> İptal Edilmedi</span>
             }
         },
         {
             field: "created_at",
-            header: "Kayıt Tarihi",
+            header: "Eklenme Tarihi",
             hidden: !selectedColumns.includes("created_at"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "Kayıt Tarihine Göre",
+            filterPlaceholder: "Eklenme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
                 return <span>{new Date(rowData.created_at).toLocaleString()}</span>
@@ -253,68 +282,59 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
-                    <Button visible={!rowData.activated} size={"small"} icon={"pi pi-check-circle"} severity={"success"}
-                            tooltip={"Aktifleştir"}
+                    {rowData.status === "draft" && <Button
+                        size={"small"}
+                        icon={"pi pi-check-circle"}
+                        severity={"success"}
+                        tooltip={"Yayınla"}
+                        loading={loading}
+                        tooltipOptions={{
+                            position: "top"
+                        }}
+                        disabled={rowData.status !== "draft"}
+                        onClick={() => {
+                            openOrder(rowData.id);
+                        }}
+                    />}
+                    {rowData.status === "draft" && <Button
+                        size={"small"}
+                        icon={"pi pi-trash"}
+                        severity={"danger"}
+                        tooltip={"Sil"}
+                        tooltipOptions={{
+                            position: "top"
+                        }}
+                        loading={loading}
+                        onClick={(event) => {
+                            deleteOrder(event, rowData.id);
+                        }}
+                    />}
+                    {rowData.status !== "draft" && rowData.status !== "deleted" && rowData.status !== "canceled" &&
+                        <Button
+                            size={"small"}
+                            icon={"pi pi-ban"}
+                            severity={"danger"}
+                            tooltip={"Siparişi İptal Et"}
                             tooltipOptions={{
                                 position: "top"
                             }}
+                            loading={loading}
                             onClick={(event) => {
-                                approveCourier(event, rowData.id);
+                                setCancelOrderState({
+                                    orderId: rowData.id,
+                                    reason: ""
+                                });
+                                cancelOrderRef.current?.toggle(event);
                             }}
-                    />
-                    <Button size={"small"} icon={"pi pi-pencil"} severity={"warning"} tooltip={"Düzenle"}
-                            tooltipOptions={{
-                                position: "top"
-                            }}
-                            onClick={() => {
-                                router.visit(route("admin.businesses.edit", {id: rowData.id}))
-                            }}
-                    /><Button size={"small"} icon={"pi pi-trash"} severity={"danger"} tooltip={"Sil"}
-                              tooltipOptions={{
-                                  position: "top"
-                              }}
-                              onClick={(event) => {
-                                  deleteCourier(event, rowData.id);
-                              }}
-                />
+                        />}
                 </div>
             }
         }
     ];
-    const columnsRef = React.useRef<OverlayPanel>(null);
+    const columnsRef = useRef<OverlayPanel>(null);
     const renderHeader = () => {
         return <>
             <Toolbar
-                start={selectedBusinesses.length > 0 && <>
-                    <Button size={"small"} icon={"pi pi-check-circle"} className={"mr-2"}
-                            tooltip={"Toplu Aktifleştirme Yapmanızı Sağlar"} tooltipOptions={{
-                        position: "top"
-                    }} visible={selectedBusinesses.map((c) => {
-                        if (c.activated) return null;
-                        return c.id;
-                    }).filter((c) => c !== null).length > 0} label={"Aktifleştir (" + selectedBusinesses.map((c) => {
-                        if (c.activated) return null;
-                        return c.id;
-                    }).filter((c) => c !== null).length + ")"} severity={"success"}
-                            onClick={(event) => {
-                                multipleApproveCouriers(event, selectedBusinesses.map((c) => {
-                                    if (c.activated) return null;
-                                    return c.id;
-                                }).filter((c) => c !== null));
-                            }}
-                    />
-                    <Button size={"small"} icon={"pi pi-trash"} className={"mr-2"}
-                            tooltip={"Seçilen İşletmeleri Silmenizi Sağlar"} tooltipOptions={{
-                        position: "top"
-                    }} label={"Sil (" + selectedBusinesses.length + ")"} severity={"danger"}
-                            onClick={(event) => {
-                                multipleDestroyCouriers(event, selectedBusinesses.map((c) => c.id));
-                            }}
-                    />
-                    <Button size={"small"} icon={"pi pi-filter-slash"} label={"Seçimi Temizle"} severity={"warning"}
-                            onClick={() => setSelectedBusinesses([])}/>
-                </>}
-
                 end={<>
                     <Button size={"small"} icon={"pi pi-sync"} severity={"help"} className={"mr-2"}
                             tooltip={"Verileri Yenile"}
@@ -322,7 +342,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                                 position: "top"
                             }}
                             onClick={() => {
-                                getBusinessesData();
+                                getOrdersAll();
                             }}
                     />
                     <Button size={"small"} icon={"pi pi-bars"} onClick={(event) => {
@@ -342,7 +362,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 </div>
                 <div className="flex flex-column justify-content-center gap-2">
                     {columns.map((col, index) => {
-                        if (col.selectionMode === "multiple") return null;
+                        if (col.selectionMode === "multiple" || col?.expander !== undefined) return null;
                         let header = col.header as string;
                         let field = col.field as string;
                         return <div className="flex align-items-center" key={index}>
@@ -362,6 +382,22 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     })}
                 </div>
             </OverlayPanel>
+            <OverlayPanel ref={cancelOrderRef} showCloseIcon style={{width: '300px'}}>
+                <h6>İptal Sebebinizi Belirterek Siparişi İptal Edebilirsiniz</h6>
+                <InputText value={cancelOrderState.reason} onChange={(e) => {
+                    setCancelOrderState({...cancelOrderState, reason: e.target.value})
+                }} placeholder={"İptal Sebebi"} className={"w-full mb-2"}/>
+                <Button
+                    label={"İptal Et"}
+                    size={"small"}
+                    className={"mt-2"}
+                    severity={"danger"}
+                    icon={"pi pi-ban"}
+                    onClick={() => {
+                        cancelOrder(cancelOrderState.orderId, cancelOrderState.reason);
+                    }}
+                />
+            </OverlayPanel>
             <div className="card">
                 <span className="text-900 text-xl font-bold mb-4 block">Siparişler</span>
                 {error !== null &&
@@ -371,33 +407,42 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         text={error}
                     />
                 }
-                {!loading && businesses.length === 0 && <Message
+                {!loading && orders.length === 0 && <Message
                     className={"w-full"}
                     severity="info" text={"Sipariş bulunamadı."}
                 />}
                 <DataTable
-                    hidden={!loading && businesses.length === 0 || error !== null}
+                    hidden={!loading && orders.length === 0 || error !== null}
                     loading={loading}
-                    value={businesses}
+                    value={orders}
                     removableSort paginator
                     filterDisplay="row"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                     rowsPerPageOptions={[5, 10, 25, 50]} rows={10}
                     dataKey="id"
                     header={renderHeader}
+                    expandedRows={expandedRows}
+                    // @ts-ignore
+                    onRowToggle={(e) => setExpandedRows(e?.data)}
+                    rowExpansionTemplate={(data) => {
+                        return <pre>
+                            {JSON.stringify(data, null, 2)}
+                        </pre>
+                    }}
                     filters={{
-                        name: {value: null, matchMode: 'contains'},
-                        email: {value: null, matchMode: 'contains'},
-                        phone: {value: null, matchMode: 'contains'},
+                        "customer.name": {value: null, matchMode: 'contains'},
+                        "customer.phone": {value: null, matchMode: 'contains'},
                         created_at: {value: null, matchMode: 'contains'},
                         updated_at: {value: null, matchMode: 'contains'},
-                        activated: {value: null, matchMode: 'equals'}
+                        status: {value: null, matchMode: 'contains'},
+                        courier_accepted_at: {value: null, matchMode: 'contains'},
+                        delivered_at: {value: null, matchMode: 'contains'},
+                        canceled_at: {value: null, matchMode: 'contains'},
+                        cancellation_reason: {value: null, matchMode: 'contains'},
+                        customer_note: {value: null, matchMode: 'contains'},
                     }}
                     emptyMessage="Sipariş bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"
-                    selectionMode={"checkbox"}
-                    selection={selectedBusinesses}
-                    onSelectionChange={(e) => setSelectedBusinesses(e.value)}
                 >
                     {columns.map((col, index) => {
                         return <Column key={index} {...col} />

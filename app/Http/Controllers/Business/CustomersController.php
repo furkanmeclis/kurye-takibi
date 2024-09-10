@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Models\CustomerAdresses;
+use App\Models\CustomerAddresses;
 use App\Models\Customers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -94,7 +94,7 @@ class CustomersController
             $customer->phone = $request->phone;
             $customer->note = $request->note ?? null;
             if ($customer->save()) {
-                $customerAddress = new CustomerAdresses();
+                $customerAddress = new CustomerAddresses();
                 $customerAddress->customer_id = $customer->id;
                 $customerAddress->phone = $request->address_phone;
                 $customerAddress->title = $request->address_title;
@@ -258,7 +258,7 @@ class CustomersController
     public function getAdresses($customerId): \Illuminate\Http\JsonResponse
     {
         try {
-            $addresses = CustomerAdresses::where('customer_id', $customerId)->get();
+            $addresses = CustomerAddresses::where('customer_id', $customerId)->get();
             return response()->json([
                 "status" => true,
                 "addresses" => $addresses
@@ -294,7 +294,7 @@ class CustomersController
                     "message" => "Müşteri bulunamadı."
                 ]);
             }
-            $customerAddress = new CustomerAdresses();
+            $customerAddress = new CustomerAddresses();
             $customerAddress->customer_id = $customerId;
             $customerAddress->phone = $request->phone;
             $customerAddress->title = $request->title;
@@ -343,7 +343,7 @@ class CustomersController
                 'address' => 'required|string|max:500',
                 'notes' => 'nullable|string|max:500',
             ]);
-            $address = CustomerAdresses::find($addressId);
+            $address = CustomerAddresses::find($addressId);
             if (!$address) {
                 return response()->json([
                     "status" => false,
@@ -388,7 +388,7 @@ class CustomersController
     public function destroyAdress($addressId): \Illuminate\Http\JsonResponse
     {
         try {
-            $address = CustomerAdresses::find($addressId);
+            $address = CustomerAddresses::find($addressId);
             if (!$address) {
                 return response()->json([
                     "status" => false,

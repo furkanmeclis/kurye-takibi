@@ -15,6 +15,8 @@ import cities from "@/helpers/cityState.json";
 import {Dropdown} from "primereact/dropdown";
 import CreateCustomerPage from "@/Pages/Business/Customers/Create";
 import {Dialog} from "primereact/dialog";
+import {storeOrder} from "@/helpers/Business/orders";
+
 interface Address {
     id: number;
     customer_id: number;
@@ -118,7 +120,12 @@ const CreateOrderPage = ({auth, csrfToken}: {
         validateOnChange: validationType,
         onSubmit: (values) => {
             setLoading(true);
-            storeCustomer(values, csrfToken)
+            storeOrder({
+                customer_id: values.customer_id,
+                address_id: values.address_id,
+                customer_note: values.customer_note,
+                location: values.location !== null ? values.location : null,
+            }, csrfToken)
                 .then((response) => {
                     if (response.status) {
                         toast.current?.show({severity: 'success', summary: 'Başarılı', detail: response.message});
@@ -307,12 +314,12 @@ const CreateOrderPage = ({auth, csrfToken}: {
                             </div>
                             {values.selectedAddress !== null && <div className="field mb-4 col-12 p-input-icon-right">
                                 <label htmlFor="address" className={classNames("font-medium text-900")}>
-                                     Seçilen Adres
+                                    Seçilen Adres
                                 </label>
                                 <InputTextarea
                                     disabled
                                     readOnly
-                                    value={values.address_id !== null ? getShortAddress(values.selectedAddress): ""}
+                                    value={values.address_id !== null ? getShortAddress(values.selectedAddress) : ""}
                                 />
                             </div>}
                             <div className="field mb-4 col-12 p-input-icon-right">

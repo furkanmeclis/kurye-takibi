@@ -84,6 +84,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/list-orders', [\App\Http\Controllers\Business\OrdersController::class, 'listOrders'])->name('listOrders');
             Route::get('/create', [\App\Http\Controllers\Business\OrdersController::class, 'create'])->name('create');
             Route::post('/store', [\App\Http\Controllers\Business\OrdersController::class, 'store'])->name('store');
+            Route::put('/{id}/status-update', [\App\Http\Controllers\Business\OrdersController::class, 'updateStatus'])->name('updateStatus');
+            Route::delete('/{id}/destroy', [\App\Http\Controllers\Business\OrdersController::class, 'destroy'])->name('destroy');
         });
 
     });
@@ -95,21 +97,5 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
 });
-Route::get('/send-notification/{message}', function ($mesaj){
-    $beamsClient = new \Pusher\PushNotifications\PushNotifications([
-        "instanceId" => "ada43e68-9d69-43c9-b0f1-ef26f8afcfce",
-        "secretKey" => "A76C90D80D3A507974A237FB68A96AA421ECD689D9FD8ED0B33632B75C0A6684"
-    ]);
-    return response()->json([
-        "status" => true,
-        "client" => $beamsClient->publishToInterests(
-            array("hello"),
-            array("web" => array("notification" => array(
-                "title" => $mesaj,
-                "body" => "Hello, World!",
-                "deep_link" => "https://www.pusher.com",
-            )),
-            ))
-    ]);
-});
+
 require __DIR__.'/auth.php';
