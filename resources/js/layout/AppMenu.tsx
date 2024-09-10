@@ -59,6 +59,24 @@ const AppMenu = () => {
                     to: route("admin.businesses.index"),
                 }
             ]
+        },
+        //Businesses Menus
+        {
+            label: "Müşteriler",
+            icon: "pi pi-users",
+            roles: ["business"],
+            items: [
+                {
+                    label: "Müşteri Ekle",
+                    icon: "pi pi-fw pi-user-plus",
+                    to: route("business.customers.create")
+                },
+                {
+                    label: "Müşteriler",
+                    icon: "pi pi-fw pi-users",
+                    to: route("business.customers.index")
+                }
+            ]
         }
     ];
 

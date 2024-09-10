@@ -15,11 +15,17 @@ use Inertia\Response;
 
 class BusinessesController extends Controller
 {
+    /**
+     * @return Response
+     */
     public function index(): Response
     {
         return Inertia::render('Admin/Businesses/All');
     }
 
+    /**
+     * @return Response
+     */
     public function waitApproval(): Response
     {
         return Inertia::render('Admin/Businesses/WaitApproval');

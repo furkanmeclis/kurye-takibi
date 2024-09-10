@@ -19,7 +19,7 @@ const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false
     return (
         <>
             {auth?.user?.role === "courier" && <>
-                {!profilePage && auth?.profile_completed === false  ?
+                {!profilePage && auth?.profile_completed === 0  ?
                     <MainLayout>
                         <PersonalInformationCourier
                             page={true}
@@ -30,7 +30,7 @@ const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false
                     </MainLayout> : <>{children}</>}
             </>}
             {auth?.user?.role === "business" && <>
-                {!profilePage && auth?.profile_completed === false  ?
+                {!profilePage && auth?.profile_completed === 0  ?
                     <MainLayout>
                         <PersonalInformationBusiness
                             page={true}

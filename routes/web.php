@@ -64,6 +64,24 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Business\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Business\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
+
+        Route::prefix("customers")->name("customers.")->group(function () {
+            Route::post('/list-customers', [\App\Http\Controllers\Business\CustomersController::class, 'listCustomers'])->name('listCustomers');
+            Route::get('/', [\App\Http\Controllers\Business\CustomersController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Business\CustomersController::class, 'create'])->name('create');
+            Route::post('/store', [\App\Http\Controllers\Business\CustomersController::class, 'store'])->name('store');
+            Route::post('/{id}/details', [\App\Http\Controllers\Business\CustomersController::class, 'getCustomer'])->name('getCustomer');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Business\CustomersController::class, 'edit'])->name('edit');
+            Route::put('/{id}/update', [\App\Http\Controllers\Business\CustomersController::class, 'update'])->name('update');
+            Route::delete('/{id}/destroy', [\App\Http\Controllers\Business\CustomersController::class, 'destroy'])->name('destroy');
+            Route::post('/multiple-destroy-customers', [\App\Http\Controllers\Business\CustomersController::class, 'multipleDestroy'])->name('multipleDestroy');
+            Route::post('/customer/{id}/adresses', [\App\Http\Controllers\Business\CustomersController::class, 'getAdresses'])->name('getAdresses');
+            Route::post('/customer/{id}/store', [\App\Http\Controllers\Business\CustomersController::class, 'storeAdress'])->name('storeAdress');
+            Route::put('/adress/{id}/update', [\App\Http\Controllers\Business\CustomersController::class, 'updateAdress'])->name('updateAdress');
+            Route::delete('/adress/{id}/destroy', [\App\Http\Controllers\Business\CustomersController::class, 'destroyAdress'])->name('destroyAdress');
+        });
+
+
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
         Route::get('/', function (){
