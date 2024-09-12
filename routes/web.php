@@ -14,11 +14,11 @@ Route::get('/access-denied', function () {
 })->name('access.denied');
 Route::middleware('auth')->group(function () {
     Route::get('/home', function () {
-        if(request()->user()->role == "admin"){
+        if (request()->user()->role == "admin") {
             return Inertia::render("Admin/Dashboard");
-        }else if(request()->user()->role == "business"){
+        } else if (request()->user()->role == "business") {
             return Inertia::render("Business/Dashboard");
-        }else if(request()->user()->role == "courier"){
+        } else if (request()->user()->role == "courier") {
             return Inertia::render("Courier/Dashboard");
         }
     })->name('dashboard');
@@ -28,9 +28,9 @@ Route::middleware('auth')->group(function () {
         Route::prefix('/couriers')->name("couriers.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\CouriersController::class, 'index'])->name('index');
             Route::get('/wait-approval', [\App\Http\Controllers\Admin\CouriersController::class, 'waitApproval'])->name('waitApproval');
-            Route::post('/list-couriers/{type}',[\App\Http\Controllers\Admin\CouriersController::class, 'listCouriers'])->name("listCouriers");
-            Route::post('/list-wait-approvals-couriers',[\App\Http\Controllers\Admin\CouriersController::class, 'getWaitApprovalCouriers'])->name("getWaitApprovalCouriers");
-            Route::post('/show-details/{id}',[\App\Http\Controllers\Admin\CouriersController::class, 'showDetails'])->name("showDetails");
+            Route::post('/list-couriers/{type}', [\App\Http\Controllers\Admin\CouriersController::class, 'listCouriers'])->name("listCouriers");
+            Route::post('/list-wait-approvals-couriers', [\App\Http\Controllers\Admin\CouriersController::class, 'getWaitApprovalCouriers'])->name("getWaitApprovalCouriers");
+            Route::post('/show-details/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'showDetails'])->name("showDetails");
             Route::get('/create', [\App\Http\Controllers\Admin\CouriersController::class, 'create'])->name('create');
             Route::post('/store', [\App\Http\Controllers\Admin\CouriersController::class, 'store'])->name('store');
             Route::get('/edit-courier/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'edit'])->name('edit');
@@ -44,9 +44,9 @@ Route::middleware('auth')->group(function () {
         Route::prefix('/businesses')->name("businesses.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('index');
             Route::get('/wait-approval', [\App\Http\Controllers\Admin\BusinessesController::class, 'waitApproval'])->name('waitApproval');
-            Route::post('/list-businesses/{type}',[\App\Http\Controllers\Admin\BusinessesController::class, 'listBusinesses'])->name("listBusinesses");
-            Route::post('/list-wait-approvals-businesses',[\App\Http\Controllers\Admin\BusinessesController::class, 'getWaitApprovalBusinesses'])->name("getWaitApprovalBusinesses");
-            Route::post('/show-details/{id}',[\App\Http\Controllers\Admin\BusinessesController::class, 'showDetails'])->name("showDetails");
+            Route::post('/list-businesses/{type}', [\App\Http\Controllers\Admin\BusinessesController::class, 'listBusinesses'])->name("listBusinesses");
+            Route::post('/list-wait-approvals-businesses', [\App\Http\Controllers\Admin\BusinessesController::class, 'getWaitApprovalBusinesses'])->name("getWaitApprovalBusinesses");
+            Route::post('/show-details/{id}', [\App\Http\Controllers\Admin\BusinessesController::class, 'showDetails'])->name("showDetails");
             Route::get('/create', [\App\Http\Controllers\Admin\BusinessesController::class, 'create'])->name('create');
             Route::post('/store', [\App\Http\Controllers\Admin\BusinessesController::class, 'store'])->name('store');
             Route::get('/edit-business/{id}', [\App\Http\Controllers\Admin\BusinessesController::class, 'edit'])->name('edit');
@@ -59,7 +59,7 @@ Route::middleware('auth')->group(function () {
         });
     });
     Route::prefix("business")->name("business.")->middleware("only:business")->group(function () {
-        Route::get('/', function (){
+        Route::get('/', function () {
             return Inertia::render('Courier/Dashboard');
         })->name('dashboard');
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Business\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
@@ -79,18 +79,20 @@ Route::middleware('auth')->group(function () {
             Route::put('/adress/{id}/update', [\App\Http\Controllers\Business\CustomersController::class, 'updateAdress'])->name('updateAdress');
             Route::delete('/adress/{id}/destroy', [\App\Http\Controllers\Business\CustomersController::class, 'destroyAdress'])->name('destroyAdress');
         });
-        Route::prefix("orders")->name("orders.")->group(function (){
+        Route::prefix("orders")->name("orders.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Business\OrdersController::class, 'index'])->name('index');
             Route::post('/list-orders', [\App\Http\Controllers\Business\OrdersController::class, 'listOrders'])->name('listOrders');
             Route::get('/create', [\App\Http\Controllers\Business\OrdersController::class, 'create'])->name('create');
             Route::post('/store', [\App\Http\Controllers\Business\OrdersController::class, 'store'])->name('store');
+            Route::get('/{id}/show', [\App\Http\Controllers\Business\OrdersController::class, 'show'])->name('show');
             Route::put('/{id}/status-update', [\App\Http\Controllers\Business\OrdersController::class, 'updateStatus'])->name('updateStatus');
+            Route::post('/{id}/get-details', [\App\Http\Controllers\Business\OrdersController::class, 'getOrder'])->name('getOrder');
             Route::delete('/{id}/destroy', [\App\Http\Controllers\Business\OrdersController::class, 'destroy'])->name('destroy');
         });
 
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
-        Route::get('/', function (){
+        Route::get('/', function () {
             return Inertia::render('Courier/Dashboard');
         })->name('dashboard');
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
@@ -98,4 +100,4 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

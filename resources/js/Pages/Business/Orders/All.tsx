@@ -4,13 +4,7 @@ import {Head, router} from "@inertiajs/react";
 import {Button} from 'primereact/button';
 import React, {useEffect, useRef, useState} from 'react';
 import {Toast} from "primereact/toast";
-import {
-    getBusinesses,
-    destroyBusiness as destroyBusinessFunc,
-    multipleDestroyBusiness as multipleDestroyBusinessFunc,
-    approveBusiness as approveBusinessFunc,
-    multipleApproveBusiness as multipleApproveBusinessFunc
-} from "@/helpers/Admin/businesses";
+import OrderShowPage from "@/Pages/Business/Orders/Show";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
 import {Message} from "primereact/message";
@@ -19,7 +13,13 @@ import {OverlayPanel} from "primereact/overlaypanel";
 import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
-import {destroyOrder, getOrders, getOrderStatuses, updateOrderStatus} from "@/helpers/Business/orders";
+import {
+    destroyOrder,
+    getOrders,
+    getOrderStatuses,
+    subscribeUpdateOrder,
+    updateOrderStatus
+} from "@/helpers/Business/orders";
 import {Tag} from "primereact/tag";
 import {Dropdown} from "primereact/dropdown";
 import {InputText} from "primereact/inputtext";
@@ -41,7 +41,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "phone", "created_at", "actions"], "BusinessesOrdersAllTableColumns");
     const [error, setError] = useState(null);
     const cancelOrderRef = useRef<OverlayPanel>(null);
-    const [expandedRows, setExpandedRows] = useState([] as any[]);
+    const [expandedRows, setExpandedRows] = useState([]);
     const [cancelOrderState, setCancelOrderState] = useState({
         orderId: 0,
         reason: ""
@@ -63,10 +63,21 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         }).finally(() => setLoading(false))
     }
     useEffect(() => {
+
         getOrdersAll();
         if (flash?.message) {
             // @ts-ignore
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
+        }
+        if (auth?.user?.id) {
+            let channel = subscribeUpdateOrder(auth?.user?.id, (data: any) => {
+                if (data?.reload) {
+                    getOrdersAll();
+                }
+            });
+            return () => {
+                channel.unbind();
+            }
         }
     }, []);
     const deleteOrder = (event: any, id: number) => {
@@ -425,9 +436,14 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     // @ts-ignore
                     onRowToggle={(e) => setExpandedRows(e?.data)}
                     rowExpansionTemplate={(data) => {
-                        return <pre>
-                            {JSON.stringify(data, null, 2)}
-                        </pre>
+                        return <OrderShowPage
+                            page={false}
+                            order={data}
+                            // @ts-ignore
+                            orderId={data.id}
+                            csrfToken={csrfToken}
+                            auth={auth}
+                        />
                     }}
                     filters={{
                         "customer.name": {value: null, matchMode: 'contains'},

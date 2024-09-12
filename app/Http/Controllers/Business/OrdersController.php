@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Business;
 
 use App\Events\Orders\NewOrder;
+use App\Events\Orders\UpdateOrder;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerAddresses;
 use App\Models\Customers;
 use App\Models\Orders;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -62,6 +65,7 @@ class OrdersController extends Controller
             }
             if ($newOrder->save()) {
                 broadcast(new NewOrder($newOrder->id))->toOthers();
+                broadcast(new UpdateOrder(null, "", "", "", true, $newOrder->business_id))->toOthers();
                 return response()->json([
                     "status" => true,
                     "message" => "Sipariş başarıyla eklendi."
@@ -98,6 +102,10 @@ class OrdersController extends Controller
                     $order->status = "canceled";
                     $order->canceled_at = now();
                     if ($order->save()) {
+                        $message = $autoAccepted ? "Sipariş Talep Üzerine Sistem Tarafından İptal Edildi" : "Sipariş İptal Talebi Oluşturuldu";
+                        $title = $autoAccepted ? "Sipariş İptal Edildi" : "Sipariş İptal Talebi";
+                        broadcast(new UpdateOrder($order->id, "error", $message, $title, true, $order->business_id))->toOthers();
+                        broadcast(new UpdateOrder(null, "error", $message, $title, true, $order->business_id))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş iptal edildi." . ($autoAccepted ? " İptal talebi otomatik olarak kabul edildi." : " Yönetici onayından sonra iptal işlemi tamamlanacaktır.")
@@ -116,6 +124,8 @@ class OrdersController extends Controller
                     ]);
                     $order->status = $request->status;
                     if ($order->save()) {
+                        broadcast(new UpdateOrder($order->id, "info", "Sipariş Durumu Güncellendi", "Sipariş Durumu", true, $order->business_id))->toOthers();
+                        broadcast(new UpdateOrder(null, "info", "Sipariş Durumu Güncellendi", "Sipariş Durumu", true, $order->business_id))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş durumu güncellendi."
@@ -148,6 +158,7 @@ class OrdersController extends Controller
         if ($order) {
             if ($order->status == "draft") {
                 if ($order->delete()) {
+                    broadcast(new UpdateOrder(null, "info", "", "", true, $order->business_id))->toOthers();
                     return response()->json([
                         "status" => true,
                         "message" => "Sipariş başarıyla silindi."
@@ -169,6 +180,44 @@ class OrdersController extends Controller
                 "status" => false,
                 "message" => "Sipariş bulunamadı."
             ]);
+        }
+    }
+
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    public function getOrder($id): \Illuminate\Http\JsonResponse
+    {
+        $order = Orders::where('business_id', auth()->user()->id)->where('id', $id)->first();
+        if ($order) {
+            $order->customer = Customers::find($order->customer_id);
+            $order->address = CustomerAddresses::find($order->address_id);
+            return response()->json([
+                'order' => $order,
+                'status' => true
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sipariş bulunamadı.'
+            ]);
+        }
+    }
+
+    /**
+     * @param $id
+     * @return Response|RedirectResponse
+     */
+    public function show($id): Response|\Illuminate\Http\RedirectResponse
+    {
+        $order = Orders::where('business_id', auth()->user()->id)->where('id', $id)->count();
+        if ($order == 1) {
+            return Inertia::render('Business/Orders/Show', [
+                'orderId' => $id
+            ]);
+        } else {
+            return redirect()->route('business.orders.index')->with('message', 'Sipariş Bulunamadı.')->with('type', 'error')->with("title", "Hata");
         }
     }
 }
