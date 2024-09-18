@@ -62,9 +62,9 @@ const EditBusinessPage = ({auth, csrfToken, businessId = 0}: {
         password: Yup.string().when('password_change', {
             is: true,
             then: () => Yup.string()
-                .required('Şifre giriniz')
-                .min(6, 'Şifre en az 6 karakter olmalıdır')
-                .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/, 'Şifreniz en az bir büyük harf, bir küçük harf ve bir rakam içermelidir'),
+                .required('Şifrenizi giriniz')
+                .min(6, 'Şifreniz en az 6 karakter olmalıdır')
+                .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{6,}$/, 'Şifreniz en az bir büyük harf, bir küçük harf ve bir rakam içermelidir'),
             otherwise: () => Yup.string().notRequired(),
         }),
 

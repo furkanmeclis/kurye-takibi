@@ -22,7 +22,10 @@ const NewBusinessPage = ({auth, csrfToken}: {
     const signUpSchema = Yup.object().shape({
         email: Yup.string().email('Geçerli bir email adresi giriniz').required('Email adresinizi giriniz'),
         name: Yup.string().required('Ad soyad giriniz').min(3, 'Ad Soyad en az 3 karakter olmalıdır'),
-        password: Yup.string().required('Şifre giriniz').min(6, 'Şifre en az 6 karakter olmalıdır').matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/, 'Şifreniz en az bir büyük harf, bir küçük harf ve bir rakam içermelidir'),
+        password: Yup.string()
+            .required('Şifrenizi giriniz')
+            .min(6, 'Şifreniz en az 6 karakter olmalıdır')
+            .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*(),.?":{}|<>]{6,}$/, 'Şifreniz en az bir büyük harf, bir küçük harf ve bir rakam içermelidir'),
         password_confirmation: Yup.string().required('Şifreyi tekrar giriniz').oneOf([Yup.ref('password'), ""], 'Şifreler uyuşmuyor'),
         phone: Yup.string().required('Telefon numarası giriniz').matches(/^\(\d{3}\)-\d{3}-\d{4}$/, 'Geçerli bir telefon numarası giriniz')
     });
