@@ -124,9 +124,34 @@ export const subscribeOrderEvents = (orderId: any, callback: any) => {
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-${orderId}`, callback);
 }
+export const unsubscribeOrderEvents = (orderId: any) => {
+    let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    });
+    return pusher.unsubscribe(`order-channel`);
+}
 export const subscribeUpdateOrder = (businessId: any, callback: any) => {
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-business-${businessId}`, callback);
+}
+
+export const subscribeOrderLocationChange = (orderId: any, callback: any) => {
+    let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    });
+    return pusher.subscribe(`order-channel`).bind(`update-order-location-${orderId}`, callback);
+}
+
+export const getLocations = async (orderId:any,csrfToken: any) => {
+    let url = route("business.orders.getLocations", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
 }

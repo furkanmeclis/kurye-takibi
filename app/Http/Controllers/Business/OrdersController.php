@@ -7,6 +7,7 @@ use App\Events\Orders\UpdateOrder;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerAddresses;
 use App\Models\Customers;
+use App\Models\OrderLocations;
 use App\Models\Orders;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -32,6 +33,10 @@ class OrdersController extends Controller
         $orders = Orders::where('business_id', auth()->user()->id)->orderBy('updated_at', 'desc')->get()->map(function ($order) {
             $order->customer = Customers::find($order->customer_id);
             $order->address = CustomerAddresses::find($order->address_id);
+            $order->start_location = json_decode($order->start_location);
+            $order->end_location = json_decode($order->end_location);
+            $order->courier = User::getCourier($order->courier_id);
+
             return $order;
         });
         return response()->json([
@@ -193,6 +198,10 @@ class OrdersController extends Controller
         if ($order) {
             $order->customer = Customers::find($order->customer_id);
             $order->address = CustomerAddresses::find($order->address_id);
+            $order->start_location = json_decode($order->start_location);
+            $order->end_location = json_decode($order->end_location);
+            $order->courier = User::getCourier($order->courier_id);
+
             return response()->json([
                 'order' => $order,
                 'status' => true
@@ -218,6 +227,23 @@ class OrdersController extends Controller
             ]);
         } else {
             return redirect()->route('business.orders.index')->with('message', 'Sipariş Bulunamadı.')->with('type', 'error')->with("title", "Hata");
+        }
+    }
+
+    public function getLocations($id): JsonResponse
+    {
+        $order = Orders::where('business_id', auth()->user()->id)->where('id', $id)->first();
+        if($order) {
+            $locations = OrderLocations::getLocations($order->id);
+            return response()->json([
+                'locations' => $locations,
+                'status' => true
+            ]);
+        }else{
+            return response()->json([
+                'status' => false,
+                'message' => 'Sipariş bulunamadı.'
+            ]);
         }
     }
 }

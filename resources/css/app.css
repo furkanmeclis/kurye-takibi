@@ -1,0 +1,39 @@
+.blinking-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--teal-500);
+    border-radius: 50%;
+    animation: blink 2s infinite;
+    display: inline-block;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.blinking-dot.slow {
+    animation-duration: 3s;
+}
+
+.blinking-dot.medium {
+    animation-duration: 2s;
+}
+
+.blinking-dot.fast {
+    animation-duration: 1s;
+}
+
+.blinking-dot.no-animation {
+    animation: none;
+}
+
+.blinking-dot.red {
+    background-color: var(--red-500);
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}

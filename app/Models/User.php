@@ -70,4 +70,15 @@ class User extends Authenticatable implements MustVerifyEmail
             "approved" => false
         ];
     }
+
+    public static function getCourier($id)
+    {
+        $courier = User::where('id', $id)->where('role', 'courier')->first();
+        if ($courier) {
+            $courier->details = CourierDetails::where('courier_id', $courier->id)->first();
+            return $courier;
+        }else{
+            return false;
+        }
+    }
 }

@@ -87,7 +87,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}/show', [\App\Http\Controllers\Business\OrdersController::class, 'show'])->name('show');
             Route::put('/{id}/status-update', [\App\Http\Controllers\Business\OrdersController::class, 'updateStatus'])->name('updateStatus');
             Route::post('/{id}/get-details', [\App\Http\Controllers\Business\OrdersController::class, 'getOrder'])->name('getOrder');
+            Route::post('/{id}/get-locations', [\App\Http\Controllers\Business\OrdersController::class, 'getLocations'])->name('getLocations');
             Route::delete('/{id}/destroy', [\App\Http\Controllers\Business\OrdersController::class, 'destroy'])->name('destroy');
+
         });
 
     });
@@ -98,6 +100,28 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
+});
+function generateLocations($latitude, $longitude, $numLocations, $distance = 10): array
+{
+    $locations = [];
+    $earthRadius = 6371000;
+    for ($i = 0; $i < $numLocations; $i++) {
+        $angle = mt_rand(0, 360) * (M_PI / 180);
+        $newLatitude = $latitude + ($distance / $earthRadius) * (180 / M_PI);
+        $newLongitude = $longitude + ($distance / $earthRadius) * (180 / M_PI) / cos($latitude * (M_PI / 180));
+        $locations[] = [$newLatitude, $newLongitude];
+        $latitude = $newLatitude;
+        $longitude = $newLongitude;
+    }
+    return $locations;
+}
+
+Route::get('/add-location', function () {
+    $locations = generateLocations(39.9334, 32.8597, 100);
+    $rand = rand(0, 99);
+    $latitude = $locations[$rand][0];
+    $longitude = $locations[$rand][1];
+    return \App\Models\OrderLocations::addLocation(7, $latitude, $longitude);
 });
 
 require __DIR__ . '/auth.php';
