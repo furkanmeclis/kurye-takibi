@@ -1,6 +1,6 @@
 import PageContainer from "@/PageContainer";
 import MainLayout from "@/Layouts/MainLayout";
-import {useEffect, useRef, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import {
     getLocations,
     getOrder,
@@ -19,6 +19,13 @@ import car from "@/icons/car.svg";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import WatchingIcon from "@/components/WatchingIcon";
+import L from "leaflet";
+import finishMarkerIcon from "@/icons/finishMarker.png";
+import startMarkerIcon from "@/icons/startMarker.png";
+import roadDotIcon from "@/icons/roadDot.png";
+import {Button} from "primereact/button";
+import {ScrollPanel} from "primereact/scrollpanel";
+import {LayoutContext} from "@/layout/context/layoutcontext";
 
 interface Location {
     latitude: number;
@@ -119,6 +126,28 @@ interface Order {
     courier: Courier | null | false;
 }
 
+const startMarker = new L.Icon({
+    iconUrl: startMarkerIcon,
+    iconSize: [32, 32],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+const finishMarker = new L.Icon({
+    iconUrl: finishMarkerIcon,
+    iconSize: [32, 32],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+const roadMarker = new L.Icon({
+    iconUrl: roadDotIcon,
+    iconSize: [16, 16],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
 const OrderShowPage = ({
                            page = true,
                            order = {},
@@ -190,6 +219,17 @@ const OrderShowPage = ({
     const [locations, setLocations] = useState<Location[]>([]);
     const [watchingLocation, setWatchingLocation] = useState(false);
     const [loading, setLoading] = useState(false);
+    const {setBreadcrumbs} = useContext(LayoutContext);
+    useEffect(() => {
+        if (page) {
+            setBreadcrumbs(prevState => {
+                return [...prevState, {
+                    labels: ["Siparişler", "Siparişi Görüntüle"],
+                    to: window.location.href
+                }]
+            });
+        }
+    }, [])
     const unSubscribeChannel = () => {
         unsubscribeOrderEvents(orderId);
         setWatchingLocation(false)
@@ -270,7 +310,7 @@ const OrderShowPage = ({
     }, [orderData]);
     const PageComponent = () => {
         return <div className={`${!page && 'bg-primary-50 py-2 px-3'}`}>
-            <Tooltip target={"[data-pr-tooltip]"} position={"left"}/>   
+            <Tooltip target={"[data-pr-tooltip]"} position={"bottom"} className={"zoomin"}/>
             <div className={"grid row-gap-2"}>
                 {orderData.status === "transporting" && orderData.courier !== false && orderData.courier !== null && locations.length > 0 && <>
                     <div className="col-12">
@@ -280,18 +320,31 @@ const OrderShowPage = ({
                                               text={"Kurye Konumu İzleniyor"}/>}
                         </span>
                     </div>
-                    <div className="col-6">
+                    <div className="col-12">
                         {orderData.status === "transporting" && locations.length > 0 &&
                             <MapContainer
                                 // @ts-ignore
-                                center={[locations[0].latitude, locations[0].longitude]} zoom={13}
-                                style={{height: "300px"}}
+                                center={[locations[0].latitude, locations[0].longitude]} zoom={15}
+                                zoomControl
+                                attributionControl={false}
+                                style={{height: "350px", borderRadius: "10px"}}
                                 scrollWheelZoom={false}>
-                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
+                                <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
                                 {locations.map((location, index) => (
-                                    <Marker key={index} position={[location.latitude, location.longitude]}>
+                                    <Marker key={index} position={[location.latitude, location.longitude]}
+                                            icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
+                                    >
                                         <Popup>
-                                            {index === 0 ? "Başlangıç" : index === locations.length - 1 ? "Bitiş" : index}
+                                            <span
+                                                className={"font-semibold flex justify-content-center text-lg"}>{index === 0 ? "Başlangıç" : index === locations.length - 1 ? (orderData.status === "delivered" ? "Bitiş" : "Güzergah-" + index) : "Güzergah-" + index}</span>
+                                            <Button label={"Google Maps'te Aç"}
+                                                    size={"small"}
+                                                    icon={"pi pi-external-link"}
+                                                    severity={"help"}
+                                                    className={"w-full mt-2"}
+                                                    onClick={() => {
+                                                        window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, "_blank");
+                                                    }}/>
                                         </Popup>
                                     </Marker>
                                 ))}
@@ -457,6 +510,37 @@ const OrderShowPage = ({
                             {new Date(orderData.delivered_at).toLocaleString()}
                         </span>
                     </div>}
+
+                    {orderData.status === "delivered" && locations.length > 0 &&
+                        <div className="col-12">
+                            <MapContainer
+                                // @ts-ignore
+                                center={[locations[0].latitude, locations[0].longitude]} zoom={15}
+                                zoomControl
+                                attributionControl={false}
+                                style={{height: "400px", borderRadius: "10px"}}
+                                scrollWheelZoom={false}>
+                                <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
+                                {locations.map((location, index) => (
+                                    <Marker key={index} position={[location.latitude, location.longitude]}
+                                            icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
+                                    >
+                                        <Popup>
+                                            <span
+                                                className={"font-semibold flex justify-content-center text-lg"}>{index === 0 ? "Başlangıç" : index === locations.length - 1 ? (orderData.status === "delivered" ? "Bitiş" : "Güzergah-" + index) : "Güzergah-" + index}</span>
+                                            <Button label={"Google Maps'te Aç"}
+                                                    size={"small"}
+                                                    icon={"pi pi-external-link"}
+                                                    severity={"help"}
+                                                    className={"w-full mt-2 zoomindown"}
+                                                    onClick={() => {
+                                                        window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, "_blank");
+                                                    }}/>
+                                        </Popup>
+                                    </Marker>
+                                ))}
+                            </MapContainer>
+                        </div>}
                 </>}
             </div>
 
@@ -465,12 +549,14 @@ const OrderShowPage = ({
     return <>
         <Toast ref={toast}/>
         {page ? <PageContainer auth={auth} csrfToken={csrfToken}>
-            <MainLayout>
-                <div className="card">
-                    <PageComponent/>
-                </div>
-            </MainLayout>
-        </PageContainer> : <PageComponent/>}
+                <MainLayout>
+                    <div className="card">
+                        <PageComponent/>
+                    </div>
+                </MainLayout>
+            </PageContainer> :
+            <PageComponent/>}
+
     </>
 
 };

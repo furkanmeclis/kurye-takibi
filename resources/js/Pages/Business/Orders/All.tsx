@@ -51,6 +51,13 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         getOrders(csrfToken).then(data => {
             if (data.status) {
                 setOrders(data.orders);
+                setExpandedRows((prevState: any) => {
+                    let ar = prevState?.map((row: any) => {
+                        let newRecord = data.orders.find((r: any) => r.id === row.id);
+                        return newRecord ? newRecord : row;
+                    });
+                    return ar ? ar : [];
+                })
                 setLoading(false);
                 setError(null)
             } else {
@@ -307,6 +314,19 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                             openOrder(rowData.id);
                         }}
                     />}
+                    <Button
+                        size={"small"}
+                        icon={"pi pi-eye"}
+                        severity={"info"}
+                        tooltip={"Görüntüle"}
+                        loading={loading}
+                        tooltipOptions={{
+                            position: "top"
+                        }}
+                        onClick={() => {
+                            router.visit(route('business.orders.show', rowData.id))
+                        }}
+                    />
                     {rowData.status === "draft" && <Button
                         size={"small"}
                         icon={"pi pi-trash"}
