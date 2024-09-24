@@ -223,7 +223,7 @@ class OrdersController extends Controller
     {
         $order = Orders::where('business_id', auth()->user()->id)->where('id', $id)->count();
         if ($order == 1) {
-            return Inertia::render('Business/Orders/Show', [
+            return Inertia::render('Business/Orders/ShowPage', [
                 'orderId' => $id
             ]);
         } else {
