@@ -148,6 +148,11 @@ Route::post('/add-location/{i}', function ($order_id) {
     if($order->start_location == null){
         $latitude = 39.9334;
         $longitude = 32.8597; //Ankara
+        \App\Models\OrderLocations::addLocation($order_id, $latitude, $longitude, $order->courier_id);
+        return response()->json([
+            'status' => true,
+            'message' => 'Konum Eklendi(DEV)'
+        ]);
     }else{
         $latitude = json_decode($order->start_location)->latitude;
         $longitude = json_decode($order->start_location)->longitude;
