@@ -119,25 +119,29 @@ export const getOrder = async (orderId: any, csrfToken: any) => {
     return await response.json();
 }
 export const subscribeOrderEvents = (orderId: any, callback: any) => {
+    if(import.meta.env.VITE_ALLOW_PUSHER === "false") return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-${orderId}`, callback);
 }
 export const unsubscribeOrderEvents = (orderId: any) => {
+    if(import.meta.env.VITE_ALLOW_PUSHER === "false") return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.unsubscribe(`order-channel`);
 }
 export const subscribeUpdateOrder = (businessId: any, callback: any) => {
+    if(import.meta.env.VITE_ALLOW_PUSHER === "false") return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-business-${businessId}`, callback);
 }
 
-export const subscribeOrderLocationChange = (orderId: any, callback: any) => {
+export const subscribeOrderLocationChange = (orderId: any, callback: any,allowAlways=false) => {
+    if(import.meta.env.VITE_ALLOW_PUSHER === "false" && !allowAlways) return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
@@ -149,6 +153,26 @@ export const getLocations = async (orderId:any,csrfToken: any) => {
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
     headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
+}
+export const demoAddLocation = async (orderId:any,csrfToken:any) => {
+    let url = route("demoAddLocation", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
+}
+export const demoDeliverOrder = async (orderId:any,csrfToken:any) => {
+    let url = route("demoDeliverOrder", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
     let response = await fetch(url, {
         method: "POST",
         headers: headers

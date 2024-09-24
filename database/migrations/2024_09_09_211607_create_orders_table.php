@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->json("end_location")->default('{"latitude":0,"longitude":0}');
             $table->boolean("cancellation_accepted")->default(false);
             $table->unsignedBigInteger("cancellation_accepted_by")->nullable();
+            $table->enum("cancellation_requested_by",["courier","business"])->nullable();
             $table->string("cancellation_reason")->nullable();
             $table->enum("marketplace", ["web", "trendyol", "yemeksepeti", "getir"])->default("web");
             $table->string("marketplace_order_id")->nullable();

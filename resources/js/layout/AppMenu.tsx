@@ -60,6 +60,18 @@ const AppMenu = () => {
                 }
             ]
         },
+        {
+            label: "Siparişler",
+            icon: "pi pi-shopping-cart",
+            roles: ["admin"],
+            items: [
+                {
+                    label: "İptal İşlemleri",
+                    icon: "pi pi-fw pi-hourglass",
+                    to: route("admin.orders.cancellationRequests")
+                }
+            ]
+        },
         //Businesses Menus
         {
             label: "Müşteriler",

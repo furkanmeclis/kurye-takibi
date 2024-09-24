@@ -26,6 +26,7 @@ import roadDotIcon from "@/icons/roadDot.png";
 import {Button} from "primereact/button";
 import {ScrollPanel} from "primereact/scrollpanel";
 import {LayoutContext} from "@/layout/context/layoutcontext";
+import {Timeline} from "primereact/timeline";
 
 interface Location {
     latitude: number;
@@ -108,8 +109,9 @@ interface Order {
     status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted";
     start_location: Location;
     end_location: Location;
+    cancellation_requested_by: any;
     cancellation_accepted: number;
-    cancellation_accepted_by: number | null;
+    cancellation_accepted_by: any;
     cancellation_reason: string | null;
     marketplace: string;
     marketplace_order_id: string | null;
@@ -182,6 +184,7 @@ const OrderShowPage = ({
             },
             "cancellation_accepted": 0,
             "cancellation_accepted_by": null,
+            "cancellation_requested_by": null,
             "cancellation_reason": null,
             "marketplace": "web",
             "marketplace_order_id": null,
@@ -303,247 +306,352 @@ const OrderShowPage = ({
                         latitude: data.latitude,
                         longitude: data.longitude
                     } as Location]));
-                });
+                },true);
                 return () => unSubscribeChannel();
             }
         }
     }, [orderData]);
+    const prepareTimeLine = (order: Order) => {
+        let created_at = new Date(order.created_at);
+        let courier_accepted_at = order.courier_accepted_at !== null ? new Date(order.courier_accepted_at) : null;
+        let delivered_at = order.delivered_at !== null ? new Date(order.delivered_at) : null;
+        let canceled_at = order.canceled_at !== null ? new Date(order.canceled_at) : null;
+        let timeline = [];
+
+
+        if (canceled_at !== null) {
+            timeline.push({
+                "date": canceled_at,
+                "status": "Sipariş İptal Edildi",
+                "icon": "pi pi-times-circle",
+                "bg": "red-500"
+            });
+        }
+        if (delivered_at !== null) {
+            timeline.push({
+                "date": delivered_at,
+                "status": "Sipariş Teslim Edildi",
+                "icon": "pi pi-send",
+                "bg": "green-500"
+            });
+        }
+        if (courier_accepted_at !== null) {
+            timeline.push({
+                "date": courier_accepted_at,
+                "status": "Kurye Kabul Etti",
+                "icon": "pi pi-check-square",
+                "bg": "teal-500"
+            });
+        }
+        timeline.push({
+            "date": created_at,
+            "status": "Sipariş Oluşturuldu",
+            "icon": "pi pi-file-import",
+            "bg": "yellow-500"
+
+        });
+        return timeline;
+    }
     const PageComponent = () => {
-        return <div className={`${!page && 'bg-primary-50 py-2 px-3'}`}>
-            <Tooltip target={"[data-pr-tooltip]"} position={"bottom"} className={"zoomin"}/>
-            <div className={"grid row-gap-2"}>
-                {orderData.status === "transporting" && orderData.courier !== false && orderData.courier !== null && locations.length > 0 && <>
-                    <div className="col-12">
+        return <div className={`grid ${!page && 'bg-primary-50 py-2 px-3'}`}>
+
+            <div
+                className={`col-12 lg:col-9 md:col-8`}>
+                <div className={`${!page && 'bg-primary-50 py-2 px-3'}`}>
+                    <Tooltip target={"[data-pr-tooltip]"} position={"bottom"} className={"zoomin"}/>
+                    <div className={"grid row-gap-2"}>
+                        {orderData.status === "transporting" && orderData.courier !== false && orderData.courier !== null && locations.length > 0 && <>
+                            <div className="col-12">
                         <span className={"text-xl font-semibold"}>Kurye Konumu
                             {orderData.status === "transporting" &&
                                 <WatchingIcon speed={"fast"} connected={watchingLocation}
                                               text={"Kurye Konumu İzleniyor"}/>}
                         </span>
-                    </div>
-                    <div className="col-12">
-                        {orderData.status === "transporting" && locations.length > 0 &&
-                            <MapContainer
-                                // @ts-ignore
-                                center={[locations[0].latitude, locations[0].longitude]} zoom={15}
-                                zoomControl
-                                attributionControl={false}
-                                style={{height: "350px", borderRadius: "10px"}}
-                                scrollWheelZoom={false}>
-                                <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
-                                {locations.map((location, index) => (
-                                    <Marker key={index} position={[location.latitude, location.longitude]}
-                                            icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
-                                    >
-                                        <Popup>
+                            </div>
+                            <div className="col-12">
+                                {orderData.status === "transporting" && locations.length > 0 &&
+                                    <MapContainer
+                                        // @ts-ignore
+                                        center={[locations[0].latitude, locations[0].longitude]} zoom={15}
+                                        zoomControl
+                                        attributionControl={false}
+                                        style={{height: "350px", borderRadius: "10px"}}
+                                        scrollWheelZoom={false}>
+                                        <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
+                                        {locations.map((location, index) => (
+                                            <Marker key={index} position={[location.latitude, location.longitude]}
+                                                    icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
+                                            >
+                                                <Popup>
                                             <span
                                                 className={"font-semibold flex justify-content-center text-lg"}>{index === 0 ? "Başlangıç" : index === locations.length - 1 ? (orderData.status === "delivered" ? "Bitiş" : "Güzergah-" + index) : "Güzergah-" + index}</span>
-                                            <Button label={"Google Maps'te Aç"}
-                                                    size={"small"}
-                                                    icon={"pi pi-external-link"}
-                                                    severity={"help"}
-                                                    className={"w-full mt-2"}
-                                                    onClick={() => {
-                                                        window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, "_blank");
-                                                    }}/>
-                                        </Popup>
-                                    </Marker>
-                                ))}
+                                                    <Button label={"Google Maps'te Aç"}
+                                                            size={"small"}
+                                                            icon={"pi pi-external-link"}
+                                                            severity={"help"}
+                                                            className={"w-full mt-2"}
+                                                            onClick={() => {
+                                                                window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, "_blank");
+                                                            }}/>
+                                                </Popup>
+                                            </Marker>
+                                        ))}
 
-                            </MapContainer>}
-                    </div>
-                </>}
-                <div className="col-12">
-                    <span className={"text-xl font-semibold"}>Sipariş Detayları</span>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Müşteri Adı Soyadı"}>
-                    <Avatar
-                        icon={"pi pi-user"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <Link className={"font-semibold ml-2 text-blue-800 text-decoration-none"}
-                          href={route('business.customers.edit', orderData.customer.id)}>
-                        {orderData.customer.name}
-                    </Link>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Müşteri Telefon Numarası"}>
-                    <Avatar
-                        icon={"pi pi-phone"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <a className={"font-semibold ml-2 text-blue-800 text-decoration-none"}
-                       href={`tel:${orderData.customer.phone}`}>{orderData.customer.phone}</a>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Son Değişiklik Tarihi"}>
-                    <Avatar
-                        icon={"pi pi-clock"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <span className={"font-semibold ml-2"}>{new Date(orderData.updated_at).toLocaleString()}</span>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Sipariş Durumu"}>
-                    <Avatar
-                        icon={"pi pi-check"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <Tag
-                        className={"ml-2"}
-                        // @ts-ignore
-                        value={getOrderStatuses(orderData.status).label}
-                        // @ts-ignore
-                        severity={getOrderStatuses(orderData.status).severity}
-                    />
-                </div>
-                <div className="col-12">
-                    <span className={"text-xl font-semibold"}>Adres Bilgileri</span>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Adres Başlığı"}>
-                    <Avatar
-                        icon={"pi pi-tag"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <span className={"font-semibold ml-2"}>{orderData.address.title}</span>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Adres Telefon Numarası"}>
-                    <Avatar
-                        icon={"pi pi-phone"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <a className={"font-semibold ml-2 text-blue-800 text-decoration-none"}
-                       href={`tel:${orderData.address.phone}`}>{orderData.address.phone}</a>
-                </div>
-                <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"İl/İlçe"}>
-                    <Avatar
-                        icon={"pi pi-map"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <span
-                        className={"font-semibold ml-2"}>{orderData.address.city} / {orderData.address.district}</span>
-                </div>
-                <div className="lg:col-6 md:col-6 col-12 cursor-pointer" data-pr-tooltip={"Adres"}>
-                    <Avatar
-                        icon={"pi pi-home"}
-                        shape={"circle"}
-                        className={"bg-primary-300 font-semibold text-primary-800"}
-                    />
-                    <span
-                        data-pr-position={"bottom"}
-                        className={"font-semibold ml-2"}>{orderData.address.address}</span>
-                </div>
-                {orderData.address.notes !== null &&
-                    <div className="lg:col-6 md:col-6 col-12 cursor-pointer" data-pr-tooltip={"Notlar"}>
-                        <Avatar
-                            icon={"pi pi-info"}
-                            shape={"circle"}
-                            className={"bg-primary-300 font-semibold text-primary-800"}
-                        />
-                        <span
-                            className={"font-semibold ml-2"}>{orderData.address.notes}</span>
-                    </div>}
-                {orderData.courier !== false && orderData.courier !== null && <>
-                    <div className="col-12">
-                        <span className={"text-xl font-semibold"}>Kurye Bilgileri</span>
-                    </div>
-                    <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Kurye Adı Soyadı"}>
-                        <Avatar
-                            icon={"pi pi-user"}
-                            shape={"circle"}
-                            className={"bg-primary-300 font-semibold text-primary-800"}
-                        />
-                        <span className={"font-semibold ml-2"}>
+                                    </MapContainer>}
+                            </div>
+                        </>}
+                        <div className="col-12">
+                            <span className={"text-xl font-semibold"}>Sipariş Detayları</span>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Müşteri Adı Soyadı"}>
+                            <Avatar
+                                icon={"pi pi-user"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <Link className={"font-semibold ml-2 text-color dark: text-decoration-none"}
+                                  href={route('business.customers.edit', orderData.customer.id)}>
+                                {orderData.customer.name}
+                            </Link>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                             data-pr-tooltip={"Müşteri Telefon Numarası"}>
+                            <Avatar
+                                icon={"pi pi-phone"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <a className={"font-semibold ml-2 text-color text-decoration-none"}
+                               href={`tel:${orderData.customer.phone}`}>{orderData.customer.phone}</a>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                             data-pr-tooltip={"Son Değişiklik Tarihi"}>
+                            <Avatar
+                                icon={"pi pi-clock"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <span
+                                className={"font-semibold ml-2"}>{new Date(orderData.updated_at).toLocaleString()}</span>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Sipariş Durumu"}>
+                            <Avatar
+                                icon={"pi pi-check"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <Tag
+                                className={"ml-2"}
+                                // @ts-ignore
+                                value={getOrderStatuses(orderData.status).label}
+                                // @ts-ignore
+                                severity={getOrderStatuses(orderData.status).severity}
+                            />
+                        </div>
+                        {orderData.status === "canceled" && <>
+                            <div className="col-12">
+                                <span className={"text-xl font-semibold"}>İptal Bilgileri</span>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"İptal Edilme Sebebi"}>
+                                <Avatar
+                                    icon={"pi pi-file"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span className={"font-semibold ml-2"}>{orderData.cancellation_reason}</span>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"İptal Edilme Sebebi"}>
+                                <Avatar
+                                    icon={`pi pi-${orderData.cancellation_accepted === 1 ? "check" : "times"}-circle`}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span
+                                    className={"font-semibold ml-2"}>{orderData.cancellation_accepted === 1 ? "İptal Onaylandı" : "İptal İşlemi Onay Bekliyor"}</span>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"İptal Edilme Tarihi"}>
+                                <Avatar
+                                    icon={`pi pi-clock`}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span
+                                    className={"font-semibold ml-2"}>{new Date(String(orderData.canceled_at)).toLocaleString()}</span>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"Onaylayan Yetkili"}>
+                                <Avatar
+                                    icon={`pi pi-user`}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span
+                                    className={"font-semibold ml-2"}>{orderData.cancellation_accepted_by !== null ? orderData.cancellation_accepted_by.name : "Onaylanmadı"}</span>
+                            </div>
+                        </>}
+                        <div className="col-12">
+                            <span className={"text-xl font-semibold"}>Adres Bilgileri</span>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Adres Başlığı"}>
+                            <Avatar
+                                icon={"pi pi-tag"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <span className={"font-semibold ml-2"}>{orderData.address.title}</span>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                             data-pr-tooltip={"Adres Telefon Numarası"}>
+                            <Avatar
+                                icon={"pi pi-phone"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <a className={"font-semibold ml-2 text-color text-decoration-none"}
+                               href={`tel:${orderData.address.phone}`}>{orderData.address.phone}</a>
+                        </div>
+                        <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"İl/İlçe"}>
+                            <Avatar
+                                icon={"pi pi-map"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <span
+                                className={"font-semibold ml-2"}>{orderData.address.city} / {orderData.address.district}</span>
+                        </div>
+                        <div className="lg:col-6 md:col-6 col-12 cursor-pointer" data-pr-tooltip={"Adres"}>
+                            <Avatar
+                                icon={"pi pi-home"}
+                                shape={"circle"}
+                                className={"bg-primary-300 font-semibold text-primary-800"}
+                            />
+                            <span
+                                data-pr-position={"bottom"}
+                                className={"font-semibold ml-2"}>{orderData.address.address}</span>
+                        </div>
+                        {orderData.address.notes !== null &&
+                            <div className="lg:col-6 md:col-6 col-12 cursor-pointer" data-pr-tooltip={"Notlar"}>
+                                <Avatar
+                                    icon={"pi pi-info"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span
+                                    className={"font-semibold ml-2"}>{orderData.address.notes}</span>
+                            </div>}
+                        {orderData.courier !== false && orderData.courier !== null && <>
+                            <div className="col-12">
+                                <span className={"text-xl font-semibold"}>Kurye Bilgileri</span>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"Kurye Adı Soyadı"}>
+                                <Avatar
+                                    icon={"pi pi-user"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span className={"font-semibold ml-2"}>
                             {orderData.courier.name}
                         </span>
-                    </div>
-                    <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Kurye Telefon Numarası"}>
-                        <Avatar
-                            icon={"pi pi-phone"}
-                            shape={"circle"}
-                            className={"bg-primary-300 font-semibold text-primary-800"}
-                        />
-                        <a className={"font-semibold ml-2 text-blue-800 text-decoration-none"}
-                           href={`tel:${orderData.courier.phone}`}>{orderData.courier.phone}</a>
-                    </div>
-                    <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Kurye Email Adresi"}>
-                        <Avatar
-                            icon={"pi pi-envelope"}
-                            shape={"circle"}
-                            className={"bg-primary-300 font-semibold text-primary-800"}
-                        />
-                        <a className={"font-semibold ml-2 text-blue-800 text-decoration-none"}
-                           href={`mailto:${orderData.courier.email}`}>{orderData.courier.email}</a>
-                    </div>
-                    <div className="lg:col-3 md:col-4 col-6 cursor-pointer flex align-items-center"
-                         data-pr-tooltip={"Teslimat Tipi"}>
-                        <Avatar
-                            image={orderData.courier.details.vehicle_type === "bicycle" ? bicycle : orderData.courier.details.vehicle_type === "motorcycle" ? motorcycle : car}
-                            className={"bg-primary-300 font-semibold text-primary-800 p-1"}
-                        />
-                        <span className="ml-2 font-semibold">
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"Kurye Telefon Numarası"}>
+                                <Avatar
+                                    icon={"pi pi-phone"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <a className={"font-semibold ml-2 text-color text-decoration-none"}
+                                   href={`tel:${orderData.courier.phone}`}>{orderData.courier.phone}</a>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"Kurye Email Adresi"}>
+                                <Avatar
+                                    icon={"pi pi-envelope"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <a className={"font-semibold ml-2 text-color text-decoration-none"}
+                                   href={`mailto:${orderData.courier.email}`}>{orderData.courier.email}</a>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer flex align-items-center"
+                                 data-pr-tooltip={"Teslimat Tipi"}>
+                                <Avatar
+                                    image={orderData.courier.details.vehicle_type === "bicycle" ? bicycle : orderData.courier.details.vehicle_type === "motorcycle" ? motorcycle : car}
+                                    className={"bg-primary-300 font-semibold text-primary-800 p-1"}
+                                />
+                                <span className="ml-2 font-semibold">
                             {orderData.courier.details.vehicle_type === "bicycle" ? "Bisiklet" : orderData.courier.details.vehicle_type === "motorcycle" ? "Motosiklet" : "Araba"}
                         </span>
-                    </div>
-                    <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
-                         data-pr-tooltip={"Siparişi Teslim Alma Tarihi"}>
-                        <Avatar
-                            icon={"pi pi-clock"}
-                            shape={"circle"}
-                            className={"bg-primary-300 font-semibold text-primary-800"}
-                        />
-                        <span className={"font-semibold ml-2"}>
+                            </div>
+                            <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                 data-pr-tooltip={"Siparişi Teslim Alma Tarihi"}>
+                                <Avatar
+                                    icon={"pi pi-clock"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span className={"font-semibold ml-2"}>
                             {orderData.courier_accepted_at !== null ? new Date(orderData.courier_accepted_at).toLocaleString() : "-"}
                         </span>
-                    </div>
-                    {orderData.delivered_at !== null && <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
-                                                             data-pr-tooltip={"Siparişi Teslim Etme Tarihi"}>
-                        <Avatar
-                            icon={"pi pi-stop-circle"}
-                            shape={"circle"}
-                            className={"bg-primary-300 font-semibold text-primary-800"}
-                        />
-                        <span className={"font-semibold ml-2"}>
+                            </div>
+                            {orderData.delivered_at !== null && <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
+                                                                     data-pr-tooltip={"Siparişi Teslim Etme Tarihi"}>
+                                <Avatar
+                                    icon={"pi pi-stop-circle"}
+                                    shape={"circle"}
+                                    className={"bg-primary-300 font-semibold text-primary-800"}
+                                />
+                                <span className={"font-semibold ml-2"}>
                             {new Date(orderData.delivered_at).toLocaleString()}
                         </span>
-                    </div>}
+                            </div>}
 
-                    {orderData.status === "delivered" && locations.length > 0 &&
-                        <div className="col-12">
-                            <MapContainer
-                                // @ts-ignore
-                                center={[locations[0].latitude, locations[0].longitude]} zoom={15}
-                                zoomControl
-                                attributionControl={false}
-                                style={{height: "400px", borderRadius: "10px"}}
-                                scrollWheelZoom={false}>
-                                <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
-                                {locations.map((location, index) => (
-                                    <Marker key={index} position={[location.latitude, location.longitude]}
-                                            icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
-                                    >
-                                        <Popup>
+                            {!watchingLocation && locations.length > 0 &&
+                                <div className="col-12">
+                                    <MapContainer
+                                        // @ts-ignore
+                                        center={[locations[0].latitude, locations[0].longitude]} zoom={15}
+                                        zoomControl
+                                        attributionControl={false}
+                                        style={{height: "400px", borderRadius: "10px"}}
+                                        scrollWheelZoom={false}>
+                                        <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
+                                        {locations.map((location, index) => (
+                                            <Marker key={index} position={[location.latitude, location.longitude]}
+                                                    icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
+                                            >
+                                                <Popup>
                                             <span
                                                 className={"font-semibold flex justify-content-center text-lg"}>{index === 0 ? "Başlangıç" : index === locations.length - 1 ? (orderData.status === "delivered" ? "Bitiş" : "Güzergah-" + index) : "Güzergah-" + index}</span>
-                                            <Button label={"Google Maps'te Aç"}
-                                                    size={"small"}
-                                                    icon={"pi pi-external-link"}
-                                                    severity={"help"}
-                                                    className={"w-full mt-2 zoomindown"}
-                                                    onClick={() => {
-                                                        window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, "_blank");
-                                                    }}/>
-                                        </Popup>
-                                    </Marker>
-                                ))}
-                            </MapContainer>
-                        </div>}
-                </>}
-            </div>
+                                                    <Button label={"Google Maps'te Aç"}
+                                                            size={"small"}
+                                                            icon={"pi pi-external-link"}
+                                                            severity={"help"}
+                                                            className={"w-full mt-2 zoomindown"}
+                                                            onClick={() => {
+                                                                window.open(`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`, "_blank");
+                                                            }}/>
+                                                </Popup>
+                                            </Marker>
+                                        ))}
+                                    </MapContainer>
+                                </div>}
+                        </>}
+                    </div>
 
+                </div>
+            </div>
+            <div className="col-12 lg:col-3 md:col-4">
+                <Timeline layout={"vertical"} marker={(item) => <span
+                    className={`bg-${item.bg} flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1`}>
+                <i className={item.icon}></i>
+            </span>} value={prepareTimeLine(orderData)} opposite={(item) => item.status} content={(item) => <small
+                    className="text-color-secondary">{item.date.toLocaleString()}</small>}/>
+            </div>
         </div>
     }
     return <>

@@ -57,6 +57,11 @@ Route::middleware('auth')->group(function () {
             Route::delete('/destroy-business/{id}', [\App\Http\Controllers\Admin\BusinessesController::class, 'destroy'])->name('destroy');
             Route::post('/multiple-destroy-business', [\App\Http\Controllers\Admin\BusinessesController::class, 'multipleDestroy'])->name('multipleDestroy');
         });
+        Route::prefix('/orders')->name("orders.")->group(function () {
+            Route::get('/cancellation-requests', [\App\Http\Controllers\Admin\OrdersController::class, 'cancellationRequests'])->name('cancellationRequests');
+            Route::post('/list-cancellation-requests', [\App\Http\Controllers\Admin\OrdersController::class, 'listCancellationRequests'])->name('listCancellationRequests');
+            Route::post('/approve-cancellation/{id}', [\App\Http\Controllers\Admin\OrdersController::class, 'approveCancellation'])->name('approveCancellation');
+        });
     });
     Route::prefix("business")->name("business.")->middleware("only:business")->group(function () {
         Route::get('/', function () {
@@ -116,12 +121,69 @@ function generateLocations($latitude, $longitude, $numLocations, $distance = 10)
     return $locations;
 }
 
-Route::get('/add-location', function () {
-    $locations = generateLocations(39.9334, 32.8597, 100);
+Route::post('/add-location/{i}', function ($order_id) {
+    $order = \App\Models\Orders::where('id', $order_id)->first();
+    if (!$order) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Sipariş Bulunamadı(DEV)'
+        ]);
+    }
+    if ($order->courier_id == null) {
+        $newCourier = \App\Models\User::where('role', 'courier')->inRandomOrder()->first();
+        if (!$newCourier) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sistemde Kurye Bulunamadı(DEV)'
+            ]);
+        }
+        $order->status = "transporting";
+        $order->courier_accepted_at = now();
+        $order->courier_id = $newCourier->id;
+        $order->save();
+        broadcast(new \App\Events\Orders\UpdateOrder($order_id, "success", "Sipariş Güncellendi", "Siparişe Kurye Atandı", true, $order->business_id))->toOthers();
+    }
+    $order->status = "transporting";
+    $order->save();
+    if($order->start_location == null){
+        $latitude = 39.9334;
+        $longitude = 32.8597;
+    }else{
+        $latitude = json_decode($order->start_location)->latitude;
+        $longitude = json_decode($order->start_location)->longitude;
+    }
+
+    $locations = generateLocations($latitude, $longitude, 100);
     $rand = rand(0, 99);
     $latitude = $locations[$rand][0];
     $longitude = $locations[$rand][1];
-    return \App\Models\OrderLocations::addLocation(7, $latitude, $longitude);
-});
+    \App\Models\OrderLocations::addLocation($order_id, $latitude, $longitude, $order->courier_id);
+    return response()->json([
+        'status' => true,
+        'message' => 'Konum Eklendi(DEV)'
+    ]);
+})->name("demoAddLocation");
+Route::post("/demo-deliver-order/{id}",function($id){
+    $order = \App\Models\Orders::where('id', $id)->first();
+    if (!$order) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Sipariş Bulunamadı(DEV)'
+        ]);
+    }
+    $order->status = "delivered";
+    $order->delivered_at = now();
+    if($order->save()){
+        return response()->json([
+            'status' => true,
+            'message' => 'Sipariş Teslim Edildi(DEV)'
+        ]);
+    }else{
+        return response()->json([
+            'status' => false,
+            'message' => 'Sipariş Teslim Edilirken Bir Hata Oluştu(DEV)'
+        ]);
+    }
+})->name("demoDeliverOrder");
 
 require __DIR__ . '/auth.php';

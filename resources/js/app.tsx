@@ -23,4 +23,5 @@ createInertiaApp({
         showSpinner: true
     },
 }).then(r => {
+    //document.getElementById('app')?.removeAttribute("data-page")
 });

@@ -36,7 +36,9 @@ class OrdersController extends Controller
             $order->start_location = json_decode($order->start_location);
             $order->end_location = json_decode($order->end_location);
             $order->courier = User::getCourier($order->courier_id);
-
+            if ($order->cancellation_accepted_by != null) {
+                $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+            }
             return $order;
         });
         return response()->json([
@@ -71,6 +73,9 @@ class OrdersController extends Controller
             if ($newOrder->save()) {
                 broadcast(new NewOrder($newOrder->id))->toOthers();
                 broadcast(new UpdateOrder(null, "", "", "", true, $newOrder->business_id))->toOthers();
+                if ($request->location != null) {
+                    OrderLocations::addLocation($newOrder->id, $request->location['latitude'], $request->location['longitude']);
+                }
                 return response()->json([
                     "status" => true,
                     "message" => "Sipariş başarıyla eklendi."
@@ -97,23 +102,17 @@ class OrdersController extends Controller
             $updateStatus = $request->status;
             if ($updateStatus == "canceled") {
                 if ($request->has("cancellation_reason")) {
-                    $autoAccepted = false;
-                    if ($order->status == "opened") {
-                        $order->cancellation_accepted = 1;
-                        $order->cancellation_accepted_by = User::where('role', 'admin')->first()->id;
-                        $autoAccepted = true;
-                    }
-                    $order->cancellation_reason = $request->cancellation_reason . ($autoAccepted ? " (Otomatik kabul edildi)" : "");
+                    $order->cancellation_accepted = 0;
+                    $order->cancellation_reason = $request->cancellation_reason;
                     $order->status = "canceled";
-                    $order->canceled_at = now();
                     if ($order->save()) {
-                        $message = $autoAccepted ? "Sipariş Talep Üzerine Sistem Tarafından İptal Edildi" : "Sipariş İptal Talebi Oluşturuldu";
-                        $title = $autoAccepted ? "Sipariş İptal Edildi" : "Sipariş İptal Talebi";
+                        $message = "Sipariş İptal Talebi Oluşturuldu";
+                        $title = "Sipariş İptal Talebi";
                         broadcast(new UpdateOrder($order->id, "error", $message, $title, true, $order->business_id))->toOthers();
                         broadcast(new UpdateOrder(null, "error", $message, $title, true, $order->business_id))->toOthers();
                         return response()->json([
                             "status" => true,
-                            "message" => "Sipariş iptal edildi." . ($autoAccepted ? " İptal talebi otomatik olarak kabul edildi." : " Yönetici onayından sonra iptal işlemi tamamlanacaktır.")
+                            "message" => "Sipariş iptal edildi. Yönetici onayından sonra iptal işlemi tamamlanacaktır."
                         ]);
                     }
                 } else {
@@ -201,7 +200,9 @@ class OrdersController extends Controller
             $order->start_location = json_decode($order->start_location);
             $order->end_location = json_decode($order->end_location);
             $order->courier = User::getCourier($order->courier_id);
-
+            if ($order->cancellation_accepted_by != null) {
+                $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+            }
             return response()->json([
                 'order' => $order,
                 'status' => true
@@ -233,13 +234,13 @@ class OrdersController extends Controller
     public function getLocations($id): JsonResponse
     {
         $order = Orders::where('business_id', auth()->user()->id)->where('id', $id)->first();
-        if($order) {
+        if ($order) {
             $locations = OrderLocations::getLocations($order->id);
             return response()->json([
                 'locations' => $locations,
                 'status' => true
             ]);
-        }else{
+        } else {
             return response()->json([
                 'status' => false,
                 'message' => 'Sipariş bulunamadı.'

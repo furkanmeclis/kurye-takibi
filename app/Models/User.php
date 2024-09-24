@@ -77,7 +77,18 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($courier) {
             $courier->details = CourierDetails::where('courier_id', $courier->id)->first();
             return $courier;
-        }else{
+        } else {
+            return false;
+        }
+    }
+
+    public static function getBusiness($id)
+    {
+        $business = User::where('id', $id)->where('role', 'business')->first();
+        if ($business) {
+            $business->details = BusinessDetails::where('business_id', $business->id)->first();
+            return $business;
+        } else {
             return false;
         }
     }

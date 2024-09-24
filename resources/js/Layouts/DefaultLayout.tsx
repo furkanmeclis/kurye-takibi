@@ -56,6 +56,7 @@ export default function RootLayout({children, auth = {}, csrfToken = ""}: {
             <LayoutProvider auth={auth} csrfToken={csrfToken}>
                 <ConfirmPopup />
                 {children}
+                <AppConfig/>
             </LayoutProvider>
         </PrimeReactProvider>
     );

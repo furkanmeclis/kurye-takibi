@@ -14,6 +14,7 @@ import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 import {
+    demoAddLocation, demoDeliverOrder,
     destroyOrder,
     getOrders,
     getOrderStatuses,
@@ -23,6 +24,8 @@ import {
 import {Tag} from "primereact/tag";
 import {Dropdown} from "primereact/dropdown";
 import {InputText} from "primereact/inputtext";
+import {TriStateCheckbox} from "primereact/tristatecheckbox";
+import {classNames} from "primereact/utils";
 
 interface AllCouriersProps {
     auth?: any,
@@ -50,14 +53,12 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         setLoading(true);
         getOrders(csrfToken).then(data => {
             if (data.status) {
-                setOrders(data.orders);
-                setExpandedRows((prevState: any) => {
-                    let ar = prevState?.map((row: any) => {
-                        let newRecord = data.orders.find((r: any) => r.id === row.id);
-                        return newRecord ? newRecord : row;
-                    });
-                    return ar ? ar : [];
-                })
+                setOrders(data.orders.map((order: any) => {
+                    return {
+                        ...order,
+                        cancellation_accepted: order.cancellation_accepted === 1,
+                    }
+                }));
                 setLoading(false);
                 setError(null)
             } else {
@@ -77,14 +78,11 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
         }
         if (auth?.user?.id) {
-            let channel = subscribeUpdateOrder(auth?.user?.id, (data: any) => {
+            subscribeUpdateOrder(auth?.user?.id, (data: any) => {
                 if (data?.reload) {
                     getOrdersAll();
                 }
             });
-            return () => {
-                channel.unbind();
-            }
         }
     }, []);
     const deleteOrder = (event: any, id: number) => {
@@ -244,16 +242,20 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             }
         },
         {
-            field: "cancellation_reason",
-            header: "İptal Nedeni",
-            hidden: !selectedColumns.includes("cancellation_reason"),
+            field: "cancellation_accepted",
+            header: "İptal Onayı",
+            hidden: !selectedColumns.includes("cancellation_accepted"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "İptal Nedeni'ne Göre",
-            body: (rowData: any) => {
-                return rowData.cancellation_reason ?
-                    <span>{rowData.cancellation_reason}</span> :
-                    <span><i className={"pi pi-ban text-red-400"}></i> İptal Edilmedi</span>
+            dataType: "boolean",
+            filterElement: (options) => {
+                return <TriStateCheckbox value={options.value} onChange={(e) => options.filterApplyCallback(e.value)}/>;
+            },
+            body: (rowData) => {
+                return <i className={classNames('pi', {
+                    'pi-check-circle text-green-400': rowData.cancellation_accepted,
+                    'pi-times-circle text-red-400': !rowData.cancellation_accepted
+                })}></i>;
             }
         },
         {
@@ -300,6 +302,57 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
+                    <Button icon={"pi pi-plus-circle"} size={"small"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            visible={rowData.status !== "canceled" && rowData.status !== "deleted" && rowData.status !== "delivered"}
+                            onClick={() => {
+                                setLoading(true)
+                                demoAddLocation(rowData.id, csrfToken).then(({status, message}) => {
+                                    if (status) {
+                                        toast.current?.show({
+                                            severity: "success",
+                                            summary: "Başarılı",
+                                            detail: message
+                                        });
+                                        getOrdersAll();
+                                    } else {
+                                        toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                                    }
+                                }).catch((err) => {
+                                    toast.current?.show({severity: "error", summary: "Hata", detail: err.message});
+                                })
+                                    .finally(() => setLoading(false))
+                            }}
+                            severity={"help"}
+                            tooltip={"Konum Ekle (DEV FEATURE) Rastgele Kurye Ekler Sistemde Kurye Olmazsa Hata Verir"}
+                    />
+                    <Button icon={"pi pi-send"} size={"small"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            visible={rowData.status === "transporting"}
+                            onClick={() => {
+                                setLoading(true)
+                                demoDeliverOrder(rowData.id, csrfToken).then(({status, message}) => {
+                                    if (status) {
+                                        toast.current?.show({
+                                            severity: "success",
+                                            summary: "Başarılı",
+                                            detail: message
+                                        });
+                                        getOrdersAll();
+                                    } else {
+                                        toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                                    }
+                                }).catch((err) => {
+                                    toast.current?.show({severity: "error", summary: "Hata", detail: err.message});
+                                })
+                                    .finally(() => setLoading(false))
+                            }}
+                            severity={"success"} tooltip={"Teslimatı Tamamla (DEV FEATURE)"}
+                    />
                     {rowData.status === "draft" && <Button
                         size={"small"}
                         icon={"pi pi-check-circle"}
@@ -476,6 +529,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         canceled_at: {value: null, matchMode: 'contains'},
                         cancellation_reason: {value: null, matchMode: 'contains'},
                         customer_note: {value: null, matchMode: 'contains'},
+                        cancellation_accepted: {value: null, matchMode: 'equals'},
                     }}
                     emptyMessage="Sipariş bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"

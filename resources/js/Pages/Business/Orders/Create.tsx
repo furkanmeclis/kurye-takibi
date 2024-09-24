@@ -156,7 +156,6 @@ const CreateOrderPage = ({auth, csrfToken}: {
                 resetForm({
                     values: {
                         ...values,
-
                         // @ts-ignore
                         location: {
                             latitude: position.coords.latitude,
@@ -351,7 +350,7 @@ const CreateOrderPage = ({auth, csrfToken}: {
 
                             <div className="col-12">
                                 <Button label="Sipariş Oluştur"
-                                        disabled={!isValid || !dirty}
+                                        disabled={!isValid}
                                         loading={loading}
                                         type={"submit"}
                                         size={"small"}
