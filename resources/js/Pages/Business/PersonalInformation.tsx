@@ -298,8 +298,11 @@ const PersonalInformation = ({
                 };
                 if (details.city !== null) {
                     resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                    if (details.state !== null) {
+                    if (details.state !== null && resetData.selectedCity?.ilceler !== null) {
                         resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
+                    }else{
+                        resetData.selectedState = resetData.selectedCity.ilceler[0];
+                        resetData.state = resetData.selectedCity.ilceler[0].ilce_adi;
                     }
                 } else {
                     resetData.selectedCity = cities[0];
