@@ -4,7 +4,7 @@ import PersonalInformationCourier from "@/Pages/Courier/PersonalInformation";
 import PersonalInformationBusiness from "@/Pages/Business/PersonalInformation";
 import MainLayout from "@/Layouts/MainLayout";
 
-const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false}: {
+const PageContainer = ({auth, csrfToken, errors = [], children, profilePage = false}: {
     auth?: any,
     csrfToken?: any,
     errors?: any,
@@ -19,7 +19,7 @@ const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false
     return (
         <>
             {auth?.user?.role === "courier" && <>
-                {!profilePage && auth?.profile_approved === 0  ?
+                {!profilePage && auth?.profile_approved === 0 || !profilePage && auth?.profile_approved === false ?
                     <MainLayout>
                         <PersonalInformationCourier
                             page={true}
@@ -30,7 +30,7 @@ const PageContainer = ({auth, csrfToken, errors = [], children,profilePage=false
                     </MainLayout> : <>{children}</>}
             </>}
             {auth?.user?.role === "business" && <>
-                {!profilePage && auth?.profile_approved === 0  ?
+                {!profilePage && auth?.profile_approved === 0 || !profilePage && auth?.profile_approved === false ?
                     <MainLayout>
                         <PersonalInformationBusiness
                             page={true}

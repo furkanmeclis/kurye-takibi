@@ -147,7 +147,7 @@ Route::post('/add-location/{i}', function ($order_id) {
     $order->save();
     if($order->start_location == null){
         $latitude = 39.9334;
-        $longitude = 32.8597;
+        $longitude = 32.8597; //Ankara
     }else{
         $latitude = json_decode($order->start_location)->latitude;
         $longitude = json_decode($order->start_location)->longitude;
