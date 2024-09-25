@@ -15,6 +15,8 @@ import {ProgressBar} from 'primereact/progressbar';
 import MainLayout from "@/Layouts/MainLayout";
 import PageContainer from "@/PageContainer";
 import {Head} from "@inertiajs/react";
+import {Skeleton} from "primereact/skeleton";
+import CourierOrdersWidget from "@/components/CourierOrdersWidget";
 
 let revenueChartData: ChartData;
 let overviewChartData: ChartData;
@@ -217,15 +219,15 @@ function Dashboard({auth, csrfToken, errors}: {
     return (
         <PageContainer auth={auth} csrfToken={csrfToken} errors={errors}>
             <MainLayout>
-                <Head title="İşletme Anasayfa"/>
+                <Head title="Kurye Anasayfa"/>
                 <div className="grid">
                     <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">
-                                <i className="pi pi-users text-6xl text-blue-500"></i>
+                                <i className="pi pi-clock text-6xl text-blue-500"></i>
                                 <div className="ml-3">
-                                    <span className="text-blue-500 block white-space-nowrap">TOPLAM MÜŞTERİ</span>
-                                    <span className="text-blue-500 block text-4xl font-bold">3882</span>
+                                    <span className="text-blue-500 block white-space-nowrap">Ortalama Teslimat Süresi</span>
+                                    <span className="text-blue-500 block text-4xl font-bold">15.3dk</span>
                                 </div>
                             </div>
                             <img src={setSvg('users')} className="w-full" alt="users"/>
@@ -234,59 +236,47 @@ function Dashboard({auth, csrfToken, errors}: {
                     <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">
-                                <i className="pi pi-map text-6xl text-orange-500"></i>
+                                <i className="pi pi-dollar text-6xl text-orange-500"></i>
                                 <div className="ml-3">
-                                    <span className="text-orange-500 block white-space-nowrap">TOPLAM SİPARİŞ</span>
-                                    <span className="text-orange-500 block text-4xl font-bold">532</span>
+                                    <span className="text-orange-500 block white-space-nowrap">Elde Edilen Kazanç</span>
+                                    <span className="text-orange-500 block text-4xl font-bold">436 ₺</span>
                                 </div>
                             </div>
                             <img src={setSvg('locations')} className="w-full" alt="locations"/>
                         </div>
                     </div>
                     <div className="col-12 lg:col-6 xl:col-3">
-                        <div className="card p-0 overflow-hidden flex flex-column">
-                            <div className="flex align-items-center p-3">
-                                <i className="pi pi-directions text-6xl text-green-500"></i>
-                                <div className="ml-3">
-                                    <span
-                                        className="text-green-500 block white-space-nowrap">ORTALAMA TESLİM SÜRESİ</span>
-                                    <span className="text-green-500 block text-4xl font-bold">25dk</span>
-                                </div>
-                            </div>
-                            <img src={setSvg('rate')} className="w-full" alt="conversion"/>
-                        </div>
-                    </div>
-                    <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card h-full p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">
-                                <i className="pi pi-comments text-6xl text-purple-500"></i>
+                                <i className="pi pi-box text-6xl text-purple-500"></i>
                                 <div className="ml-3">
-                                    <span className="text-purple-500 block white-space-nowrap">KURYE BEKLEYEN SİPARİŞ ADEDİ</span>
+                                    <span className="text-purple-500 block white-space-nowrap">Teslim Edilen Sipariş Adedi</span>
                                     <span className="text-purple-500 block text-4xl font-bold">5</span>
                                 </div>
                             </div>
                             <img src={setSvg('interactions')} className="w-full mt-auto" alt="interactions"/>
                         </div>
                     </div>
-
-                    <div className="col-12 xl:col-6">
-                        <div className="card h-full">
-                            <div className="flex justify-content-between align-items-center mb-3">
-                                <h5>Günlük Sipariş Grafiği</h5>
-                                <Dropdown options={overviewWeeks} value={selectedOverviewWeek}
-                                          onChange={changeOverviewWeek}
-                                          optionLabel="name"></Dropdown>
+                    <div className="col-12 lg:col-6 xl:col-3">
+                        <div className="card p-0 overflow-hidden flex flex-column">
+                            <div className="flex align-items-center p-3">
+                                <i className="pi pi-bolt text-6xl text-green-500"></i>
+                                <div className="ml-3">
+                                    <span
+                                        className="text-green-500 block white-space-nowrap">Siparişlerdeki Ortalama Hız</span>
+                                    <span className="text-green-500 block text-4xl font-bold">48.3km/h </span>
+                                </div>
                             </div>
-                            <div className="graph">
-                                <Chart type="bar" height="400px" data={overviewChartData}
-                                       options={ordersOptions as ChartOptions}></Chart>
-                            </div>
+                            <img src={setSvg('rate')} className="w-full" alt="conversion"/>
                         </div>
                     </div>
 
                     <div className="col-12 lg:col-6 xl:col-3">
+                        <CourierOrdersWidget/>
+                    </div>
+                    <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card h-full">
-                            <h5>Son Müşteriler</h5>
+                            <h5>Son Siparişler</h5>
                             <ul className="list-none p-0 m-0">
                                 <li className="mb-4 flex align-items-center">
                                     <Avatar label="BÇ" size="large" shape="circle" className="text-base font-bold"
@@ -362,68 +352,32 @@ function Dashboard({auth, csrfToken, errors}: {
                                     iconPos="right"></Button>
                         </div>
                     </div>
+                    <div className="col-12 xl:col-6">
+                        <div className="card h-full">
+                            <div className="flex justify-content-between align-items-center mb-3">
+                                <h5>Günlük Sipariş Grafiği</h5>
+                                <div>
 
-                    <div className="col-12 lg:col-6 xl:col-3">
-                        <div className="card">
-                            <div className="text-center mb-5">
-                                <img src={setSvg('completion-graph')} alt="graph" className="w-full"/>
+                                    <Dropdown
+                                        options={overviewWeeks}
+                                        value={selectedOverviewWeek}
+                                        onChange={changeOverviewWeek}
+                                        optionLabel="name"
+                                    />
+                                    <Button
+                                        icon={"pi pi-refresh"}
+                                        tooltip={"Verileri Yenile"}
+                                        tooltipOptions={{position: 'top'}}
+                                        className={"ml-2"}
+                                        severity={"secondary"}
+                                        outlined
+                                    />
+                                </div>
                             </div>
-
-                            <ul className="list-none p-0 m-0">
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-user-edit" size="large" shape="circle"
-                                            className="text-base font-bold" style={{
-                                        backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                        color: '#DE911D',
-                                        border: '1px solid #FADB5F'
-                                    }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Add your personal information</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">Go Profile Edit</span>
-                                    </div>
-                                </li>
-
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-send" size="large" shape="circle"
-                                            className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Verify your phone</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">Send Verification SMS</span>
-                                    </div>
-                                </li>
-
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-video" size="large" shape="circle"
-                                            className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Verify your Face ID</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">Upload Pictures</span>
-                                    </div>
-                                </li>
-
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-briefcase" size="large" shape="circle"
-                                            className="text-base font-bold" style={{
-                                        backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                        color: '#DE911D',
-                                        border: '1px solid #FADB5F'
-                                    }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Give permissions for personal data</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">View Agreement</span>
-                                    </div>
-                                </li>
-                            </ul>
+                            <div className="graph">
+                                <Chart type="bar" height="400px" data={overviewChartData}
+                                       options={ordersOptions as ChartOptions}></Chart>
+                            </div>
                         </div>
                     </div>
                 </div>
