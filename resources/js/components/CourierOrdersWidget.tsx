@@ -9,6 +9,7 @@ const CourierOrdersWidget = () => {
     const {auth, csrfToken} = useContext(LayoutContext);
     const [notSupported, setNotSupported] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
+    
     const [orders, setOrders] = React.useState<any[]>(["", "", "", ""]);
     const [location, setLocation] = React.useState<any>({});
     const getNearOrders = () => {
