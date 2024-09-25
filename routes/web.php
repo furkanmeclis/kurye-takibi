@@ -190,5 +190,15 @@ Route::post("/demo-deliver-order/{id}",function($id){
         ]);
     }
 })->name("demoDeliverOrder");
+Route::get('/haversine-test',function (){
+    $lat = 39.9550;
+    $lon = 32.8750;
+    return response()->json([
+        "orders" => \App\Models\Orders::getNearbyOrders($lat,$lon),
+        "lat" => $lat,
+        "lon" => $lon
+    ]);
+});
+
 
 require __DIR__ . '/auth.php';

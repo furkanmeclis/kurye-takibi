@@ -33,11 +33,6 @@ return new class extends Migration {
             $table->timestamp("canceled_at")->nullable();
             $table->timestamp("courier_accepted_at")->nullable();
             $table->timestamps();
-            $table->foreign("business_id")->references("id")->on("users")->onDelete("set null");
-            $table->foreign("customer_id")->references("id")->on("customers")->onDelete("set null");
-            $table->foreign("courier_id")->references("id")->on("users")->onDelete("set null");
-            $table->foreign("cancellation_accepted_by")->references("id")->on("users")->onDelete("set null");
-            $table->foreign("address_id")->references("id")->on("customer_addresses")->onDelete("set null");
         });
     }
 

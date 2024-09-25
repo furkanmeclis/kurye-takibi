@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string("phone");
             $table->string("note")->nullable();
             $table->timestamps();
-            $table->foreign("business_id")->references("id")->on("users")->onDelete("set null");
         });
     }
 

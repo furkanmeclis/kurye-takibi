@@ -106,7 +106,25 @@ const AppMenu = () => {
                     to: route("business.orders.index")
                 }
             ]
-        }
+        },
+        //Courier Menus
+        {
+            label: "Siparişler",
+            icon: "pi pi-shopping-cart",
+            roles: ["courier"],
+            items: [
+                {
+                    label: "Siparişler",
+                    icon: "pi pi-fw pi-shopping-cart",
+                    to: route("business.orders.index")
+                },
+                {
+                    label:"Geçmiş Siparişler",
+                    icon:"pi pi-fw pi-history",
+                    to:route("business.orders.index")
+                }
+            ]
+        },
     ];
 
     return <AppSubMenu model={model}/>;
