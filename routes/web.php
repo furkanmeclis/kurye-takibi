@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Services\TrendyolYemekApi;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -102,6 +103,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return Inertia::render('Courier/Dashboard');
         })->name('dashboard');
+        Route::prefix('/orders')->middleware("only:courier")->name("orders.")->group(function () {
+            Route::get('/new-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'newOrders'])->name('newOrders');
+            Route::post('/list-nearby-orders',[\App\Http\Controllers\Courier\OrdersController::class,'listNearbyOrders'])->name('listNearbyOrders');
+        });
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
@@ -145,7 +150,7 @@ Route::post('/add-location/{i}', function ($order_id) {
     }
     $order->status = "transporting";
     $order->save();
-    if($order->start_location == null){
+    if ($order->start_location == null) {
         $latitude = 39.9334;
         $longitude = 32.8597; //Ankara
         \App\Models\OrderLocations::addLocation($order_id, $latitude, $longitude, $order->courier_id);
@@ -153,7 +158,7 @@ Route::post('/add-location/{i}', function ($order_id) {
             'status' => true,
             'message' => 'Konum Eklendi(DEV)'
         ]);
-    }else{
+    } else {
         $latitude = json_decode($order->start_location)->latitude;
         $longitude = json_decode($order->start_location)->longitude;
     }
@@ -168,7 +173,7 @@ Route::post('/add-location/{i}', function ($order_id) {
         'message' => 'Konum Eklendi(DEV)'
     ]);
 })->name("demoAddLocation");
-Route::post("/demo-deliver-order/{id}",function($id){
+Route::post("/demo-deliver-order/{id}", function ($id) {
     $order = \App\Models\Orders::where('id', $id)->first();
     if (!$order) {
         return response()->json([
@@ -178,27 +183,16 @@ Route::post("/demo-deliver-order/{id}",function($id){
     }
     $order->status = "delivered";
     $order->delivered_at = now();
-    if($order->save()){
+    if ($order->save()) {
         return response()->json([
             'status' => true,
             'message' => 'Sipariş Teslim Edildi(DEV)'
         ]);
-    }else{
+    } else {
         return response()->json([
             'status' => false,
             'message' => 'Sipariş Teslim Edilirken Bir Hata Oluştu(DEV)'
         ]);
     }
 })->name("demoDeliverOrder");
-Route::get('/haversine-test',function (){
-    $lat = 39.9550;
-    $lon = 32.8750;
-    return response()->json([
-        "orders" => \App\Models\Orders::getNearbyOrders($lat,$lon),
-        "lat" => $lat,
-        "lon" => $lon
-    ]);
-});
-
-
 require __DIR__ . '/auth.php';

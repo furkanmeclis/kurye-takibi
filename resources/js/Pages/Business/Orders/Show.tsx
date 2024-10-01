@@ -101,6 +101,7 @@ interface Address {
 
 interface Order {
     id: number;
+    price: number;
     business_id: number;
     customer_id: number;
     courier_id: number | null;
@@ -167,6 +168,7 @@ const OrderShowPage = ({
     const [orderData, setOrderData] = useState<Order>(
         {
             "id": 0,
+            "price": 0,
             "business_id": 0,
             "customer_id": 0,
             "courier_id": null,
@@ -306,7 +308,7 @@ const OrderShowPage = ({
                         latitude: data.latitude,
                         longitude: data.longitude
                     } as Location]));
-                },true);
+                }, true);
                 return () => unSubscribeChannel();
             }
         }
@@ -425,14 +427,14 @@ const OrderShowPage = ({
                                href={`tel:${orderData.customer.phone}`}>{orderData.customer.phone}</a>
                         </div>
                         <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
-                             data-pr-tooltip={"Son Değişiklik Tarihi"}>
+                             data-pr-tooltip={"Paket Ücreti"}>
                             <Avatar
-                                icon={"pi pi-clock"}
+                                icon={"pi pi-dollar"}
                                 shape={"circle"}
                                 className={"bg-primary-300 font-semibold text-primary-800"}
                             />
                             <span
-                                className={"font-semibold ml-2"}>{new Date(orderData.updated_at).toLocaleString()}</span>
+                                className={"font-semibold ml-2"}>{orderData.price} ₺</span>
                         </div>
                         <div className="lg:col-3 md:col-4 col-6 cursor-pointer" data-pr-tooltip={"Sipariş Durumu"}>
                             <Avatar

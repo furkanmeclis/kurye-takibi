@@ -92,4 +92,22 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
     }
+
+    public function getCourierAvailability(): object
+    {
+        $returnObject = (object)[
+            "available" => false,
+            "details" => null,
+            "message" => "Bu Servis Sadece Kurye Hesapları İçin Kullanılmaktadır."
+        ];
+        if($this->role == "courier") {
+            $details = CourierDetails::where('courier_id', $this->id)->first();
+            $returnObject->details = $details;
+            $returnObject->available = $details->approved;
+            if(!$details->approved) {
+                $returnObject->message = "Kurye Hesabınız Onaylanmadığı İçin Sipariş Alımı Yapamazsınız.";
+            }
+        }
+        return $returnObject;
+    }
 }

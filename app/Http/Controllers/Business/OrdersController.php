@@ -60,6 +60,7 @@ class OrdersController extends Controller
                 'address_id' => 'required|integer|exists:customer_addresses,id',
                 'customer_note' => 'nullable|string|max:255',
                 'location' => 'nullable',
+                'price' => 'required|min:1|max:255'
             ]);
             $newOrder = new Orders();
             $newOrder->customer_id = $request->customer_id;

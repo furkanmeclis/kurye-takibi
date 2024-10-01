@@ -49,6 +49,7 @@ const CreateOrderPage = ({auth, csrfToken}: {
         customer_id: Yup.number().required('Müşteri Seçimi Zorunludur'),
         address_id: Yup.number().required('Adres Seçimi Zorunludur'),
         customer_note: Yup.string().nullable().min(3, 'Müşteri Notu En Az 3 Karakter Olmalıdır').max(255, 'Müşteri Notu En Fazla 255 Karakter Olmalıdır'),
+        price: Yup.number().required().min(1, "Paket Ücreti En Az 1 TL Olmalıdır")
     });
     const fetchCustomers = () => {
         setLoading(true);
@@ -114,6 +115,7 @@ const CreateOrderPage = ({auth, csrfToken}: {
             selectedAddress: null,
             address_id: null,
             location: null,
+            price: 0
         },
         validationSchema: orderCreateSchema,
         validateOnBlur: validationType,
@@ -125,6 +127,7 @@ const CreateOrderPage = ({auth, csrfToken}: {
                 address_id: values.address_id,
                 customer_note: values.customer_note,
                 location: values.location !== null ? values.location : null,
+                price: values.price
             }, csrfToken)
                 .then((response) => {
                     if (response.status) {
@@ -168,7 +171,7 @@ const CreateOrderPage = ({auth, csrfToken}: {
                 setGeoLoading(false);
             }, {
                 enableHighAccuracy: true,
-                timeout: 5000,
+                timeout: 10000,
                 maximumAge: 0
             });
         } else {
@@ -321,6 +324,36 @@ const CreateOrderPage = ({auth, csrfToken}: {
                                     value={values.address_id !== null ? getShortAddress(values.selectedAddress) : ""}
                                 />
                             </div>}
+                            <div className="field mb-4 col-12 p-input-icon-right">
+                                <label htmlFor="price" className={classNames("font-medium text-900", {
+                                    'text-red-500': !!errors.price,
+                                    'text-green-500': !errors.price && submitCount > 0,
+                                })}>
+                                    <i className={classNames("pi", {
+                                        'pi-times-circle text-red-500 text-sm': !!errors.price,
+                                        'pi-check-circle text-green-500 text-sm': !errors.price && submitCount > 0,
+                                    })}></i> Paket Ücreti(Kuryeye Ödenecek Miktar)
+                                </label>
+                                <InputText
+                                    autoComplete={"off"}
+                                    type={"number"}
+                                    name={"price"}
+                                    id={"price"}
+                                    min={0}
+                                    tooltip={errors?.price}
+                                    tooltipOptions={{
+                                        position: 'top',
+                                    }}
+                                    disabled={loading}
+                                    onChange={(e) => {
+                                        setFieldValue('price', Number(e.target.value))
+                                    }}
+                                    value={String(values.price)}
+                                    className={classNames('w-full', {
+                                        'p-invalid': !!errors.price,
+                                    })}
+                                />
+                            </div>
                             <div className="field mb-4 col-12 p-input-icon-right">
                                 <label htmlFor="customer_note" className={classNames("font-medium text-900", {
                                     'text-red-500': !!errors.customer_note,

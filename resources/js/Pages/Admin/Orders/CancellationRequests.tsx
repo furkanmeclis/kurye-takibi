@@ -147,6 +147,17 @@ const CancellationRequestsPage = ({auth, csrfToken, flash}: AllCouriersProps) =>
             }
         },
         {
+            field: "price",
+            header: "Paket Ücreti",
+            hidden: !selectedColumns.includes("price"),
+            sortable: true,
+            filter: true,
+            filterPlaceholder: "Fiyata'a Göre",
+            body: (rowData: any) => {
+                return <span>{rowData.price} ₺</span>
+            }
+        },
+        {
             field: "cancellation_accepted",
             header: "İptal Durumu",
             hidden: !selectedColumns.includes("cancellation_accepted"),
@@ -394,6 +405,7 @@ const CancellationRequestsPage = ({auth, csrfToken, flash}: AllCouriersProps) =>
                         "courier_accepted_at": {value: null, matchMode: "contains"},
                         "delivered_at": {value: null, matchMode: "contains"},
                         "canceled_at": {value: null, matchMode: "contains"},
+                        "price": {value: null, matchMode: "contains"},
                     }}
                     emptyMessage="Sipariş bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"

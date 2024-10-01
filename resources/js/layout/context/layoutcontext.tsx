@@ -2,12 +2,13 @@
 import {Head, router} from '@inertiajs/react';
 import React, {useState} from 'react';
 import type {ChildContainerProps, LayoutContextProps, LayoutConfig, LayoutState, Breadcrumb} from '@/types';
+import {useLocalStorage} from "primereact/hooks";
 
 export const LayoutContext = React.createContext({} as LayoutContextProps);
 export const LayoutProvider = (props: ChildContainerProps) => {
     const [tabs, setTabs] = useState<any>([]);
     const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
-    const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
+    const [layoutConfig, setLayoutConfig] = useLocalStorage<LayoutConfig>({
         ripple: true,
         inputStyle: 'outlined',
         menuMode: 'static',
@@ -18,7 +19,7 @@ export const LayoutProvider = (props: ChildContainerProps) => {
         menuTheme: 'light',
         layoutTheme: 'colorScheme',
         topBarTheme: 'colorScheme'
-    });
+    },'themeSettings');
 
     const [layoutState, setLayoutState] = useState<LayoutState>({
         staticMenuDesktopInactive: false,

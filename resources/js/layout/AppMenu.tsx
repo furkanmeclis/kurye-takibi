@@ -114,9 +114,9 @@ const AppMenu = () => {
             roles: ["courier"],
             items: [
                 {
-                    label: "Siparişler",
+                    label: "Yeni Siparişler",
                     icon: "pi pi-fw pi-shopping-cart",
-                    to: route("business.orders.index")
+                    to: route("courier.orders.newOrders")
                 },
                 {
                     label:"Geçmiş Siparişler",

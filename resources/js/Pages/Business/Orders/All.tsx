@@ -186,6 +186,17 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             }
         },
         {
+            field: "price",
+            header: "Paket Ücreti",
+            hidden: !selectedColumns.includes("price"),
+            sortable: true,
+            filter: true,
+            filterPlaceholder: "Fiyata'a Göre",
+            body: (rowData: any) => {
+                return <span>{rowData.price} ₺</span>
+            }
+        },
+        {
             field: "status",
             header: "Sipariş Durumu",
             hidden: !selectedColumns.includes("status"),
@@ -528,8 +539,10 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         delivered_at: {value: null, matchMode: 'contains'},
                         canceled_at: {value: null, matchMode: 'contains'},
                         cancellation_reason: {value: null, matchMode: 'contains'},
+                        price: {value: null, matchMode: 'contains'},
                         customer_note: {value: null, matchMode: 'contains'},
                         cancellation_accepted: {value: null, matchMode: 'equals'},
+
                     }}
                     emptyMessage="Sipariş bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"

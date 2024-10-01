@@ -25,4 +25,8 @@ class BusinessDetails extends Model
         'tax_office',
         'vehicle_type',
     ];
+    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Orders::class, 'business_id', 'business_id');
+    }
 }

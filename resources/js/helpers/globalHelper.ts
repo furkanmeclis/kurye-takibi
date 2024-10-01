@@ -1,3 +1,5 @@
+import {Toast} from "primereact/toast";
+
 export const getDetailKeysTranslation = (key: string) => {
     const labelTranslations = {
         "name": "Ad Soyad",
@@ -27,16 +29,16 @@ export const getDetailsValueTranslation = (key: string, value: any) => {
         return value === "company" ? "Şirket" : "Bireysel";
     }
     if (key === "vehicle_type") {
-        if(value === "motorcycle"){
+        if (value === "motorcycle") {
             return "Motosiklet";
-        }else if(value === "bicycle"){
+        } else if (value === "bicycle") {
             return "Bisiklet";
-        } else if (value === "car"){
+        } else if (value === "car") {
             return "Araba";
         }
         return value;
     }
-    if(key === "created_at" || key === "updated_at"){
+    if (key === "created_at" || key === "updated_at") {
         return new Date(value).toLocaleString();
     }
     if (key === "country") {
@@ -64,4 +66,31 @@ export const updateProfile = async (data: any, csrfToken: any) => {
         return false;
     }
 
+}
+export const getLocation = (toast: Toast) => {
+    return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
+            }, (error) => {
+                console.log(error)
+                toast.show({
+                    severity: "error",
+                    summary: "Hata",
+                    detail: "Konum Bilginiz Alınamadı.Lütfen Tarayıcı Ayarlarınızı Kontrol Ediniz."
+                });
+                reject("Konum Bilgisi Alınamadı");
+            }, {timeout: 10000});
+        } else {
+            toast.show({
+                severity: "error",
+                summary: "Hata",
+                detail: "Konum Bilginiz Alınamadı.Lütfen Tarayıcı Ayarlarınızı Kontrol Ediniz."
+            });
+            reject("Konum Bilgisi Alınamadı");
+        }
+    });
 }

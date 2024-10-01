@@ -11,29 +11,42 @@ class Orders extends Model
 {
     use HasFactory;
 
-    /**
-     * Kuryeye belirli bir çapta yakın siparişleri döndürür.
-     *
-     * @param float $lat Kuryenin enlemi
-     * @param float $lon Kuryenin boylamı
-     * @param float $radius Arama yarıçapı (km olarak), varsayılan 10 km
-     * @return Collection Yakındaki siparişlerin koleksiyonu
-     */
+    public function businessDetails(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(BusinessDetails::class, 'business_id', 'business_id');
+    }
+
     public static function getNearbyOrders($lat, $lon, $radius = 10): Collection
     {
         $earthRadius = 6371;
-        return self::select(
-            'orders.*',
-            DB::raw("(
-                    $earthRadius * ACOS(
-                        COS(RADIANS($lat)) * COS(RADIANS(JSON_EXTRACT(orders.start_location, '$.latitude'))) *
-                        COS(RADIANS(JSON_EXTRACT(orders.start_location, '$.longitude')) - RADIANS($lon)) +
-                        SIN(RADIANS($lat)) * SIN(RADIANS(JSON_EXTRACT(orders.start_location, '$.latitude')))
-                    )
-                ) AS distance")
-        )
+
+        return self::join('business_details', 'orders.business_id', '=', 'business_details.business_id')
+            ->whereNotNull('business_details.latitude')
+            ->whereNotNull('business_details.longitude')
+            ->select(
+                'orders.*',
+                DB::raw("(
+                $earthRadius * ACOS(
+                    COS(RADIANS($lat)) * COS(RADIANS(business_details.latitude)) *
+                    COS(RADIANS(business_details.longitude) - RADIANS($lon)) +
+                    SIN(RADIANS($lat)) * SIN(RADIANS(business_details.latitude))
+                )
+            ) AS distance")
+            )
             ->having('distance', '<=', $radius)
             ->orderBy('distance', 'asc')
-            ->get();
+            ->get()->map(function ($order) {
+                $order->distance = round($order->distance,2);
+                $order->customer = Customers::find($order->customer_id);
+                $order->address = CustomerAddresses::find($order->address_id);
+                $order->start_location = json_decode($order->start_location);
+                $order->end_location = json_decode($order->end_location);
+                $order->courier = User::getCourier($order->courier_id);
+                $order->business = User::getBusiness($order->business_id);
+                if ($order->cancellation_accepted_by != null) {
+                    $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+                }
+                return $order;
+            });
     }
 }
