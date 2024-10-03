@@ -9,11 +9,11 @@ import {Toast} from "primereact/toast";
 import {getLocation} from "@/helpers/globalHelper";
 import {Tag} from "primereact/tag";
 
-const CourierOrdersWidget = () => {
+const CourierOrdersWidget = ({csrfToken}:{csrfToken:any}) => {
     const toast = useRef<Toast>(null);
     const [error, setError] = useState<string | null>(null);
     const listCount = 7;
-    const {auth, csrfToken} = useContext(LayoutContext);
+    const {auth} = useContext(LayoutContext);
     const [notSupported, setNotSupported] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [orders, setOrders] = useState<any[]>(["", "", "", ""]);

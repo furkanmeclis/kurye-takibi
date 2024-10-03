@@ -226,7 +226,8 @@ function Dashboard({auth, csrfToken, errors}: {
                             <div className="flex align-items-center p-3">
                                 <i className="pi pi-clock text-6xl text-blue-500"></i>
                                 <div className="ml-3">
-                                    <span className="text-blue-500 block white-space-nowrap">Ortalama Teslimat Süresi</span>
+                                    <span
+                                        className="text-blue-500 block white-space-nowrap">Ortalama Teslimat Süresi</span>
                                     <span className="text-blue-500 block text-4xl font-bold">15.3dk</span>
                                 </div>
                             </div>
@@ -272,7 +273,7 @@ function Dashboard({auth, csrfToken, errors}: {
                     </div>
 
                     <div className="col-12 lg:col-6 xl:col-3">
-                        <CourierOrdersWidget/>
+                        <CourierOrdersWidget csrfToken={csrfToken}/>
                     </div>
                     <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card h-full">
