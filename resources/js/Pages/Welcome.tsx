@@ -210,31 +210,33 @@ const LandingPage: Page = ({auth, csrfToken, errors}: {
                     </div>
                     <div ref={features as any} className="px-5 sm:px-8 py-8 surface-card">
                         <div className="flex flex-column lg:flex-row justify-content-center gap-5">
-                            <div>
+                            <div className={"flex-1"}>
                                 <div
                                     className="bg-orange-50 p-6 flex align-items-center justify-content-center mb-5"
                                     style={{borderRadius: '14px', borderTopLeftRadius: '5rem'}}>
                                     <img alt="intro image" src="/layout/images/landing/icon-modern-responsive.svg"
                                          className="h-6rem sm:h-12rem"/>
                                 </div>
-                                <h3 className="mt-0 mb-5 font-bold text-4xl">Responsive Design</h3>
-                                <p className="line-height-3 text-color-secondary">Nam non ligula sed urna malesuada
-                                    lacinia. Aliquam sed viverra ipsum.</p>
+                                <h3 className="mt-0 mb-5 font-bold text-4xl">Mobil Uyumlu Tasarım</h3>
+                                <p className="line-height-3 text-color-secondary">
+                                    Sektörde mobil uyumlu tasarım.
+                                </p>
                             </div>
-                            <div>
+                            <div className={"flex-1"}>
                                 <div className="bg-green-50 p-6 flex align-items-center justify-content-center mb-5"
                                      style={{borderRadius: '14px'}}>
                                     <img alt="intro image" src="/layout/images/landing/icon-modern-design.svg"
                                          className="h-6rem sm:h-12rem"/>
                                 </div>
-                                <h3 className="mt-0 mb-5 font-bold text-4xl">Modern Design</h3>
-                                <p className="line-height-3 text-color-secondary">Nam non ligula sed urna malesuada
-                                    lacinia. Aliquam sed viverra ipsum.</p>
+                                <h3 className="mt-0 mb-5 font-bold text-4xl">Modern Tasarım</h3>
+                                <p className="line-height-3 text-color-secondary">
+                                    Kullanıcı dostu arayüz.
+                                </p>
                             </div>
-                            <div>
+                            <div className={"flex-1"}>
                                 <div className="bg-red-50 p-6 flex align-items-center justify-content-center mb-5"
                                      style={{borderRadius: '14px', borderBottomRightRadius: '5rem'}}>
-                                    <img alt="intro image" src="/layout/images/landing/icon-clean-code.svg"
+                                    <img alt="intro image" src="/layout/images/landing/feature-icons.svg"
                                          className="h-6rem sm:h-12rem"/>
                                 </div>
                                 <h3 className="mt-0 mb-5 font-bold text-4xl">Clean Code</h3>

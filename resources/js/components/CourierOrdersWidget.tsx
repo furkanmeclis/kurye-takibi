@@ -9,10 +9,10 @@ import {Toast} from "primereact/toast";
 import {getLocation} from "@/helpers/globalHelper";
 import {Tag} from "primereact/tag";
 
-const CourierOrdersWidget = ({csrfToken}:{csrfToken:any}) => {
+const CourierOrdersWidget = ({csrfToken}: { csrfToken: any }) => {
     const toast = useRef<Toast>(null);
     const [error, setError] = useState<string | null>(null);
-    const listCount = 7;
+    const listCount = 9;
     const {auth} = useContext(LayoutContext);
     const [notSupported, setNotSupported] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
@@ -22,7 +22,7 @@ const CourierOrdersWidget = ({csrfToken}:{csrfToken:any}) => {
         if (toast?.current) {
             setLoading(true)
             getLocation(toast?.current).then((location: any) => {
-                getNearbyNewOrders(location.latitude, location.longitude, csrfToken).then((response) => {
+                getNearbyNewOrders(location.latitude, location.longitude, csrfToken, listCount).then((response) => {
                     if (response.status) {
                         setOrders(response.orders);
                         setError(null)
@@ -46,12 +46,8 @@ const CourierOrdersWidget = ({csrfToken}:{csrfToken:any}) => {
             })
         }
     }
-    const onClickLi = () => {
-        toast.current?.show({
-            severity: "warn",
-            summary: "Geliştirme Sürecinde",
-            detail: "Bu Özellik En Kısa Süre İçerisinde Eklenecektir"
-        })
+    const onClickLi = (orderId: any) => {
+        router.visit(route("courier.orders.reviewOrder", orderId));
     }
     React.useEffect(() => {
         getNearOrders();
@@ -77,15 +73,21 @@ const CourierOrdersWidget = ({csrfToken}:{csrfToken:any}) => {
             {notSupported && <Message text={"Konum Bilgisi Alınamadı"} className={"w-full"} severity={"error"}/>}
             {!notSupported && <ul className="list-none p-0 m-0 relative">
                 {loading && Array.from({length: listCount}).map((_, index) => (
-                    <li key={index} className={"mb-4 flex align-items-center"}>
+                    <li key={index} className={"mb-2 flex align-items-center"}>
                         <div className="w-full">
                             <Skeleton width="100%" height={"2rem"}/>
                         </div>
                     </li>))}
+                {!loading && orders.length > 0 &&
+                    <li className={"w-full px-2 mb-2 flex align-items-center justify-content-between font-semibold text-sm"}>
+                        <span className={"flex-1 text-left"}>İşletme Adı</span>
+                        <span className={"flex-1 text-center"}>Paket Ücreti</span>
+                        <span className={"flex-1 text-right"}>İşletmeye Uzaklık</span>
+                    </li>}
                 {!loading && orders.map((order, index) => (
                     <li key={index}
-                        onClick={onClickLi}
-                        className={"mb-4 flex hover:text-primary-900 align-items-center hover:bg-primary-300 border-1 border-gray-400 cursor-pointer hover:border-primary transition-all transition-duration-400 h-2rem w-full px-2 py-4 border-round"}>
+                        onClick={() => onClickLi(order.id)}
+                        className={"mb-2 flex hover:text-primary-900 align-items-center hover:bg-primary-300 border-1 border-gray-400 cursor-pointer hover:border-primary transition-all transition-duration-400 h-2rem w-full px-2 py-4 border-round"}>
                         <div className="flex align-items-center justify-content-between w-full">
                             <div className={"flex-1 font-semibold"}>
                                 {order.business.name}
@@ -100,8 +102,8 @@ const CourierOrdersWidget = ({csrfToken}:{csrfToken:any}) => {
                             </div>
                         </div>
                     </li>))}
-                {!loading && orders.length !== 4 && Array.from({length: listCount - orders.length}).map((_, index) => (
-                    <li key={index} className={"mb-4 flex align-items-center"}>
+                {!loading && orders.length !== listCount && Array.from({length: listCount - orders.length}).map((_, index) => (
+                    <li key={index} className={"mb-2 flex align-items-center"}>
                         <div className="ml-3 w-full h-2rem"></div>
                     </li>))}
             </ul>}

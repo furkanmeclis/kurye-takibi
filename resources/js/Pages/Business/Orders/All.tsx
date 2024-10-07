@@ -17,10 +17,10 @@ import {
     demoAddLocation, demoDeliverOrder,
     destroyOrder,
     getOrders,
-    getOrderStatuses,
     subscribeUpdateOrder,
     updateOrderStatus
 } from "@/helpers/Business/orders";
+import {getOrderStatuses} from "@/helpers/globalHelper"
 import {Tag} from "primereact/tag";
 import {Dropdown} from "primereact/dropdown";
 import {InputText} from "primereact/inputtext";

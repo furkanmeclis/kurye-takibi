@@ -3,13 +3,15 @@ import {LayoutContext} from "@/layout/context/layoutcontext";
 import PersonalInformationCourier from "@/Pages/Courier/PersonalInformation";
 import PersonalInformationBusiness from "@/Pages/Business/PersonalInformation";
 import MainLayout from "@/Layouts/MainLayout";
+import ActiveOrder from "@/Pages/Courier/Orders/ActiveOrder";
 
-const PageContainer = ({auth, csrfToken, errors = [], children, profilePage = false}: {
+const PageContainer = ({auth, csrfToken, errors = [], children, profilePage = false, courierIsTransporting = false}: {
     auth?: any,
     csrfToken?: any,
     errors?: any,
     children: React.ReactNode,
-    profilePage?: boolean
+    profilePage?: boolean,
+    courierIsTransporting?: boolean
 }) => {
     const {setAuth, setCsrfToken} = useContext(LayoutContext);
     useEffect(() => {
@@ -19,6 +21,7 @@ const PageContainer = ({auth, csrfToken, errors = [], children, profilePage = fa
     return (
         <>
             {auth?.user?.role === "courier" && <>
+
                 {!profilePage && auth?.profile_approved === 0 || !profilePage && auth?.profile_approved === false ?
                     <MainLayout>
                         <PersonalInformationCourier
@@ -27,7 +30,11 @@ const PageContainer = ({auth, csrfToken, errors = [], children, profilePage = fa
                             profileApproved={auth?.profile_approved}
                             csrfToken={csrfToken}
                         />
-                    </MainLayout> : <>{children}</>}
+                    </MainLayout> : <>
+                        {courierIsTransporting ? <MainLayout>
+                            <ActiveOrder auth={auth} csrfToken={csrfToken}/>
+                        </MainLayout> : children}
+                    </>}
             </>}
             {auth?.user?.role === "business" && <>
                 {!profilePage && auth?.profile_approved === 0 || !profilePage && auth?.profile_approved === false ?

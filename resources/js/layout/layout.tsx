@@ -1,19 +1,30 @@
 'use client';
-import { PrimeReactContext } from 'primereact/api';
-import { useEventListener, useMountEffect, useResizeListener, useUnmountEffect } from 'primereact/hooks';
-import { classNames, DomHandler } from 'primereact/utils';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import {PrimeReactContext} from 'primereact/api';
+import {useEventListener, useMountEffect, useResizeListener, useUnmountEffect} from 'primereact/hooks';
+import {classNames, DomHandler} from 'primereact/utils';
+import React, {useCallback, useContext, useEffect, useRef} from 'react';
 import AppConfig from './AppConfig';
 import AppSidebar from './AppSidebar';
 import AppTopbar from './AppTopbar';
-import { LayoutContext } from './context/layoutcontext';
+import {LayoutContext} from './context/layoutcontext';
 import AppBreadcrumb from './AppBreadCrumb';
 import AppFooter from './AppFooter';
-import type { AppTopbarRef, ChildContainerProps } from '@/types';
+import type {AppTopbarRef, ChildContainerProps} from '@/types';
+import {ConfirmDialog} from "primereact/confirmdialog";
 
 const Layout = (props: ChildContainerProps) => {
-    const { layoutConfig, layoutState, setLayoutState, setLayoutConfig, isSlim, isSlimPlus, isHorizontal, isDesktop, isSidebarActive } = useContext(LayoutContext);
-    const { setRipple } = useContext(PrimeReactContext);
+    const {
+        layoutConfig,
+        layoutState,
+        setLayoutState,
+        setLayoutConfig,
+        isSlim,
+        isSlimPlus,
+        isHorizontal,
+        isDesktop,
+        isSidebarActive
+    } = useContext(LayoutContext);
+    const {setRipple} = useContext(PrimeReactContext);
     const topbarRef = useRef<AppTopbarRef>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const pathname = "usePathname()";
@@ -103,7 +114,7 @@ const Layout = (props: ChildContainerProps) => {
     useEffect(() => {
         const onRouteChange = () => {
             if (layoutConfig.colorScheme === 'dark') {
-                setLayoutConfig((prevState) => ({ ...prevState, menuTheme: 'dark' }));
+                setLayoutConfig((prevState) => ({...prevState, menuTheme: 'dark'}));
             }
         };
         onRouteChange();
@@ -157,10 +168,12 @@ const Layout = (props: ChildContainerProps) => {
 
     return (
         <React.Fragment>
+            <ConfirmDialog/>
             <div className={classNames('layout-container', containerClassName)}>
-                <AppTopbar ref={topbarRef} />
-                <div ref={sidebarRef} className="layout-sidebar" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-                    <AppSidebar />
+                <AppTopbar ref={topbarRef}/>
+                <div ref={sidebarRef} className="layout-sidebar" onMouseEnter={onMouseEnter}
+                     onMouseLeave={onMouseLeave}>
+                    <AppSidebar/>
                 </div>
                 <div className="layout-content-wrapper">
                     <div className="layout-content">

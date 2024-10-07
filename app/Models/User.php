@@ -110,4 +110,17 @@ class User extends Authenticatable implements MustVerifyEmail
         }
         return $returnObject;
     }
+
+    public function isTransporting(): bool
+    {
+        if($this->role == "courier") {
+            $orderCount = Orders::where('courier_id', $this->id)->where('status', 'transporting')->count();
+            if($orderCount == 1) {
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
 }

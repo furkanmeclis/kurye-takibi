@@ -24,44 +24,6 @@ export const storeOrder = async (order: any, csrfToken: any) => {
     return await response.json();
 }
 
-export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false) => {
-    // ["draft", "opened", "transporting", "delivered", "canceled", "deleted"]
-    let statuses = {
-        draft: {
-            label: "Taslak",
-            severity: "secondary"
-        },
-        opened: {
-            label: "Açık",
-            severity: "warning"
-        },
-        transporting: {
-            label: "Taşımada",
-            severity: "info"
-        },
-        delivered: {
-            label: "Teslim Edildi",
-            severity: "success"
-        },
-        canceled: {
-            label: "İptal Edildi",
-            severity: "danger"
-        },
-        deleted: {
-            label: "Silindi",
-            severity: "danger"
-        }
-    }
-    if (getAll) {
-        return Object.entries(statuses).map(([key, value]) => ({
-            value: key,
-            label: value.label,
-            severity: value.severity
-        }));
-    }
-    return statuses[status] as { label: string, severity: string };
-
-}
 
 export const updateOrderStatus = async (orderId: any, status: "opened" | "transporting" | "delivered" | "canceled", csrfToken: any, cancellationReason = "") => {
     if (status === "canceled") {
@@ -119,36 +81,36 @@ export const getOrder = async (orderId: any, csrfToken: any) => {
     return await response.json();
 }
 export const subscribeOrderEvents = (orderId: any, callback: any) => {
-    if(import.meta.env.VITE_ALLOW_PUSHER === "false") return;
+    if (import.meta.env.VITE_ALLOW_PUSHER === "false") return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-${orderId}`, callback);
 }
 export const unsubscribeOrderEvents = (orderId: any) => {
-    if(import.meta.env.VITE_ALLOW_PUSHER === "false") return;
+    if (import.meta.env.VITE_ALLOW_PUSHER === "false") return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.unsubscribe(`order-channel`);
 }
 export const subscribeUpdateOrder = (businessId: any, callback: any) => {
-    if(import.meta.env.VITE_ALLOW_PUSHER === "false") return;
+    if (import.meta.env.VITE_ALLOW_PUSHER === "false") return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-business-${businessId}`, callback);
 }
 
-export const subscribeOrderLocationChange = (orderId: any, callback: any,allowAlways=false) => {
-    if(import.meta.env.VITE_ALLOW_PUSHER === "false" && !allowAlways) return;
+export const subscribeOrderLocationChange = (orderId: any, callback: any, allowAlways = false) => {
+    if (import.meta.env.VITE_ALLOW_PUSHER === "false" && !allowAlways) return;
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     return pusher.subscribe(`order-channel`).bind(`update-order-location-${orderId}`, callback);
 }
 
-export const getLocations = async (orderId:any,csrfToken: any) => {
+export const getLocations = async (orderId: any, csrfToken: any) => {
     let url = route("business.orders.getLocations", orderId);
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
@@ -159,7 +121,7 @@ export const getLocations = async (orderId:any,csrfToken: any) => {
     });
     return await response.json();
 }
-export const demoAddLocation = async (orderId:any,csrfToken:any) => {
+export const demoAddLocation = async (orderId: any, csrfToken: any) => {
     let url = route("demoAddLocation", orderId);
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
@@ -169,7 +131,7 @@ export const demoAddLocation = async (orderId:any,csrfToken:any) => {
     });
     return await response.json();
 }
-export const demoDeliverOrder = async (orderId:any,csrfToken:any) => {
+export const demoDeliverOrder = async (orderId: any, csrfToken: any) => {
     let url = route("demoDeliverOrder", orderId);
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);

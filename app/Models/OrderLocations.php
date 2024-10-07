@@ -14,23 +14,27 @@ class OrderLocations extends Model
         return self::where('order_id', $order_id)->orderBy('created_at', 'desc')->get();
     }
 
-    public static function addLocation($order_id,$latitude,$longitude,$courier_id = false): bool
+    public static function addLocation($order_id, $latitude, $longitude, $courier_id = false): bool
     {
+        $control = self::where('order_id', $order_id)->where('latitude', $latitude)->where('longitude', $longitude)->first();
+        if ($control) {
+            return true;
+        }
         $orderLocation = new self();
         $orderLocation->order_id = $order_id;
         $orderLocation->latitude = $latitude;
         $orderLocation->longitude = $longitude;
-        if($courier_id){
+        if ($courier_id) {
             $orderLocation->courier_id = $courier_id;
-        }else{
-            if(auth()->user()->role == "courier"){
+        } else {
+            if (auth()->user()->role == "courier") {
                 $orderLocation->courier_id = auth()->user()->id;
             }
         }
-        if($orderLocation->save()){
-            broadcast(new \App\Events\Orders\LocationChange($order_id,$latitude,$longitude))->toOthers();
+        if ($orderLocation->save()) {
+            broadcast(new \App\Events\Orders\LocationChange($order_id, $latitude, $longitude))->toOthers();
             return true;
-        }else{
+        } else {
             return false;
         }
     }

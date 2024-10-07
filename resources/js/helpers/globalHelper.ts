@@ -24,6 +24,44 @@ export const getDetailKeysTranslation = (key: string) => {
     // @ts-ignore
     return labelTranslations[key];
 }
+export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false) => {
+    // ["draft", "opened", "transporting", "delivered", "canceled", "deleted"]
+    let statuses = {
+        draft: {
+            label: "Taslak",
+            severity: "secondary"
+        },
+        opened: {
+            label: "Açık",
+            severity: "warning"
+        },
+        transporting: {
+            label: "Taşımada",
+            severity: "info"
+        },
+        delivered: {
+            label: "Teslim Edildi",
+            severity: "success"
+        },
+        canceled: {
+            label: "İptal Edildi",
+            severity: "danger"
+        },
+        deleted: {
+            label: "Silindi",
+            severity: "danger"
+        }
+    }
+    if (getAll) {
+        return Object.entries(statuses).map(([key, value]) => ({
+            value: key,
+            label: value.label,
+            severity: value.severity
+        }));
+    }
+    return statuses[status] as { label: string, severity: string };
+
+}
 export const getDetailsValueTranslation = (key: string, value: any) => {
     if (key === "billing") {
         return value === "company" ? "Şirket" : "Bireysel";
@@ -83,7 +121,7 @@ export const getLocation = (toast: Toast) => {
                     detail: "Konum Bilginiz Alınamadı.Lütfen Tarayıcı Ayarlarınızı Kontrol Ediniz."
                 });
                 reject("Konum Bilgisi Alınamadı");
-            }, {timeout: 10000});
+            });
         } else {
             toast.show({
                 severity: "error",

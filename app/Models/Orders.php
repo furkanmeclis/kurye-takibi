@@ -6,21 +6,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class Orders extends Model
 {
     use HasFactory;
+
+    public static int $earthRadius = 6371;
 
     public function businessDetails(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(BusinessDetails::class, 'business_id', 'business_id');
     }
 
-    public static function getNearbyOrders($lat, $lon, $radius = 10): Collection
-    {
-        $earthRadius = 6371;
 
-        return self::join('business_details', 'orders.business_id', '=', 'business_details.business_id')
+    public static function getNearbyOrders($lat, $lon, $limit = false): Collection
+    {
+        $radius = 10;
+        $earthRadius = self::$earthRadius;
+        Session::put("courier_lat", $lat);
+        Session::put("courier_lon", $lon);
+        $instance = self::join('business_details', 'orders.business_id', '=', 'business_details.business_id')
             ->whereNotNull('business_details.latitude')
             ->whereNotNull('business_details.longitude')
             ->select(
@@ -34,19 +40,86 @@ class Orders extends Model
             ) AS distance")
             )
             ->having('distance', '<=', $radius)
-            ->orderBy('distance', 'asc')
-            ->get()->map(function ($order) {
-                $order->distance = round($order->distance,2);
-                $order->customer = Customers::find($order->customer_id);
-                $order->address = CustomerAddresses::find($order->address_id);
-                $order->start_location = json_decode($order->start_location);
-                $order->end_location = json_decode($order->end_location);
-                $order->courier = User::getCourier($order->courier_id);
-                $order->business = User::getBusiness($order->business_id);
-                if ($order->cancellation_accepted_by != null) {
-                    $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+            ->orderBy('distance', 'asc');
+        if ($limit !== false) {
+            $instance = $instance->offset(0)->limit($limit);
+        }
+        return $instance->get()->map(function ($order) {
+            $order->distance = round($order->distance, 2);
+            $order->customer = Customers::find($order->customer_id);
+            $order->address = CustomerAddresses::find($order->address_id);
+            $order->start_location = json_decode($order->start_location);
+            $order->end_location = json_decode($order->end_location);
+            $order->courier = User::getCourier($order->courier_id);
+            $order->business = User::getBusiness($order->business_id);
+            if ($order->cancellation_accepted_by != null) {
+                $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+            }
+            return $order;
+        });
+    }
+
+    public static function calculateDistance($latFrom, $lonFrom, $latTo, $lonTo): float
+    {
+        $latFrom = deg2rad($latFrom);
+        $lonFrom = deg2rad($lonFrom);
+        $latTo = deg2rad($latTo);
+        $lonTo = deg2rad($lonTo);
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+        $a = sin($latDelta / 2) * sin($latDelta / 2) +
+            cos($latFrom) * cos($latTo) *
+            sin($lonDelta / 2) * sin($lonDelta / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        return round(self::$earthRadius * $c, 2);
+    }
+
+    public static function findOrder($id, $withDetails = false): object
+    {
+        $order = self::find($id);
+        if ($order) {
+            if (!Session::has("courier_lat") || !Session::has("courier_lon")) {
+                return (object)[
+                    "status" => false,
+                    "message" => "Kurye Konumu Alınamadı",
+                    "getLocation" => true
+                ];
+            } else {
+                if (
+                    $order->status != "opened" &&
+                    auth()->user()->role == "courier" &&
+                    auth()->user()->id != $order->courier_id
+                ) {
+                    return (object)[
+                        "status" => false,
+                        "message" => "Bu İşlemi Yapmaya Yetkiniz Yok"
+                    ];
                 }
-                return $order;
-            });
+                if ($withDetails) {
+                    $latFrom = Session::get("courier_lat");
+                    $lonFrom = Session::get("courier_lon");
+                    $order->customer = Customers::find($order->customer_id);
+                    $order->address = CustomerAddresses::find($order->address_id);
+                    $order->start_location = json_decode($order->start_location);
+                    $order->end_location = json_decode($order->end_location);
+                    $order->courier = User::getCourier($order->courier_id);
+                    $order->business = User::getBusiness($order->business_id);
+                    if ($order->cancellation_accepted_by != null) {
+                        $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+                    }
+                    $latTo = $order->business->details->latitude;
+                    $lonTo = $order->business->details->longitude;
+                    $order->distance = self::calculateDistance($latFrom, $lonFrom, $latTo, $lonTo);
+                }
+                return (object)[
+                    "status" => true,
+                    "order" => $order
+                ];
+            }
+        }
+        return (object)[
+            "status" => false,
+            "message" => "Sipariş Bulunamadı"
+        ];
     }
 }

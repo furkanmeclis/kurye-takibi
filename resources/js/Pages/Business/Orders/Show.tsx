@@ -4,10 +4,10 @@ import {useContext, useEffect, useRef, useState} from "react";
 import {
     getLocations,
     getOrder,
-    getOrderStatuses,
     subscribeOrderEvents, subscribeOrderLocationChange,
     unsubscribeOrderEvents
 } from "@/helpers/Business/orders";
+import {getOrderStatuses} from "@/helpers/globalHelper"
 import {Toast} from "primereact/toast";
 import {Avatar} from "primereact/avatar";
 import {Tooltip} from "primereact/tooltip";

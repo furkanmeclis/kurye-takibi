@@ -21,10 +21,11 @@ import CourierOrdersWidget from "@/components/CourierOrdersWidget";
 let revenueChartData: ChartData;
 let overviewChartData: ChartData;
 
-function Dashboard({auth, csrfToken, errors}: {
+function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     auth?: any,
     csrfToken?: string,
-    errors?: any
+    errors?: any,
+    courierIsTransporting?: boolean
 }) {
     const {layoutConfig} = useContext(LayoutContext);
     const [products, setProducts] = useState<Demo.Product[]>([]);
@@ -217,7 +218,7 @@ function Dashboard({auth, csrfToken, errors}: {
     }, [layoutConfig]);
 
     return (
-        <PageContainer auth={auth} csrfToken={csrfToken} errors={errors}>
+        <PageContainer auth={auth} csrfToken={csrfToken} errors={errors} courierIsTransporting={courierIsTransporting}>
             <MainLayout>
                 <Head title="Kurye Anasayfa"/>
                 <div className="grid">

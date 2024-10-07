@@ -1,7 +1,7 @@
 import PageContainer from "@/PageContainer";
 import MainLayout from "@/Layouts/MainLayout";
 import React, {useEffect, useRef, useState} from "react";
-import {Head} from "@inertiajs/react";
+import {Head, router} from "@inertiajs/react";
 import {Toast} from "primereact/toast";
 import {getLocation} from "@/helpers/globalHelper";
 import {getNearbyNewOrders} from "@/helpers/Courier/orders";
@@ -13,9 +13,10 @@ import {classNames} from "primereact/utils";
 import {Dropdown} from "primereact/dropdown";
 import {OverlayPanel} from "primereact/overlaypanel";
 
-const NewOrders = ({auth, csrfToken}: {
+const NewOrders = ({auth, csrfToken, courierIsTransporting = false}: {
     auth: any,
-    csrfToken: any
+    csrfToken: any,
+    courierIsTransporting?: boolean
 }) => {
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
@@ -33,7 +34,7 @@ const NewOrders = ({auth, csrfToken}: {
             setLoading(true);
             getLocation(toast?.current).then((location: any) => {
                 setLocationFetched(true);
-                getNearbyNewOrders(location.latitude, location.longitude, csrfToken).then((response) => {
+                getNearbyNewOrders(location.latitude, location.longitude, csrfToken, false).then((response) => {
                     if (response.status) {
                         setOrders(response.orders);
                         setError(null)
@@ -103,14 +104,18 @@ const NewOrders = ({auth, csrfToken}: {
                                 </span>
                     </div>
                     <div className="col-4  flex justify-content-end align-items-center">
-                        <Button label={"Siparişi Al"} size={"small"} icon={"pi pi-plus-circle"} severity={"success"}/>
+                        <Button label={"Siparişi Al"} size={"small"} icon={"pi pi-plus-circle"}
+                                onClick={() => {
+                                    router.visit(route("courier.orders.reviewOrder", order.id))
+                                }}
+                                severity={"success"}/>
                     </div>
                 </div>
             </div>
         );
     };
 
-    return <PageContainer auth={auth} csrfToken={csrfToken}>
+    return <PageContainer auth={auth} csrfToken={csrfToken} courierIsTransporting={courierIsTransporting}>
         <Toast ref={toast}/>
         <MainLayout>
             <OverlayPanel ref={businessOp} showCloseIcon style={{width: 300}}>

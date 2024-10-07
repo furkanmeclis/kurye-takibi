@@ -106,6 +106,11 @@ Route::middleware('auth')->group(function () {
         Route::prefix('/orders')->middleware("only:courier")->name("orders.")->group(function () {
             Route::get('/new-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'newOrders'])->name('newOrders');
             Route::post('/list-nearby-orders',[\App\Http\Controllers\Courier\OrdersController::class,'listNearbyOrders'])->name('listNearbyOrders');
+            Route::get('/review-order/{id}',[\App\Http\Controllers\Courier\OrdersController::class,'reviewOrder'])->name('reviewOrder');
+            Route::post('/list-review-order/{id}',[\App\Http\Controllers\Courier\OrdersController::class,'listReviewOrder'])->name('listReviewOrder');
+            Route::post('/accept-order-from-courier/{id}',[\App\Http\Controllers\Courier\OrdersController::class,'acceptOrderFromCourier'])->name('acceptOrderFromCourier');
+            Route::post('/get-active-order',[\App\Http\Controllers\Courier\OrdersController::class,'activeOrder'])->name('activeOrder');
+            Route::post('/update-courier-location',[\App\Http\Controllers\Courier\OrdersController::class,'updateCourierLocation'])->name('updateCourierLocation');
         });
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');

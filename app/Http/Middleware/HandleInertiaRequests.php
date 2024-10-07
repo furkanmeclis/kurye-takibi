@@ -49,6 +49,13 @@ class HandleInertiaRequests extends Middleware
                 'type' => fn() => $request->session()->get('type'),
                 'title' => fn() => $request->session()->get('title'),
             ],
+            'courierIsTransporting' => $this->courierIsTransporting()
         ];
+    }
+
+    public function courierIsTransporting()
+    {
+        $user = auth()->user();
+        return $user && $user->role == "courier" ? $user->isTransporting() : false;
     }
 }
