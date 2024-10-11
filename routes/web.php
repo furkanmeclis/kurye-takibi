@@ -117,89 +117,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
 });
-function generateLocations($latitude, $longitude, $numLocations, $distance = 10): array
-{
-    $locations = [];
-    $earthRadius = 6371000;
-    for ($i = 0; $i < $numLocations; $i++) {
-        $angle = mt_rand(0, 360) * (M_PI / 180);
-        $newLatitude = $latitude + ($distance / $earthRadius) * (180 / M_PI);
-        $newLongitude = $longitude + ($distance / $earthRadius) * (180 / M_PI) / cos($latitude * (M_PI / 180));
-        $locations[] = [$newLatitude, $newLongitude];
-        $latitude = $newLatitude;
-        $longitude = $newLongitude;
-    }
-    return $locations;
-}
 
 Route::post('/add-location/{i}', function ($order_id) {
-    $order = \App\Models\Orders::where('id', $order_id)->first();
-    if (!$order) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Sipariş Bulunamadı(DEV)'
-        ]);
-    }
-    if ($order->courier_id == null) {
-        $newCourier = \App\Models\User::where('role', 'courier')->inRandomOrder()->first();
-        if (!$newCourier) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Sistemde Kurye Bulunamadı(DEV)'
-            ]);
-        }
-        $order->status = "transporting";
-        $order->courier_accepted_at = now();
-        $order->courier_id = $newCourier->id;
-        $order->save();
-        broadcast(new \App\Events\Orders\UpdateOrder($order_id, "success", "Sipariş Güncellendi", "Siparişe Kurye Atandı", true, $order->business_id))->toOthers();
-    }
-    $order->status = "transporting";
-    $order->save();
-    if ($order->start_location == null) {
-        $latitude = 39.9334;
-        $longitude = 32.8597; //Ankara
-        \App\Models\OrderLocations::addLocation($order_id, $latitude, $longitude, $order->courier_id);
-        return response()->json([
-            'status' => true,
-            'message' => 'Konum Eklendi(DEV)'
-        ]);
-    } else {
-        $latitude = json_decode($order->start_location)->latitude;
-        $longitude = json_decode($order->start_location)->longitude;
-    }
-
-    $locations = generateLocations($latitude, $longitude, 100);
-    $rand = rand(0, 99);
-    $latitude = $locations[$rand][0];
-    $longitude = $locations[$rand][1];
-    \App\Models\OrderLocations::addLocation($order_id, $latitude, $longitude, $order->courier_id);
     return response()->json([
-        'status' => true,
-        'message' => 'Konum Eklendi(DEV)'
+        'status' => false,
+        'message' => 'Bu Özellik Kullanıma Kapatıldı(DEV)'
     ]);
 })->name("demoAddLocation");
 Route::post("/demo-deliver-order/{id}", function ($id) {
-    $order = \App\Models\Orders::where('id', $id)->first();
-    if (!$order) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Sipariş Bulunamadı(DEV)'
-        ]);
-    }
-    $order->status = "delivered";
-    $order->delivered_at = now();
-    if ($order->save()) {
-        return response()->json([
-            'status' => true,
-            'message' => 'Sipariş Teslim Edildi(DEV)'
-        ]);
-    } else {
-        return response()->json([
-            'status' => false,
-            'message' => 'Sipariş Teslim Edilirken Bir Hata Oluştu(DEV)'
-        ]);
-    }
+    return response()->json([
+        'status' => false,
+        'message' => 'Bu Özellik Kullanıma Kapatıldı(DEV)'
+    ]);
 })->name("demoDeliverOrder");
 Route::get('/trendyol', function () {
     $api = new TrendyolYemekApi('1030310', '313143', 'ixLUAtJST8gKT4bEA7O5', 'N1wIvCznqVHJMIOVWVOR', 'furkanmeclis@icloud.com');
