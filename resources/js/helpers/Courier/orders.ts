@@ -84,3 +84,14 @@ export const watchPosition = (csrfToken: any, callback: any) => {
     }
 }
 
+export const deliverOrder = async (orderId: any, csrfToken: any) => {
+    let url = route("courier.orders.deliverOrder", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+    });
+    return await response.json();
+}

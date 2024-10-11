@@ -1,5 +1,5 @@
 import {useContext, useEffect, useRef, useState} from "react";
-import {getActiveOrder, watchPosition} from "@/helpers/Courier/orders";
+import {deliverOrder, getActiveOrder, watchPosition} from "@/helpers/Courier/orders";
 import {Toast} from "primereact/toast";
 import {getLocation, getOrderStatuses} from "@/helpers/globalHelper";
 import {BlockUI} from "primereact/blockui";
@@ -8,7 +8,7 @@ import WatchingIcon from "@/components/WatchingIcon";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import {Button} from "primereact/button";
 import {Avatar} from "primereact/avatar";
-import {Link} from "@inertiajs/react";
+import {Link, router} from "@inertiajs/react";
 import {Tag} from "primereact/tag";
 import {Timeline} from "primereact/timeline";
 import L from "leaflet";
@@ -150,6 +150,17 @@ const ActiveOrder = ({auth, csrfToken}: {
             rejectLabel: "Hayır",
             draggable: false,
             accept: () => {
+                setLoading(true);
+                deliverOrder(order.id, csrfToken).then((res: any) => {
+                    if(res.status) {
+                        toast?.current?.show({severity: 'success', summary: 'Başarılı', detail: res.message});
+                        router.reload();
+                    }else{
+                        toast?.current?.show({severity: 'error', summary: 'Hata', detail: res.message});
+                    }
+                }).catch(() => {
+                    toast?.current?.show({severity: 'error', summary: 'Hata', detail: "Bir Sorun Oluştu"});
+                }).finally(() => setLoading(false))
             },
         });
     }

@@ -193,4 +193,35 @@ class OrdersController extends \App\Http\Controllers\Controller
             ]);
         }
     }
+
+    public function deliverOrder($orderId): \Illuminate\Http\JsonResponse
+    {
+        $order = Orders::find($orderId);
+        if ($order && $order->status == "transporting" && $order->courier_id == auth()->user()->id) {
+            //TODO: Sipariş Teslim Edildiğine Dair Bilgilendirme Mesajları Gönderilecek
+            $order->status = "delivered";
+            $order->delivered_at = now();
+            $lastLocation = OrderLocations::where('order_id', $order->id)->orderBy('created_at', 'desc')->first();
+            $order->end_location = json_encode([
+                "latitude" => $lastLocation->latitude,
+                "longitude" => $lastLocation->longitude,
+            ]);
+            if ($order->save()) {
+                return response()->json([
+                    "status" => true,
+                    "message" => "Sipariş Başarıyla Teslim Edildi"
+                ]);
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Sipariş Teslim Edilemedi"
+                ]);
+            }
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Sipariş Bulunamadı"
+            ]);
+        }
+    }
 }
