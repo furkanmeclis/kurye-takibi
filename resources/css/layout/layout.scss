@@ -13,3 +13,76 @@ $breakpoint: 992px !default;
 @import './_typography';
 @import './_utils';
 @import './_config';
+
+.layout-danger-button {
+    position: fixed;
+    width: 4rem;
+    height: 4rem;
+    background: var(--red-400);
+    color: var(--red-50);
+    top: 50%;
+    right: 0;
+    margin-top: -2rem;
+    border-radius: 30px 0 0 30px;
+    transition: background-color var(--transition-duration);
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: -0.25rem 0 1rem #00000026;
+
+
+    &.config-link {
+        font-size: 1rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        border: none;
+    }
+
+    .config-link:focus {
+        outline: 0 none;
+        outline-offset: 0;
+        box-shadow: 0 0 0 1px var(--focus-ring);
+    }
+
+    i {
+        font-size: 2.5rem;
+        line-height: inherit;
+        transform: rotate(0deg);
+        transition: transform 1s;
+    }
+
+    &:hover {
+        background: var(--red-500);
+    }
+}
+.emergency-button{
+    width:100%;
+    height:6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    border:2px solid var(--red-200);
+    border-radius: .5rem;
+    color: var(--primary-color-text);
+    font-weight: bold;
+    background: var(--gray-400);
+    font-size: .9rem;
+    svg{
+        fill: var(--red-500);
+
+    }
+    &:hover {
+        border-color: var(--red-400);
+        background-color: var(--red-100);
+        color:initial;
+    }
+    &:focus{
+        background-color: var(--red-100);
+    }
+
+}

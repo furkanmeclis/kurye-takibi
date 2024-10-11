@@ -40,6 +40,7 @@ class Orders extends Model
             ) AS distance")
             )
             ->having('distance', '<=', $radius)
+            ->where('orders.status', 'opened')
             ->orderBy('distance', 'asc');
         if ($limit !== false) {
             $instance = $instance->offset(0)->limit($limit);
@@ -74,7 +75,7 @@ class Orders extends Model
         return round(self::$earthRadius * $c, 2);
     }
 
-    public static function findOrder($id, $withDetails = false): object
+    public static function findOrder($id, $withDetails = false, $withLocations = false): object
     {
         $order = self::find($id);
         if ($order) {
@@ -110,6 +111,9 @@ class Orders extends Model
                     $latTo = $order->business->details->latitude;
                     $lonTo = $order->business->details->longitude;
                     $order->distance = self::calculateDistance($latFrom, $lonFrom, $latTo, $lonTo);
+                }
+                if($withLocations){
+                    $order->locations = OrderLocations::getLocations($order->id);
                 }
                 return (object)[
                     "status" => true,

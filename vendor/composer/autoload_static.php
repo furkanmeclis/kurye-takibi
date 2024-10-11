@@ -54,6 +54,10 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         array (
             'phpDocumentor\\Reflection\\' => 25,
         ),
+        'f' => 
+        array (
+            'furkanmeclis\\Tools\\' => 19,
+        ),
         'W' => 
         array (
             'Whoops\\' => 7,
@@ -215,6 +219,10 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+        ),
+        'furkanmeclis\\Tools\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/furkanmeclis/trendyol-yemek-api/src',
         ),
         'Whoops\\' => 
         array (
@@ -617,8 +625,12 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
     );
 
     public static $classMap = array (
+        'App\\Events\\Orders\\LocationChange' => __DIR__ . '/../..' . '/app/Events/Orders/LocationChange.php',
+        'App\\Events\\Orders\\NewOrder' => __DIR__ . '/../..' . '/app/Events/Orders/NewOrder.php',
+        'App\\Events\\Orders\\UpdateOrder' => __DIR__ . '/../..' . '/app/Events/Orders/UpdateOrder.php',
         'App\\Http\\Controllers\\Admin\\BusinessesController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/BusinessesController.php',
         'App\\Http\\Controllers\\Admin\\CouriersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/CouriersController.php',
+        'App\\Http\\Controllers\\Admin\\OrdersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/OrdersController.php',
         'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
         'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',
         'App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/EmailVerificationNotificationController.php',
@@ -632,6 +644,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'App\\Http\\Controllers\\Business\\OrdersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Business/OrdersController.php',
         'App\\Http\\Controllers\\Business\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Business/ProfileController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\Courier\\OrdersController' => __DIR__ . '/../..' . '/app/Http/Controllers/Courier/OrdersController.php',
         'App\\Http\\Controllers\\Courier\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/Courier/ProfileController.php',
         'App\\Http\\Controllers\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfileController.php',
         'App\\Http\\Middleware\\EnsureUserHasRole' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUserHasRole.php',
@@ -640,10 +653,12 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'App\\Http\\Requests\\ProfileUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProfileUpdateRequest.php',
         'App\\Models\\BusinessDetails' => __DIR__ . '/../..' . '/app/Models/BusinessDetails.php',
         'App\\Models\\CourierDetails' => __DIR__ . '/../..' . '/app/Models/CourierDetails.php',
-        'App\\Models\\CustomerAdresses' => __DIR__ . '/../..' . '/app/Models/CustomerAdresses.php',
+        'App\\Models\\CustomerAddresses' => __DIR__ . '/../..' . '/app/Models/CustomerAddresses.php',
         'App\\Models\\Customers' => __DIR__ . '/../..' . '/app/Models/Customers.php',
+        'App\\Models\\OrderLocations' => __DIR__ . '/../..' . '/app/Models/OrderLocations.php',
         'App\\Models\\Orders' => __DIR__ . '/../..' . '/app/Models/Orders.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
+        'App\\Notifications\\Example' => __DIR__ . '/../..' . '/app/Notifications/Example.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Services\\EventEmitter' => __DIR__ . '/../..' . '/app/Services/EventEmitter.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
@@ -6968,6 +6983,7 @@ class ComposerStaticInit8a2051caa79f2a0e2fbb2129070d4e33
         'Whoops\\Util\\Misc' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/Misc.php',
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
+        'furkanmeclis\\Tools\\TrendyolYemekApi' => __DIR__ . '/..' . '/furkanmeclis/trendyol-yemek-api/src/TrendyolYemekApi.php',
         'phpDocumentor\\Reflection\\DocBlock' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlock.php',
         'phpDocumentor\\Reflection\\DocBlockFactory' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactory.php',
         'phpDocumentor\\Reflection\\DocBlockFactoryInterface' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactoryInterface.php',

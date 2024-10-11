@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fd4c01008edf30aef23a91a400db3317",
+    "content-hash": "8824cf5956e8c31c3f2665a574cf9da4",
     "packages": [
         {
             "name": "brick/math",
@@ -639,6 +639,48 @@
                 }
             ],
             "time": "2023-10-12T05:21:21+00:00"
+        },
+        {
+            "name": "furkanmeclis/trendyol-yemek-api",
+            "version": "v0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/furkanmeclis/trendyol-yemek-api.git",
+                "reference": "31b7ac65c8e702a87a00d7c142705eb297ab4b08"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/furkanmeclis/trendyol-yemek-api/zipball/31b7ac65c8e702a87a00d7c142705eb297ab4b08",
+                "reference": "31b7ac65c8e702a87a00d7c142705eb297ab4b08",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=7.2.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "furkanmeclis\\Tools\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Furkan Meclis",
+                    "email": "furkanmeclis@icloud.com"
+                }
+            ],
+            "description": "Trendyol Yemek API PHP Client",
+            "support": {
+                "issues": "https://github.com/furkanmeclis/trendyol-yemek-api/issues",
+                "source": "https://github.com/furkanmeclis/trendyol-yemek-api/tree/v0.1"
+            },
+            "time": "2024-10-10T23:34:45+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -9334,7 +9376,8 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.2"
+        "php": "^8.2",
+        "ext-curl": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"

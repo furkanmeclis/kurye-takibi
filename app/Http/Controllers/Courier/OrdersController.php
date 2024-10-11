@@ -133,7 +133,7 @@ class OrdersController extends \App\Http\Controllers\Controller
                     Session::put("courier_lat", $request->latitude);
                     Session::put("courier_lon", $request->longitude);
                 }
-                return response()->json(Orders::findOrder($order->id, true));
+                return response()->json(Orders::findOrder($order->id, true, true));
             } else {
                 return response()->json([
                     "status" => false,

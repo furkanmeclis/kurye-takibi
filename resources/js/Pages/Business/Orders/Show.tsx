@@ -429,7 +429,7 @@ const OrderShowPage = ({
                         <div className="lg:col-3 md:col-4 col-6 cursor-pointer"
                              data-pr-tooltip={"Paket Ücreti"}>
                             <Avatar
-                                icon={"pi pi-dollar"}
+                                icon={"pi pi-turkish-lira"}
                                 shape={"circle"}
                                 className={"bg-primary-300 font-semibold text-primary-800"}
                             />

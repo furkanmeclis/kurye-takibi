@@ -1,1 +1,0 @@
-const o=async(r,t,s)=>{let a=route("courier.orders.listNearbyOrders"),e=new Headers;return e.append("X-CSRF-TOKEN",s),e.append("Content-Type","application/json"),await(await fetch(a,{method:"POST",headers:e,body:JSON.stringify({latitude:r,longitude:t})})).json()};export{o as g};

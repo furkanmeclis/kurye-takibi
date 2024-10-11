@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Services\TrendyolYemekApi;
+use furkanmeclis\Tools\TrendyolYemekApi;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -105,12 +105,12 @@ Route::middleware('auth')->group(function () {
         })->name('dashboard');
         Route::prefix('/orders')->middleware("only:courier")->name("orders.")->group(function () {
             Route::get('/new-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'newOrders'])->name('newOrders');
-            Route::post('/list-nearby-orders',[\App\Http\Controllers\Courier\OrdersController::class,'listNearbyOrders'])->name('listNearbyOrders');
-            Route::get('/review-order/{id}',[\App\Http\Controllers\Courier\OrdersController::class,'reviewOrder'])->name('reviewOrder');
-            Route::post('/list-review-order/{id}',[\App\Http\Controllers\Courier\OrdersController::class,'listReviewOrder'])->name('listReviewOrder');
-            Route::post('/accept-order-from-courier/{id}',[\App\Http\Controllers\Courier\OrdersController::class,'acceptOrderFromCourier'])->name('acceptOrderFromCourier');
-            Route::post('/get-active-order',[\App\Http\Controllers\Courier\OrdersController::class,'activeOrder'])->name('activeOrder');
-            Route::post('/update-courier-location',[\App\Http\Controllers\Courier\OrdersController::class,'updateCourierLocation'])->name('updateCourierLocation');
+            Route::post('/list-nearby-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'listNearbyOrders'])->name('listNearbyOrders');
+            Route::get('/review-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'reviewOrder'])->name('reviewOrder');
+            Route::post('/list-review-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'listReviewOrder'])->name('listReviewOrder');
+            Route::post('/accept-order-from-courier/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'acceptOrderFromCourier'])->name('acceptOrderFromCourier');
+            Route::post('/get-active-order', [\App\Http\Controllers\Courier\OrdersController::class, 'activeOrder'])->name('activeOrder');
+            Route::post('/update-courier-location', [\App\Http\Controllers\Courier\OrdersController::class, 'updateCourierLocation'])->name('updateCourierLocation');
         });
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
@@ -200,4 +200,9 @@ Route::post("/demo-deliver-order/{id}", function ($id) {
         ]);
     }
 })->name("demoDeliverOrder");
+Route::get('/trendyol', function () {
+    $api = new TrendyolYemekApi('1030310', '313143', 'ixLUAtJST8gKT4bEA7O5', 'N1wIvCznqVHJMIOVWVOR', 'furkanmeclis@icloud.com');
+    $restaurant = $api->getPackages();
+    return response()->json($restaurant);
+});
 require __DIR__ . '/auth.php';
