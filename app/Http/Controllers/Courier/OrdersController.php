@@ -16,6 +16,19 @@ class OrdersController extends \App\Http\Controllers\Controller
         return Inertia::render('Courier/Orders/NewOrders');
     }
 
+    public function pastOrders(): \Inertia\Response
+    {
+        return Inertia::render('Courier/Orders/PastOrders');
+    }
+
+    public function listPastOrders(): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            "status" => true,
+            "orders" => Orders::getCourierOrders()
+        ]);
+    }
+
     public function listNearbyOrders(Request $request): \Illuminate\Http\JsonResponse
     {
         $courier = auth()->user();

@@ -12,7 +12,7 @@ import {Tag} from "primereact/tag";
 const CourierOrdersWidget = ({csrfToken}: { csrfToken: any }) => {
     const toast = useRef<Toast>(null);
     const [error, setError] = useState<string | null>(null);
-    const listCount = 9;
+    const listCount = 10;
     const {auth} = useContext(LayoutContext);
     const [notSupported, setNotSupported] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
@@ -102,10 +102,16 @@ const CourierOrdersWidget = ({csrfToken}: { csrfToken: any }) => {
                             </div>
                         </div>
                     </li>))}
-                {!loading && orders.length !== listCount && Array.from({length: listCount - orders.length}).map((_, index) => (
+                {!loading && orders.length === 0 && <li className={"mb-2 flex hover:text-primary-900 align-items-center bg-primary-300 hover:bg-red-400 hover:text-white border-1 hover:border-gray-400 border-primary transition-all transition-duration-400 h-2rem w-full px-2 py-4 border-round"}>
+                    <div className="flex align-items-center justify-content-center w-full">
+                        <span>Yakınınızda Sipariş Bulunamadı</span>
+                    </div>
+                </li>}
+                {!loading && orders.length !== listCount && Array.from({length: (listCount - orders.length) - 1}).map((_, index) => (
                     <li key={index} className={"mb-2 flex align-items-center"}>
                         <div className="ml-3 w-full h-2rem"></div>
                     </li>))}
+
             </ul>}
             <Button type="button" loading={loading} className="w-full mt-3" label="Hepsini Görüntüle"
                     onClick={() => router.visit(route("courier.orders.newOrders"))}

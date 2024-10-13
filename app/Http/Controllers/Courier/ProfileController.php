@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Courier;
 
 use App\Http\Controllers\Controller;
 use App\Models\CourierDetails;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -109,6 +110,14 @@ class ProfileController extends Controller
             "status" => true,
             "details" => $courierDetails,
             "courier" => $user,
+        ]);
+    }
+
+    public function getStatics(): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            "status" => true,
+            "statics" => Orders::getCourierStatics(14)
         ]);
     }
 }

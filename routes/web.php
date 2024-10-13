@@ -103,8 +103,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return Inertia::render('Courier/Dashboard');
         })->name('dashboard');
+
+        Route::post('/statics',[\App\Http\Controllers\Courier\ProfileController::class,'getStatics'])->name("getStatics");
+        Route::get('/');
         Route::prefix('/orders')->middleware("only:courier")->name("orders.")->group(function () {
             Route::get('/new-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'newOrders'])->name('newOrders');
+            Route::get('/past-orders',[\App\Http\Controllers\Courier\OrdersController::class,'pastOrders'])->name('pastOrders');
+            Route::post('/list-past-orders',[\App\Http\Controllers\Courier\OrdersController::class,'listPastOrders'])->name('listPastOrders');
             Route::post('/list-nearby-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'listNearbyOrders'])->name('listNearbyOrders');
             Route::get('/review-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'reviewOrder'])->name('reviewOrder');
             Route::post('/list-review-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'listReviewOrder'])->name('listReviewOrder');
@@ -130,6 +135,10 @@ Route::post("/demo-deliver-order/{id}", function ($id) {
         'message' => 'Bu Özellik Kullanıma Kapatıldı(DEV)'
     ]);
 })->name("demoDeliverOrder");
+
+Route::get('/demo3',function (){
+    return response()->json(\App\Models\Orders::getCourierStatics());
+});
 Route::get('/trendyol', function () {
     $api = new TrendyolYemekApi('1030310', '313143', 'ixLUAtJST8gKT4bEA7O5', 'N1wIvCznqVHJMIOVWVOR', 'furkanmeclis@icloud.com');
     $restaurant = $api->getPackages();

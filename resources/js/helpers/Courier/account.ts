@@ -21,3 +21,14 @@ export const getPersonalInformation = async (csrfToken: any) => {
     });
     return await response.json();
 }
+export const getCourierStatics = async (csrfToken: any) => {
+    let url = route("courier.getStatics");
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
+}

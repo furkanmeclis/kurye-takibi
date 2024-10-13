@@ -121,7 +121,7 @@ const AppMenu = () => {
                 {
                     label:"Geçmiş Siparişler",
                     icon:"pi pi-fw pi-history",
-                    to:route("business.orders.index")
+                    to:route("courier.orders.pastOrders")
                 }
             ]
         },

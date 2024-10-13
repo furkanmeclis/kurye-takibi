@@ -17,6 +17,7 @@ import PageContainer from "@/PageContainer";
 import {Head} from "@inertiajs/react";
 import {Skeleton} from "primereact/skeleton";
 import CourierOrdersWidget from "@/components/CourierOrdersWidget";
+import {getCourierStatics} from "@/helpers/Courier/account";
 
 let revenueChartData: ChartData;
 let overviewChartData: ChartData;
@@ -27,12 +28,30 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     errors?: any,
     courierIsTransporting?: boolean
 }) {
+
     const {layoutConfig} = useContext(LayoutContext);
     const [products, setProducts] = useState<Demo.Product[]>([]);
     const [ordersOptions, setOrdersOptions] = useState<ChartOptions | null>(null);
     const [revenueChartOptions, setRevenueChartOptions] = useState<ChartOptions | null>(null);
     const [selectedOverviewWeek, setSelectedOverviewWeek] = useState<any>(null);
-
+    const [loading,setLoading] = useState<boolean>(false);
+    const [statics,setStatics] = useState<any>({
+        price:0,
+        speed:0,
+        time:0,
+        count:0,
+    });
+    const getStaticData = () => {
+        setLoading(true);
+        getCourierStatics(csrfToken).then((response:any) => {
+            if(response.status){
+                setStatics(response.statics);
+            }
+        })
+    }
+    useEffect(() => {
+        getStaticData();
+    },[])
     const overviewWeeks: object[] = [
         {name: 'Bu Hafta', code: '0'},
         {name: 'Geçen Hafta', code: '1'}
@@ -133,9 +152,6 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     const setSvg = (path: any) => {
         return `/demo/images/dashboard/${path}` + '.svg';
     };
-    const dynamicBackground = () => {
-        return 'rgba(227, 248, 255, 0.1)';
-    };
 
     useEffect(() => {
         selectWeek();
@@ -186,35 +202,6 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                 }
             }
         });
-        setRevenueChartOptions({
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    grid: {
-                        color: borderColor
-                    },
-                    max: 100,
-                    min: 0,
-                    ticks: {
-                        color: textColorSecondary
-                    }
-                },
-                x: {
-                    grid: {
-                        color: borderColor
-                    },
-                    ticks: {
-                        color: textColorSecondary
-                    }
-                }
-            }
-        });
     }, [layoutConfig]);
 
     return (
@@ -229,7 +216,7 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                 <div className="ml-3">
                                     <span
                                         className="text-blue-500 block white-space-nowrap">Ortalama Teslimat Süresi</span>
-                                    <span className="text-blue-500 block text-4xl font-bold">15.3dk</span>
+                                    <span className="text-blue-500 block text-4xl font-bold">{statics.time}dk</span>
                                 </div>
                             </div>
                             <img src={setSvg('users')} className="w-full" alt="users"/>
@@ -241,7 +228,7 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                 <i className="pi pi-turkish-lira text-6xl text-orange-500"></i>
                                 <div className="ml-3">
                                     <span className="text-orange-500 block white-space-nowrap">Elde Edilen Kazanç</span>
-                                    <span className="text-orange-500 block text-4xl font-bold">436 ₺</span>
+                                    <span className="text-orange-500 block text-4xl font-bold">{statics.price} ₺</span>
                                 </div>
                             </div>
                             <img src={setSvg('locations')} className="w-full" alt="locations"/>
@@ -253,7 +240,7 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                 <i className="pi pi-box text-6xl text-purple-500"></i>
                                 <div className="ml-3">
                                     <span className="text-purple-500 block white-space-nowrap">Teslim Edilen Sipariş Adedi</span>
-                                    <span className="text-purple-500 block text-4xl font-bold">5</span>
+                                    <span className="text-purple-500 block text-4xl font-bold">{statics.count}</span>
                                 </div>
                             </div>
                             <img src={setSvg('interactions')} className="w-full mt-auto" alt="interactions"/>
@@ -266,7 +253,7 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                 <div className="ml-3">
                                     <span
                                         className="text-green-500 block white-space-nowrap">Siparişlerdeki Ortalama Hız</span>
-                                    <span className="text-green-500 block text-4xl font-bold">48.3km/h </span>
+                                    <span className="text-green-500 block text-4xl font-bold">{statics.speed}km/h </span>
                                 </div>
                             </div>
                             <img src={setSvg('rate')} className="w-full" alt="conversion"/>

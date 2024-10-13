@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -112,7 +113,7 @@ class Orders extends Model
                     $lonTo = $order->business->details->longitude;
                     $order->distance = self::calculateDistance($latFrom, $lonFrom, $latTo, $lonTo);
                 }
-                if($withLocations){
+                if ($withLocations) {
                     $order->locations = OrderLocations::getLocations($order->id);
                 }
                 return (object)[
@@ -126,4 +127,69 @@ class Orders extends Model
             "message" => "Sipariş Bulunamadı"
         ];
     }
+
+    public static function getCourierOrders()
+    {
+        $courierId = auth()->user()->id;
+        return self::where('courier_id', $courierId)->orderBy('updated_at', 'desc')->get()->map(function ($order) {
+            $order->customer = Customers::find($order->customer_id);
+            $order->address = CustomerAddresses::find($order->address_id);
+            $order->start_location = json_decode($order->start_location);
+            $order->end_location = json_decode($order->end_location);
+            $order->courier = User::getCourier($order->courier_id);
+            $order->business = User::getBusiness($order->business_id);
+            if ($order->cancellation_accepted_by != null) {
+                $order->cancellation_accepted_by = User::where('id', $order->cancellation_accepted_by)->first(["id", "name"]);
+            }
+            return $order;
+        });
+    }
+
+    public static function getCourierStatics(int $days = 7): object
+    {
+        $courierId = auth()->user()->id;
+        $startDate = Carbon::now()->subDays($days);
+        $orders = self::where('courier_id', $courierId)
+            ->where('status', "delivered")
+            ->where('updated_at', '>=', $startDate)
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                $acceptedAt = Carbon::parse($order->courier_accepted_at);
+                $deliveredAt = Carbon::parse($order->delivered_at);
+                $hours = $acceptedAt->diffInHours($deliveredAt);
+                $start_location = json_decode($order->start_location);
+                $end_location = json_decode($order->end_location);
+                $distance = self::calculateDistance(
+                    $start_location->latitude,
+                    $start_location->longitude,
+                    $end_location->latitude,
+                    $end_location->longitude);
+                $order->average_speed = $hours > 0 ? $distance / $hours : 0;
+                $order->delivery_time = $acceptedAt->diffInMinutes($deliveredAt);
+                return $order;
+            });
+
+        $sumSpeed = 0;
+        $sumTime = 0;
+        $sumPrice = 0;
+        $ordersCount = count($orders);
+
+        foreach ($orders as $order) {
+            $sumSpeed += $order->average_speed;
+            $sumTime += $order->delivery_time;
+            $sumPrice += $order->price;
+        }
+
+        $averageSpeed = $ordersCount > 0 ? ($sumSpeed / $ordersCount) : 0;
+        $averageTime = $ordersCount > 0 ? ($sumTime / $ordersCount) : 0;
+
+        return (object)[
+            "price" => $sumPrice,
+            "speed" => round($averageSpeed,2),
+            "time" => round($averageTime,2),
+            "count" => $ordersCount
+        ];
+    }
+
 }

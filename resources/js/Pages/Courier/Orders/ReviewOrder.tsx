@@ -10,7 +10,7 @@ import WatchingIcon from "@/components/WatchingIcon";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import {Button} from "primereact/button";
 import {Avatar} from "primereact/avatar";
-import {Head, Link} from "@inertiajs/react";
+import {Head, Link, router} from "@inertiajs/react";
 import {Tag} from "primereact/tag";
 import bicycle from "@/icons/bicycle.svg";
 import motorcycle from "@/icons/motorcycle.svg";
@@ -460,13 +460,12 @@ const ReviewOrder = ({auth, csrfToken, orderId, courierIsTransporting = false}: 
                                         acceptOrderFromCourier(orderId, location.latitude, location.longitude, csrfToken)
                                             .then((response) => {
                                                 if (response.status) {
-                                                    // TODO: Gerekli işlemleri yapmayı unutma
                                                     toast.current?.show({
                                                         severity: "success",
                                                         summary: "Başarılı",
                                                         detail: response.message
                                                     });
-                                                    console.log(response)
+                                                    router.reload();
                                                 } else {
                                                     toast.current?.show({
                                                         severity: "error",
