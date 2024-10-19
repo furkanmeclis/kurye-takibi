@@ -266,9 +266,11 @@ class OrdersController extends \App\Http\Controllers\Controller
                         "reason" => ['required', 'in:wrongAddress,notInAddress,addressMismatch,accident,heavyTraffic,productDamaged,tireBust'],
                     ]);
                     $order->cancellation_accepted = 1;
+                    $order->status = "canceled";
                     $order->cancellation_reason = $this->getStatusMessage($request->reason);
                     $order->cancellation_requested_by = "courier";
                     $order->cancellation_accepted_by = User::where("role","admin")->first()->id;
+                    $order->canceled_at = now();
                     if ($order->save()) {
                         return response()->json([
                             "status" => true,

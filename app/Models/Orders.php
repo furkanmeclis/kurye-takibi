@@ -184,12 +184,52 @@ class Orders extends Model
 
         $averageSpeed = $ordersCount > 0 ? ($sumSpeed / $ordersCount) : 0;
         $averageTime = $ordersCount > 0 ? ($sumTime / $ordersCount) : 0;
-
+        $daysArray = [
+            "monday" => 0,
+            "tuesday" => 0,
+            "wednesday" => 0,
+            "thursday" => 0,
+            "friday" => 0,
+            "saturday" => 0,
+            "sunday" => 0,
+        ];
+        $weekOfYear = Carbon::now()->weekOfYear;
+        $thisWeekCounts = [...$daysArray];
+        $lastWeekCounts = [...$daysArray];
+        $thisWeekPrices = [...$daysArray];
+        $lastWeekPrices = [...$daysArray];
+        $thisWeekTimes = [...$daysArray];
+        $lastWeekTimes = [...$daysArray];
+        foreach ($orders as $order) {
+            $day = strtolower(Carbon::parse($order->updated_at)->format("l"));
+            $week = Carbon::parse($order->updated_at)->weekOfYear;
+            if ($week == $weekOfYear) {
+                $thisWeekCounts[$day]++;
+                $thisWeekPrices[$day] += round($order->price, 2);
+                $thisWeekTimes[$day] += $order->delivery_time;
+            } elseif ($week == $weekOfYear - 1) {
+                $lastWeekCounts[$day]++;
+                $lastWeekPrices[$day] += round($order->price, 2);
+                $lastWeekTimes[$day] += $order->delivery_time;
+            }
+        }
         return (object)[
             "price" => $sumPrice,
             "speed" => round($averageSpeed, 2),
             "time" => round($averageTime, 2),
-            "count" => $ordersCount
+            "count" => $ordersCount,
+            "graph" => [
+                "thisWeek" => [
+                    "prices" => array_values($thisWeekPrices),
+                    "counts" => array_values($thisWeekCounts),
+                    "times" => array_values($thisWeekTimes)
+                ],
+                "lastWeek" => [
+                    "prices" => array_values($lastWeekPrices),
+                    "counts" => array_values($lastWeekCounts),
+                    "times" => array_values($lastWeekTimes)
+                ]
+            ]
         ];
     }
 

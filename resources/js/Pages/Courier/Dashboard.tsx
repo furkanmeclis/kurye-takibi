@@ -19,7 +19,6 @@ import {Skeleton} from "primereact/skeleton";
 import CourierOrdersWidget from "@/components/CourierOrdersWidget";
 import {getCourierStatics} from "@/helpers/Courier/account";
 
-let revenueChartData: ChartData;
 let overviewChartData: ChartData;
 
 function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
@@ -34,24 +33,40 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     const [ordersOptions, setOrdersOptions] = useState<ChartOptions | null>(null);
     const [revenueChartOptions, setRevenueChartOptions] = useState<ChartOptions | null>(null);
     const [selectedOverviewWeek, setSelectedOverviewWeek] = useState<any>(null);
-    const [loading,setLoading] = useState<boolean>(false);
-    const [statics,setStatics] = useState<any>({
-        price:0,
-        speed:0,
-        time:0,
-        count:0,
+    const [loading, setLoading] = useState<boolean>(false);
+    const [statics, setStatics] = useState<any>({
+        price: 0,
+        speed: 0,
+        time: 0,
+        count: 0,
+        graph: {
+            thisWeek: {
+                prices: [],
+                counts: [],
+                times: []
+            },
+            lastWeek: {
+                prices: [],
+                counts: [],
+                times: []
+            }
+        }
     });
     const getStaticData = () => {
         setLoading(true);
-        getCourierStatics(csrfToken).then((response:any) => {
-            if(response.status){
+        getCourierStatics(csrfToken).then((response: any) => {
+            if (response.status) {
                 setStatics(response.statics);
+                overviewChartData.datasets[0].data = response.statics.graph.thisWeek.counts;
+                overviewChartData.datasets[1].data = response.statics.graph.thisWeek.prices;
+                overviewChartData.datasets[2].data = response.statics.graph.thisWeek.times;
+                overviewChartData = {...overviewChartData};
             }
         })
     }
     useEffect(() => {
         getStaticData();
-    },[])
+    }, [])
     const overviewWeeks: object[] = [
         {name: 'Bu Hafta', code: '0'},
         {name: 'Geçen Hafta', code: '1'}
@@ -61,26 +76,15 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     };
     const changeOverviewWeek = (e: DropdownChangeEvent) => {
         setSelectedOverviewWeek(e.value);
-        const dataSet1 = [
-            91,
-            70,
-            56,
-            86,
-            64,
-        ];
-        const dataSet2 = [
-            52,
-            70,
-            55,
-            68,
-            79,
-            56,
-            74
-        ];
         if (e.value.code === '1') {
-            overviewChartData.datasets[0].data = dataSet2;
+            overviewChartData.datasets[0].data = statics.graph.lastWeek.counts;
+            overviewChartData.datasets[1].data = statics.graph.lastWeek.prices;
+            overviewChartData.datasets[2].data = statics.graph.lastWeek.times;
+
         } else {
-            overviewChartData.datasets[0].data = dataSet1;
+            overviewChartData.datasets[0].data = statics.graph.thisWeek.counts;
+            overviewChartData.datasets[1].data = statics.graph.thisWeek.prices;
+            overviewChartData.datasets[2].data = statics.graph.thisWeek.times;
         }
         overviewChartData = {...overviewChartData};
     };
@@ -88,67 +92,46 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     const getOverviewChartData = (): any => {
         const documentStyle = getComputedStyle(document.documentElement);
         const primaryColor = documentStyle.getPropertyValue('--primary-color');
-        const primaryColor300 = documentStyle.getPropertyValue('--primary-200');
+        const primaryColor300 = documentStyle.getPropertyValue('--primary-600');
 
         return {
             labels: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
             datasets: [
                 {
                     label: 'Sipariş Adedi',
-                    data: [
-                        70,
-                        68,
-                        72,
-                        56,
-                        68,
-                        90,
-                        68
-                    ],
-                    backgroundColor: ['#007bff'],
+                    data: [],
+                    backgroundColor: [primaryColor],
                     hoverBackgroundColor: [primaryColor300],
                     fill: true,
                     borderRadius: '3',
                     borderSkipped: 'top bottom',
-                    barPercentage: 0.25
-                }
-            ]
-        };
-    };
-    const getRevenueChartData = () => {
-        const documentStyle = getComputedStyle(document.documentElement);
-        const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-        const borderColor = documentStyle.getPropertyValue('--surface-border');
-        return {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [
-                {
-                    data: [11, 17, 30, 60, 88, 92],
-                    borderColor: 'rgba(25, 146, 212, 0.5)',
-                    pointBorderColor: 'transparent',
-                    pointBackgroundColor: 'transparent',
-                    fill: false,
-                    tension: 0.4
+                    barPercentage: 0.5
                 },
                 {
-                    data: [11, 19, 39, 59, 69, 71],
-                    borderColor: 'rgba(25, 146, 212, 0.5)',
-                    pointBorderColor: 'transparent',
-                    pointBackgroundColor: 'transparent',
-                    fill: false,
-                    tension: 0.4
-                },
-                {
-                    data: [11, 17, 21, 30, 47, 83],
-                    backgroundColor: 'rgba(25, 146, 212, 0.2)',
-                    borderColor: 'rgba(25, 146, 212, 0.5)',
-                    pointBorderColor: 'transparent',
-                    pointBackgroundColor: 'transparent',
+                    label: 'Sipariş Ücreti (TL)',
+                    data: [],
+                    backgroundColor: [documentStyle.getPropertyValue('--cyan-300')],
+                    hoverBackgroundColor: [documentStyle.getPropertyValue('--cyan-600')],
                     fill: true,
-                    tension: 0.4
+                    borderRadius: '3',
+                    borderSkipped: 'top bottom',
+                    barPercentage: 0.5
+                },
+                {
+                    label: 'Sipariş Teslimat Süresi (dk)',
+                    data: [],
+                    backgroundColor: [documentStyle.getPropertyValue('--pink-300')],
+                    hoverBackgroundColor: [documentStyle.getPropertyValue('--pink-600')],
+                    fill: true,
+                    borderRadius: '1',
+                    borderSkipped: 'top bottom',
+                    barPercentage: 0.5
                 }
-            ]
+            ],
         };
     };
+
+
     const setSvg = (path: any) => {
         return `/demo/images/dashboard/${path}` + '.svg';
     };
@@ -163,7 +146,6 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
         const borderColor = documentStyle.getPropertyValue('--surface-border');
         overviewChartData = getOverviewChartData();
-        revenueChartData = getRevenueChartData();
         setOrdersOptions({
             plugins: {
                 legend: {
@@ -253,7 +235,8 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                 <div className="ml-3">
                                     <span
                                         className="text-green-500 block white-space-nowrap">Siparişlerdeki Ortalama Hız</span>
-                                    <span className="text-green-500 block text-4xl font-bold">{statics.speed}km/h </span>
+                                    <span
+                                        className="text-green-500 block text-4xl font-bold">{statics.speed}km/h </span>
                                 </div>
                             </div>
                             <img src={setSvg('rate')} className="w-full" alt="conversion"/>
@@ -354,13 +337,58 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                         optionLabel="name"
                                     />
                                     <Button
-                                        icon={"pi pi-refresh"}
-                                        tooltip={"Verileri Yenile"}
+                                        icon={"pi pi-cloud-download"}
+                                        tooltip={"PNG olarak kaydet"}
                                         tooltipOptions={{position: 'top'}}
                                         className={"ml-2"}
                                         severity={"secondary"}
                                         outlined
-                                    />
+                                        onClick={() => {
+                                            const element = document.querySelector('.graph canvas') as any;
+                                            const canvas = document.createElement('canvas');
+                                            canvas.width = element.width;
+                                            canvas.height = element.height;
+                                            const context = canvas.getContext('2d');
+                                            if (context) {
+                                                context.fillStyle = 'white';
+                                                context.drawImage(element, 0, 0);
+                                                const a = document.createElement('a');
+                                                a.href = canvas.toDataURL('image/png');
+                                                let downloadNameRandom = Math.random().toString(36).substring(7);
+                                                a.download = `siparis-grafigi-${downloadNameRandom}.png`;
+                                                a.click();
+                                            }
+                                        }}
+                                    /><Button
+                                    icon={"pi pi-print"}
+                                    tooltip={"Yazdır"}
+                                    tooltipOptions={{position: 'top'}}
+                                    className={"ml-2"}
+                                    severity={"secondary"}
+                                    outlined
+                                    onClick={async () => {
+                                        // only print the chart
+                                        const element = document.querySelector('.graph canvas') as any;
+                                        const canvas = document.createElement('canvas');
+                                        canvas.width = element.width;
+                                        canvas.height = element.height;
+                                        canvas.style.backgroundColor = '#000';
+                                        const context = canvas.getContext('2d');
+                                        if (context) {
+                                            context.drawImage(element, 0, 0);
+                                            const image = new Image();
+                                            image.src = canvas.toDataURL('image/png',1);
+                                            // wait image to load
+                                            await new Promise((resolve) => {
+                                                image.onload = resolve;
+                                            });
+                                            const w = window.open("");
+                                            w?.document.write(image.outerHTML);
+                                            await w?.print();
+                                            w?.close();
+                                        }
+                                    }}
+                                />
                                 </div>
                             </div>
                             <div className="graph">
