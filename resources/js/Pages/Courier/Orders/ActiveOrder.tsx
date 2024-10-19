@@ -1,14 +1,14 @@
 import {useContext, useEffect, useRef, useState} from "react";
-import {deliverOrder, getActiveOrder, watchPosition} from "@/helpers/Courier/orders";
+import {deliverOrder, emergencyAction, getActiveOrder, watchPosition} from "@/helpers/Courier/orders";
 import {Toast} from "primereact/toast";
-import {getLocation, getOrderStatuses} from "@/helpers/globalHelper";
+import {getEmergencyStatuses, getLocation, getOrderStatuses} from "@/helpers/globalHelper";
 import {BlockUI} from "primereact/blockui";
 import {Tooltip} from "primereact/tooltip";
 import WatchingIcon from "@/components/WatchingIcon";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import {Button} from "primereact/button";
 import {Avatar} from "primereact/avatar";
-import {Link, router} from "@inertiajs/react";
+import {Head, Link, router} from "@inertiajs/react";
 import {Tag} from "primereact/tag";
 import {Timeline} from "primereact/timeline";
 import L from "leaflet";
@@ -152,10 +152,10 @@ const ActiveOrder = ({auth, csrfToken}: {
             accept: () => {
                 setLoading(true);
                 deliverOrder(order.id, csrfToken).then((res: any) => {
-                    if(res.status) {
+                    if (res.status) {
                         toast?.current?.show({severity: 'success', summary: 'Başarılı', detail: res.message});
                         router.reload();
-                    }else{
+                    } else {
                         toast?.current?.show({severity: 'error', summary: 'Hata', detail: res.message});
                     }
                 }).catch(() => {
@@ -163,6 +163,28 @@ const ActiveOrder = ({auth, csrfToken}: {
                 }).finally(() => setLoading(false))
             },
         });
+    }
+    const reportEmergency = (reason: any) => {
+        confirmDialog({
+            message: "Sipariş İptal Edilecektir İptal Nedeni Sisteme *" + getEmergencyStatuses(reason) + "* Olarak Geçecektir.",
+            header: "Uyarı",
+            draggable: false,
+            acceptLabel: "İptal Et",
+            acceptClassName: "p-button-danger",
+            rejectLabel: "Vazgeç",
+            accept() {
+                setLoading(true);
+                emergencyAction(order.id, reason, csrfToken).then((res: any) => {
+                    if (res.status) {
+                        toast?.current?.show({severity: 'success', summary: 'Başarılı', detail: res.message});
+                    } else {
+                        toast?.current?.show({severity: 'error', summary: 'Hata', detail: res.message});
+                    }
+                }).catch(() => {
+                    toast?.current?.show({severity: 'error', summary: 'Hata', detail: "Bir Sorun Oluştu"});
+                }).finally(() => setLoading(false))
+            }
+        })
     }
     const prepareTimeLine = (order: any) => {
         let created_at = new Date(order.created_at);
@@ -407,8 +429,10 @@ const ActiveOrder = ({auth, csrfToken}: {
             </div>
         </div>
     }
+
     return <BlockUI blocked={loading} template={<i className={"pi pi-spin pi-spinner"} style={{fontSize: '3rem'}}></i>}>
         <Toast ref={toast}/>
+        <Head title={"Aktif Sipariş Takibi"}/>
         <div className="card">
             <div className="grid">
                 <div className="col-12 flex justify-content-between align-items-center">
@@ -441,7 +465,9 @@ const ActiveOrder = ({auth, csrfToken}: {
         >
             <div className="grid my-3">
                 <div className="col-6">
-                    <div className="emergency-button">
+                    <div className="emergency-button" onClick={(event) => {
+                        reportEmergency("wrongAddress")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path
@@ -451,7 +477,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                     </div>
                 </div>
                 <div className="col-6">
-                    <button  className="emergency-button">
+                    <button className="emergency-button" onClick={(event) => {
+                        reportEmergency("notInAddress")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path
@@ -461,7 +489,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                     </button>
                 </div>
                 <div className="col-6">
-                    <div className="emergency-button">
+                    <div className="emergency-button" onClick={(event) => {
+                        reportEmergency("addressMismatch")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path
@@ -471,7 +501,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                     </div>
                 </div>
                 <div className="col-6">
-                    <div className="emergency-button">
+                    <div className="emergency-button" onClick={(event) => {
+                        reportEmergency("accident")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path
@@ -481,7 +513,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                     </div>
                 </div>
                 <div className="col-6">
-                    <div className="emergency-button">
+                    <div className="emergency-button" onClick={(event) => {
+                        reportEmergency("heavyTraffic")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path
@@ -491,7 +525,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                     </div>
                 </div>
                 <div className="col-6">
-                    <div className="emergency-button">
+                    <div className="emergency-button" onClick={(event) => {
+                        reportEmergency("productDamaged")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path
@@ -501,7 +537,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                     </div>
                 </div>
                 <div className="col-6">
-                    <div className="emergency-button">
+                    <div className="emergency-button" onClick={(event) => {
+                        reportEmergency("tireBust")
+                    }}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                              fill="#e8eaed">
                             <path

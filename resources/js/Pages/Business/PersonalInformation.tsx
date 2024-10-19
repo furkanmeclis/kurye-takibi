@@ -17,6 +17,7 @@ import {getPersonalInformation, savePersonalInformation} from "@/helpers/Busines
 import {Steps} from "primereact/steps";
 import {Message} from "primereact/message";
 import {LayoutContext} from "@/layout/context/layoutcontext";
+import {getLocation} from "@/helpers/globalHelper";
 
 interface State {
     plaka_kodu: string;
@@ -113,6 +114,7 @@ const PersonalInformation = ({
         country: Yup.string().required('Ülke bilgisini seçiniz'),
         status: Yup.string().nullable(),
         billing: Yup.mixed().oneOf(['individual', 'company']).required('Fatura türünü seçiniz'),
+        latitude: Yup.string().required("Konum Bilgisi Gereklidir Lütfen Konum Ekleyiniz").min(3, "Lütfen Konum Ekleyiniz"),
         identity: Yup.string().when('billing', {
             is: 'individual',
             then: () => Yup.string().required('Kimlik numarası zorunludur').max(11, 'Kimlik numarası 11 karakter olmalıdır').min(11, 'Kimlik numarası 11 karakter olmalıdır'),
@@ -179,6 +181,8 @@ const PersonalInformation = ({
             tax_address: '',
             tax_office: selectedTaxOffice.vergi_dairesi,
             selectedTaxOffice,
+            latitude: "",
+            longitude: ""
         },
         validationSchema,
         validateOnChange: validationType,
@@ -206,7 +210,7 @@ const PersonalInformation = ({
                 delete formData?.tax_office;
             }
             setLoading(true);
-            savePersonalInformation(formData,csrfToken).then((response) => {
+            savePersonalInformation(formData, csrfToken).then((response) => {
                 if (response.status) {
                     let newData = response.details;
                     let resetData = {
@@ -228,6 +232,8 @@ const PersonalInformation = ({
                         tax_address: newData.tax_address || '',
                         tax_office: newData.tax_office || '',
                         selectedTaxOffice: {} as VergiDairesi,
+                        latitude: newData.latitude || '',
+                        longitude: newData.longitude || ''
                     };
                     resetData.selectedCity = cities.find((city) => city.il_adi === newData.city) as City;
                     resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === newData.state) as State;
@@ -295,12 +301,14 @@ const PersonalInformation = ({
                     tax_office: details.tax_office || '',
                     selectedTaxOffice: {} as VergiDairesi,
                     vehicle_type: details.vehicle_type,
+                    latitude: details.latitude || '',
+                    longitude: details.longitude || ''
                 };
                 if (details.city !== null) {
                     resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
                     if (details.state !== null && resetData.selectedCity?.ilceler !== null) {
                         resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
-                    }else{
+                    } else {
                         resetData.selectedState = resetData.selectedCity.ilceler[0];
                         resetData.state = resetData.selectedCity.ilceler[0].ilce_adi;
                     }
@@ -360,6 +368,26 @@ const PersonalInformation = ({
                         Sistemdeki bilgilerinizin güncel olması gerekmektedir. Lütfen aşağıdaki alanları doldurunuz.
                         {!profileApproved && "Onay sürecinden sonra üyeliğiniz aktif edilecektir."}
                     </p>
+                    <Divider/>
+                    <Button icon={"pi pi-map-marker"}
+                            severity={errors.latitude ? "danger" : values.latitude !== "" ? "success" : "info"}
+                            size={"small"} label={values.latitude !== "" ? "Konum Ekli" : "Konum Ekle"}
+                            disabled={values.latitude !== ""}
+                            onClick={() => {
+                                if (toast?.current) {
+                                    setLoading(true)
+                                    getLocation(toast?.current)
+                                        .then((location: any) => {
+                                            setFieldValue('latitude', location.latitude);
+                                            setFieldValue('longitude', location.longitude)
+                                        })
+                                        .catch(() => {
+                                        })
+                                        .finally(() => setLoading(false))
+                                }
+                            }}
+
+                    />
                     {(activeState === 1 || approved) && <><Divider/>
                         <div className="field mb-4 w-full">
                             <label htmlFor="billing" className={classNames("font-medium text-900", {

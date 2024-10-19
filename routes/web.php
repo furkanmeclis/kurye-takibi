@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/get-active-order', [\App\Http\Controllers\Courier\OrdersController::class, 'activeOrder'])->name('activeOrder');
             Route::post('/update-courier-location', [\App\Http\Controllers\Courier\OrdersController::class, 'updateCourierLocation'])->name('updateCourierLocation');
             Route::post('/deliver-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'deliverOrder'])->name('deliverOrder');
+            Route::post('/emergency-action/{id}',[\App\Http\Controllers\Courier\OrdersController::class,"emergencyAction"])->name("emergencyAction");
         });
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');

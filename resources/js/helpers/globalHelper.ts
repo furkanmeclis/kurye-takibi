@@ -20,6 +20,8 @@ export const getDetailKeysTranslation = (key: string) => {
         "updated_at": "Güncellenme Tarihi",
         "identity": "Kimlik Numarası",
         "birth_date": "Doğum Tarihi",
+        "latitude": "Enlem",
+        "longitude": "Boylam"
     };
     // @ts-ignore
     return labelTranslations[key];
@@ -131,4 +133,21 @@ export const getLocation = (toast: Toast) => {
             reject("Konum Bilgisi Alınamadı");
         }
     });
+}
+export const getEmergencyStatuses = (key: any, getAll = false) => {
+    let statuses = {
+        wrongAddress: "Yanlış Adres",
+        notInAddress: "Adreste Yok",
+        addressMismatch: "Adres Uyuşmaması",
+        accident: "Kaza",
+        heavyTraffic: "Yoğun Trafik",
+        productDamaged: "Ürün Hasar Aldı",
+        tireBust: "Lastik Patladı"
+    }
+    if (getAll) {
+        return statuses
+    } else {
+        // @ts-ignore
+        return statuses[key];
+    }
 }

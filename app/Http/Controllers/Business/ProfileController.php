@@ -35,6 +35,8 @@ class ProfileController extends Controller
                 'tax_number' => $companyFirst . '|string|min:10|max:10',
                 'tax_address' => $companyFirst . '|string|min:10',
                 'tax_office' => $companyFirst . '|string',
+                'latitude' => "required",
+                "longitude" => "required"
             ]);
             $user = auth()->user();
             $businessDetails = BusinessDetails::firstOrNew(['business_id' => $user->id]);
@@ -48,6 +50,8 @@ class ProfileController extends Controller
             $businessDetails->tax_number = null;
             $businessDetails->tax_address = null;
             $businessDetails->tax_office = null;
+            $businessDetails->latitude = $request->get("latitude");
+            $businessDetails->longitude = $request->get("longitude");
             if ($request->get("billing") == "individual") {
                 $businessDetails->identity = $request->get("identity");
                 $businessDetails->birth_date = $request->get("birth_date");

@@ -107,3 +107,17 @@ export const getPastOrders = async (csrfToken: any) => {
     });
     return await response.json();
 }
+export const emergencyAction = async (orderId: any, reason: any, csrfToken: any) => {
+    let url = route("courier.orders.emergencyAction", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+            reason
+        })
+    });
+    return await response.json();
+}

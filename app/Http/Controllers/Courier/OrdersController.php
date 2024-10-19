@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Courier;
 
 use App\Models\OrderLocations;
 use App\Models\Orders;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
@@ -69,13 +70,16 @@ class OrdersController extends \App\Http\Controllers\Controller
     public function reviewOrder($orderId): \Inertia\Response|\Illuminate\Http\RedirectResponse
     {
         $record = Orders::findOrder($orderId);
+
         if ($record->status) {
-            return Inertia::render("Courier/Orders/ReviewOrder", [
-                "orderId" => $orderId
-            ]);
-        } else {
-            return redirect()->route('courier.orders.newOrders')->with('message', $record->message)->with('type', 'error')->with("title", "Hata");
+            if ($record->order->status == "opened") {
+                return Inertia::render("Courier/Orders/ReviewOrder", [
+                    "orderId" => $orderId
+                ]);
+            }
         }
+        return redirect()->route('courier.orders.newOrders')->with('message', $record->message)->with('type', 'error')->with("title", "Hata");
+
     }
 
     public function listReviewOrder($orderId): \Illuminate\Http\JsonResponse
@@ -228,6 +232,64 @@ class OrdersController extends \App\Http\Controllers\Controller
                 return response()->json([
                     "status" => false,
                     "message" => "Sipariş Teslim Edilemedi"
+                ]);
+            }
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Sipariş Bulunamadı"
+            ]);
+        }
+    }
+    public function getStatusMessage($key): string
+    {
+        $statuses = [
+            'wrongAddress' => 'Yanlış Adres',
+            'notInAddress' => 'Adreste Yok',
+            'addressMismatch' => 'Adres Uyuşmaması',
+            'accident' => 'Kaza',
+            'heavyTraffic' => 'Yoğun Trafik',
+            'productDamaged' => 'Ürün Hasar Aldı',
+            'tireBust' => 'Lastik Patladı',
+        ];
+
+        return $statuses[$key] ?? 'Bilinmeyen Durum';
+    }
+
+    public function emergencyAction(Request $request, $orderId): \Illuminate\Http\JsonResponse
+    {
+        $order = Orders::find($orderId);
+        if ($order) {
+            if ($order->status == "transporting" && $order->courier_id == auth()->user()->id) {
+                try {
+                    $request->validate([
+                        "reason" => ['required', 'in:wrongAddress,notInAddress,addressMismatch,accident,heavyTraffic,productDamaged,tireBust'],
+                    ]);
+                    $order->cancellation_accepted = 1;
+                    $order->cancellation_reason = $this->getStatusMessage($request->reason);
+                    $order->cancellation_accepted_by = "courier";
+                    $order->cancellation_accepted = User::where("role","admin")->first()->id;
+                    if ($order->save()) {
+                        return response()->json([
+                            "status" => true,
+                            "message" => "Sipariş İptal Edildi.İptal Sebebi: ".$this->getStatusMessage($request->reason)
+                        ]);
+                    } else {
+                        return response()->json([
+                            "status" => false,
+                            "message" => "Sipariş İptal Edilemedi"
+                        ]);
+                    }
+                } catch (ValidationException $e) {
+                    return response()->json([
+                        "status" => false,
+                        "message" => $e->getMessage(),
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Sipariş Size Ait Değil"
                 ]);
             }
         } else {

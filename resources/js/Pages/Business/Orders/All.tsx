@@ -313,57 +313,6 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
-                    <Button icon={"pi pi-plus-circle"} size={"small"}
-                            tooltipOptions={{
-                                position: "top"
-                            }}
-                            visible={rowData.status !== "canceled" && rowData.status !== "deleted" && rowData.status !== "delivered"}
-                            onClick={() => {
-                                setLoading(true)
-                                demoAddLocation(rowData.id, csrfToken).then(({status, message}) => {
-                                    if (status) {
-                                        toast.current?.show({
-                                            severity: "success",
-                                            summary: "Başarılı",
-                                            detail: message
-                                        });
-                                        getOrdersAll();
-                                    } else {
-                                        toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                                    }
-                                }).catch((err) => {
-                                    toast.current?.show({severity: "error", summary: "Hata", detail: err.message});
-                                })
-                                    .finally(() => setLoading(false))
-                            }}
-                            severity={"help"}
-                            tooltip={"Konum Ekle (DEV FEATURE) Rastgele Kurye Ekler Sistemde Kurye Olmazsa Hata Verir"}
-                    />
-                    <Button icon={"pi pi-send"} size={"small"}
-                            tooltipOptions={{
-                                position: "top"
-                            }}
-                            visible={rowData.status === "transporting"}
-                            onClick={() => {
-                                setLoading(true)
-                                demoDeliverOrder(rowData.id, csrfToken).then(({status, message}) => {
-                                    if (status) {
-                                        toast.current?.show({
-                                            severity: "success",
-                                            summary: "Başarılı",
-                                            detail: message
-                                        });
-                                        getOrdersAll();
-                                    } else {
-                                        toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                                    }
-                                }).catch((err) => {
-                                    toast.current?.show({severity: "error", summary: "Hata", detail: err.message});
-                                })
-                                    .finally(() => setLoading(false))
-                            }}
-                            severity={"success"} tooltip={"Teslimatı Tamamla (DEV FEATURE)"}
-                    />
                     {rowData.status === "draft" && <Button
                         size={"small"}
                         icon={"pi pi-check-circle"}
@@ -375,6 +324,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         }}
                         disabled={rowData.status !== "draft"}
                         onClick={() => {
+                            console.log(rowData)
                             openOrder(rowData.id);
                         }}
                     />}

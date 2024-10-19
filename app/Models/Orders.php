@@ -118,7 +118,8 @@ class Orders extends Model
                 }
                 return (object)[
                     "status" => true,
-                    "order" => $order
+                    "order" => $order,
+                    "message" => $order->status != "opened" ? "Bu Sipariş Görüntülemeye Müsait Değildir" : "Sipariş Görüntülendi"
                 ];
             }
         }
@@ -186,8 +187,8 @@ class Orders extends Model
 
         return (object)[
             "price" => $sumPrice,
-            "speed" => round($averageSpeed,2),
-            "time" => round($averageTime,2),
+            "speed" => round($averageSpeed, 2),
+            "time" => round($averageTime, 2),
             "count" => $ordersCount
         ];
     }

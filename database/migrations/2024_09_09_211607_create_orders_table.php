@@ -19,8 +19,8 @@ return new class extends Migration {
             $table->double("price")->default(1);
             $table->string("customer_note")->nullable();
             $table->enum("status", ["draft", "opened", "transporting", "delivered", "canceled", "deleted"])->default("draft");
-            $table->json("start_location")->default('{"latitude":0,"longitude":0}');
-            $table->json("end_location")->default('{"latitude":0,"longitude":0}');
+            $table->string("start_location")->default('{"latitude":0,"longitude":0}');
+            $table->string("end_location")->default('{"latitude":0,"longitude":0}');
             $table->boolean("cancellation_accepted")->default(false);
             $table->unsignedBigInteger("cancellation_accepted_by")->nullable();
             $table->enum("cancellation_requested_by",["courier","business"])->nullable();
