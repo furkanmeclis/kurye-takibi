@@ -267,8 +267,8 @@ class OrdersController extends \App\Http\Controllers\Controller
                     ]);
                     $order->cancellation_accepted = 1;
                     $order->cancellation_reason = $this->getStatusMessage($request->reason);
-                    $order->cancellation_accepted_by = "courier";
-                    $order->cancellation_accepted = User::where("role","admin")->first()->id;
+                    $order->cancellation_requested_by = "courier";
+                    $order->cancellation_accepted_by = User::where("role","admin")->first()->id;
                     if ($order->save()) {
                         return response()->json([
                             "status" => true,
