@@ -107,6 +107,22 @@ export const getPastOrders = async (csrfToken: any) => {
     });
     return await response.json();
 }
+export const getPastOrdersForWidget = async (listCount: number | boolean, csrfToken: any) => {
+    let url = route("courier.orders.listPastOrdersForWidget");
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let body = {} as any;
+    if (listCount !== false) {
+        body.listCount = listCount;
+    }
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(body)
+    });
+    return await response.json();
+}
 export const emergencyAction = async (orderId: any, reason: any, csrfToken: any) => {
     let url = route("courier.orders.emergencyAction", orderId);
     let headers = new Headers();
@@ -118,6 +134,28 @@ export const emergencyAction = async (orderId: any, reason: any, csrfToken: any)
         body: JSON.stringify({
             reason
         })
+    });
+    return await response.json();
+}
+export const getLocations = async (orderId: any, csrfToken: any) => {
+    let url = route("courier.orders.getLocations", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
+}
+export const getOrder = async (orderId: any, csrfToken: any) => {
+    let url = route("courier.orders.getOrder", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
     });
     return await response.json();
 }

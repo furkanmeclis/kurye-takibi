@@ -95,21 +95,23 @@ Route::middleware('auth')->group(function () {
             Route::post('/{id}/get-details', [\App\Http\Controllers\Business\OrdersController::class, 'getOrder'])->name('getOrder');
             Route::post('/{id}/get-locations', [\App\Http\Controllers\Business\OrdersController::class, 'getLocations'])->name('getLocations');
             Route::delete('/{id}/destroy', [\App\Http\Controllers\Business\OrdersController::class, 'destroy'])->name('destroy');
-
         });
-
+        Route::prefix("integrations")->name("integrations.")->group(function () {
+            Route::get('/', [\App\Http\Controllers\Business\IntegrationsController::class, 'show'])->name('show');
+        });
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
         Route::get('/', function () {
             return Inertia::render('Courier/Dashboard');
         })->name('dashboard');
 
-        Route::post('/statics',[\App\Http\Controllers\Courier\ProfileController::class,'getStatics'])->name("getStatics");
-        Route::get('/');
+        Route::post('/statics', [\App\Http\Controllers\Courier\ProfileController::class, 'getStatics'])->name("getStatics");
         Route::prefix('/orders')->middleware("only:courier")->name("orders.")->group(function () {
+            Route::get('/{id}/show', [\App\Http\Controllers\Courier\OrdersController::class, 'show'])->name('show');
             Route::get('/new-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'newOrders'])->name('newOrders');
-            Route::get('/past-orders',[\App\Http\Controllers\Courier\OrdersController::class,'pastOrders'])->name('pastOrders');
-            Route::post('/list-past-orders',[\App\Http\Controllers\Courier\OrdersController::class,'listPastOrders'])->name('listPastOrders');
+            Route::get('/past-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'pastOrders'])->name('pastOrders');
+            Route::post('/list-past-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'listPastOrders'])->name('listPastOrders');
+            Route::post('/list-past-orders-for-widget', [\App\Http\Controllers\Courier\OrdersController::class, 'listPastOrdersForWidget'])->name('listPastOrdersForWidget');
             Route::post('/list-nearby-orders', [\App\Http\Controllers\Courier\OrdersController::class, 'listNearbyOrders'])->name('listNearbyOrders');
             Route::get('/review-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'reviewOrder'])->name('reviewOrder');
             Route::post('/list-review-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'listReviewOrder'])->name('listReviewOrder');
@@ -117,7 +119,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/get-active-order', [\App\Http\Controllers\Courier\OrdersController::class, 'activeOrder'])->name('activeOrder');
             Route::post('/update-courier-location', [\App\Http\Controllers\Courier\OrdersController::class, 'updateCourierLocation'])->name('updateCourierLocation');
             Route::post('/deliver-order/{id}', [\App\Http\Controllers\Courier\OrdersController::class, 'deliverOrder'])->name('deliverOrder');
-            Route::post('/emergency-action/{id}',[\App\Http\Controllers\Courier\OrdersController::class,"emergencyAction"])->name("emergencyAction");
+            Route::post('/emergency-action/{id}', [\App\Http\Controllers\Courier\OrdersController::class, "emergencyAction"])->name("emergencyAction");
+            Route::post('/{id}/get-locations', [\App\Http\Controllers\Courier\OrdersController::class, "getLocations"])->name("getLocations");
+            Route::post('/{id}/get-details', [\App\Http\Controllers\Courier\OrdersController::class, "getOrder"])->name("getOrder");
         });
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
@@ -137,7 +141,7 @@ Route::post("/demo-deliver-order/{id}", function ($id) {
     ]);
 })->name("demoDeliverOrder");
 
-Route::get('/demo3',function (){
+Route::get('/demo3', function () {
     return response()->json(\App\Models\Orders::getCourierStatics());
 });
 Route::get('/trendyol', function () {

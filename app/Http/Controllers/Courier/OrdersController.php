@@ -30,6 +30,32 @@ class OrdersController extends \App\Http\Controllers\Controller
         ]);
     }
 
+    public function listPastOrdersForWidget(Request $request): \Illuminate\Http\JsonResponse
+    {
+        if ($request->has("listCount")) {
+            return response()->json([
+                "status" => true,
+                "orders" => Orders::getCourierOrders($request->get("listCount"))
+            ]);
+        }
+        return response()->json([
+            "status" => false,
+            "message" => "Liste Sayısı Belirtilmedi"
+        ]);
+    }
+
+    public function show($id): \Inertia\Response|\Illuminate\Http\RedirectResponse
+    {
+        $order = Orders::where('courier_id', auth()->user()->id)->where('id', $id)->count();
+        if ($order == 1) {
+            return Inertia::render('Courier/Orders/ShowPage', [
+                'orderId' => $id
+            ]);
+        } else {
+            return redirect()->route('courier.orders.pastOrders')->with('message', 'Sipariş Bulunamadı.')->with('type', 'error')->with("title", "Hata");
+        }
+    }
+
     public function listNearbyOrders(Request $request): \Illuminate\Http\JsonResponse
     {
         $courier = auth()->user();
@@ -241,6 +267,7 @@ class OrdersController extends \App\Http\Controllers\Controller
             ]);
         }
     }
+
     public function getStatusMessage($key): string
     {
         $statuses = [
@@ -269,12 +296,12 @@ class OrdersController extends \App\Http\Controllers\Controller
                     $order->status = "canceled";
                     $order->cancellation_reason = $this->getStatusMessage($request->reason);
                     $order->cancellation_requested_by = "courier";
-                    $order->cancellation_accepted_by = User::where("role","admin")->first()->id;
+                    $order->cancellation_accepted_by = User::where("role", "admin")->first()->id;
                     $order->canceled_at = now();
                     if ($order->save()) {
                         return response()->json([
                             "status" => true,
-                            "message" => "Sipariş İptal Edildi.İptal Sebebi: ".$this->getStatusMessage($request->reason)
+                            "message" => "Sipariş İptal Edildi.İptal Sebebi: " . $this->getStatusMessage($request->reason)
                         ]);
                     } else {
                         return response()->json([
@@ -298,6 +325,39 @@ class OrdersController extends \App\Http\Controllers\Controller
             return response()->json([
                 "status" => false,
                 "message" => "Sipariş Bulunamadı"
+            ]);
+        }
+    }
+
+    public function getLocations(Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        $order = Orders::where('courier_id', auth()->user()->id)->where('id', $id)->first();
+        if ($order) {
+            $locations = OrderLocations::getLocations($order->id);
+            return response()->json([
+                'locations' => $locations,
+                'status' => true
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sipariş bulunamadı.'
+            ]);
+        }
+    }
+
+    public function getOrder(Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        $order = Orders::where('courier_id', auth()->user()->id)->where('id', $id)->first(["id"]);
+        if ($order) {
+            return response()->json([
+                'order' => Orders::findOrder($order->id, true)->order,
+                'status' => true
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Sipariş bulunamadı.'
             ]);
         }
     }

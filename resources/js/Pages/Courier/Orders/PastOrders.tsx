@@ -3,32 +3,21 @@ import MainLayout from "@/Layouts/MainLayout";
 import React, {useEffect, useRef, useState} from "react";
 import {Head, router} from "@inertiajs/react";
 import {Toast} from "primereact/toast";
-import {getLocation, getOrderStatuses} from "@/helpers/globalHelper";
-import {getNearbyNewOrders, getPastOrders} from "@/helpers/Courier/orders";
-import {BlockUI} from "primereact/blockui";
+import {getOrderStatuses} from "@/helpers/globalHelper";
+import {getPastOrders} from "@/helpers/Courier/orders";
 import {Message} from "primereact/message";
-import {DataView} from "primereact/dataview";
 import {Button} from "primereact/button";
 import {classNames} from "primereact/utils";
 import {Dropdown} from "primereact/dropdown";
 import {OverlayPanel} from "primereact/overlaypanel";
 import {useLocalStorage} from "primereact/hooks";
-import {
-    demoAddLocation, demoDeliverOrder,
-    destroyOrder,
-    getOrders,
-    subscribeUpdateOrder,
-    updateOrderStatus
-} from "@/helpers/Business/orders";
-import {confirmPopup} from "primereact/confirmpopup";
 import {Column, ColumnProps} from "primereact/column";
 import {Tag} from "primereact/tag";
 import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {Toolbar} from "primereact/toolbar";
 import {Checkbox} from "primereact/checkbox";
-import {InputText} from "primereact/inputtext";
 import {DataTable} from "primereact/datatable";
-import OrderShowPage from "@/Pages/Business/Orders/Show";
+import OrderShowPage from "@/Pages/Courier/Orders/Show";
 
 const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
     auth: any,
@@ -37,7 +26,7 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
 }) => {
     const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState([]);
-    const [selectedColumns, setSelectedColumns] = useLocalStorage(["customer.name", "business.name","price", "delivered_at", "actions"], "CourierOrdersAllTableColumns");
+    const [selectedColumns, setSelectedColumns] = useLocalStorage(["customer.name", "business.name", "price", "delivered_at", "actions"], "CourierOrdersAllTableColumns");
     const [error, setError] = useState(null);
     const [expandedRows, setExpandedRows] = useState([]);
     const getOrdersAll = () => {
@@ -83,8 +72,8 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
             filterPlaceholder: "Ad'a Göre",
             body: (rowData: any) => {
                 return <Button label={rowData.customer.name} link size={"small"} severity={"info"} onClick={(event) => {
-                    setCacheCustomer(rowData.customer);
-                    businessOp.current?.toggle(event)
+                    setCacheCustomer(rowData);
+                    customerOp.current?.toggle(event)
                 }}/>
             }
         }, {
@@ -252,7 +241,7 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
                             position: "top"
                         }}
                         onClick={() => {
-                            router.visit(route('business.orders.show', rowData.id))
+                            router.visit(route('courier.orders.show', rowData.id))
                         }}
                     />
                 </div>
@@ -397,7 +386,6 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
                     rowExpansionTemplate={(data) => {
                         return <OrderShowPage
                             page={false}
-                            order={data}
                             // @ts-ignore
                             orderId={data.id}
                             csrfToken={csrfToken}
@@ -409,7 +397,7 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
                         "customer.phone": {value: null, matchMode: 'contains'},
                         created_at: {value: null, matchMode: 'contains'},
                         updated_at: {value: null, matchMode: 'contains'},
-                        "business.name":{value: null, matchMode: 'contains'},
+                        "business.name": {value: null, matchMode: 'contains'},
                         status: {value: null, matchMode: 'contains'},
                         courier_accepted_at: {value: null, matchMode: 'contains'},
                         delivered_at: {value: null, matchMode: 'contains'},

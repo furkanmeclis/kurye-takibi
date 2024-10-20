@@ -129,10 +129,14 @@ class Orders extends Model
         ];
     }
 
-    public static function getCourierOrders()
+    public static function getCourierOrders($limit = false)
     {
         $courierId = auth()->user()->id;
-        return self::where('courier_id', $courierId)->orderBy('updated_at', 'desc')->get()->map(function ($order) {
+        $instance = self::where('courier_id', $courierId)->orderBy('updated_at', 'desc');
+        if ($limit !== false) {
+            $instance = $instance->offset(0)->limit($limit);
+        }
+        return $instance->get()->map(function ($order) {
             $order->customer = Customers::find($order->customer_id);
             $order->address = CustomerAddresses::find($order->address_id);
             $order->start_location = json_decode($order->start_location);
@@ -170,7 +174,6 @@ class Orders extends Model
                 $order->delivery_time = $acceptedAt->diffInMinutes($deliveredAt);
                 return $order;
             });
-
         $sumSpeed = 0;
         $sumTime = 0;
         $sumPrice = 0;

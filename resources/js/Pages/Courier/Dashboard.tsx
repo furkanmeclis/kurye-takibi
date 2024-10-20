@@ -16,8 +16,9 @@ import MainLayout from "@/Layouts/MainLayout";
 import PageContainer from "@/PageContainer";
 import {Head} from "@inertiajs/react";
 import {Skeleton} from "primereact/skeleton";
-import CourierOrdersWidget from "@/components/CourierOrdersWidget";
+import CourierOrdersWidget from "@/components/CourierNearbyOrdersWidget";
 import {getCourierStatics} from "@/helpers/Courier/account";
+import CourierPastOrdersWidget from "@/components/CourierPastOrdersWidget";
 
 let overviewChartData: ChartData;
 
@@ -247,82 +248,7 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                         <CourierOrdersWidget csrfToken={csrfToken}/>
                     </div>
                     <div className="col-12 lg:col-6 xl:col-3">
-                        <div className="card h-full">
-                            <h5>Son Siparişler</h5>
-                            <ul className="list-none p-0 m-0">
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="BÇ" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(101, 214, 173, 0.1)',
-                                                color: '#27AB83',
-                                                border: '1px solid #65D6AD'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Behzat Ç</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="AA" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Adile Aydın</span>
-
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="ECD" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(94, 208, 250, 0.1)',
-                                                color: '#1992D4',
-                                                border: '1px solid #5ED0FA'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Emir Can Değril</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="MÇ" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Mehmet Ç</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="FM" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(94, 208, 250, 0.1)',
-                                                color: '#1992D4',
-                                                border: '1px solid #5ED0FA'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Furkan Mesal</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="MD" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Mehmet Duran</span>
-                                    </div>
-                                </li>
-
-                            </ul>
-                            <Button type="button" className="w-full mt-3" label="Hepsini Görüntüle"
-                                    icon="pi pi-arrow-right"
-                                    iconPos="right"></Button>
-                        </div>
+                        <CourierPastOrdersWidget csrfToken={csrfToken}/>
                     </div>
                     <div className="col-12 xl:col-6">
                         <div className="card h-full">
@@ -377,7 +303,7 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
                                         if (context) {
                                             context.drawImage(element, 0, 0);
                                             const image = new Image();
-                                            image.src = canvas.toDataURL('image/png',1);
+                                            image.src = canvas.toDataURL('image/png', 1);
                                             // wait image to load
                                             await new Promise((resolve) => {
                                                 image.onload = resolve;
