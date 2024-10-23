@@ -7,9 +7,11 @@ use App\Events\Orders\UpdateOrder;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerAddresses;
 use App\Models\Customers;
+use App\Models\Integrations;
 use App\Models\OrderLocations;
 use App\Models\Orders;
 use App\Models\User;
+use furkanmeclis\Tools\TrendyolYemekApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -246,6 +248,35 @@ class OrdersController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Sipariş bulunamadı.'
+            ]);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function listTrendyolOrders(): JsonResponse
+    {
+        $credentials = Integrations::findOrCreateBusiness(auth()->id());
+        if ($credentials) {
+            $trendyol = $credentials->trendyol();
+            if ($trendyol) {
+                $trendyolClient = new TrendyolYemekApi($trendyol->supplierId, 1, $trendyol->apiKey, $trendyol->apiSecret, auth()->user()->email);
+                $trendyolOrders = $trendyolClient->getPackages();
+                return response()->json([
+                    "status" => true,
+                    "data" => $trendyolOrders
+                ]);
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Trendyol ayarları bulunamadı."
+                ]);
+            }
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Entegrasyon bulunamadı."
             ]);
         }
     }

@@ -14,9 +14,8 @@ import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 import {
-    demoAddLocation, demoDeliverOrder,
     destroyOrder,
-    getOrders,
+    getOrders, listTrendyolOrders,
     subscribeUpdateOrder,
     updateOrderStatus
 } from "@/helpers/Business/orders";
@@ -26,6 +25,7 @@ import {Dropdown} from "primereact/dropdown";
 import {InputText} from "primereact/inputtext";
 import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {classNames} from "primereact/utils";
+import trendyolSvg from "@/icons/trendyol.svg";
 
 interface AllCouriersProps {
     auth?: any,
@@ -380,6 +380,15 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const renderHeader = () => {
         return <>
             <Toolbar
+                start={<>
+                    <Button label={"Siparişleri Güncelle"}
+                        onClick={() => {
+                            listTrendyolOrders(csrfToken)
+                        }}
+                    >
+                        <img src={trendyolSvg} className={"h-1rem ml-1"} alt={"trendyol"}/>
+                    </Button>
+                </>}
                 end={<>
                     <Button size={"small"} icon={"pi pi-sync"} severity={"help"} className={"mr-2"}
                             tooltip={"Verileri Yenile"}

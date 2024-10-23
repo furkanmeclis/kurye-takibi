@@ -121,18 +121,8 @@ export const getLocations = async (orderId: any, csrfToken: any) => {
     });
     return await response.json();
 }
-export const demoAddLocation = async (orderId: any, csrfToken: any) => {
-    let url = route("demoAddLocation", orderId);
-    let headers = new Headers();
-    headers.append("X-CSRF-TOKEN", csrfToken);
-    let response = await fetch(url, {
-        method: "POST",
-        headers: headers
-    });
-    return await response.json();
-}
-export const demoDeliverOrder = async (orderId: any, csrfToken: any) => {
-    let url = route("demoDeliverOrder", orderId);
+export const listTrendyolOrders = async (csrfToken: any) => {
+    let url = route("business.orders.listTrendyolOrders");
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
     let response = await fetch(url, {

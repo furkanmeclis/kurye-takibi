@@ -95,9 +95,14 @@ Route::middleware('auth')->group(function () {
             Route::post('/{id}/get-details', [\App\Http\Controllers\Business\OrdersController::class, 'getOrder'])->name('getOrder');
             Route::post('/{id}/get-locations', [\App\Http\Controllers\Business\OrdersController::class, 'getLocations'])->name('getLocations');
             Route::delete('/{id}/destroy', [\App\Http\Controllers\Business\OrdersController::class, 'destroy'])->name('destroy');
+            Route::post('/list-trendyol-orders', [\App\Http\Controllers\Business\OrdersController::class, 'listTrendyolOrders'])->name('listTrendyolOrders');
         });
         Route::prefix("integrations")->name("integrations.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Business\IntegrationsController::class, 'show'])->name('show');
+            Route::post('/get-integrations', [\App\Http\Controllers\Business\IntegrationsController::class, 'getIntegrations'])->name('getIntegrations');
+            Route::post('/save-trendyol-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveTrendyolSettings'])->name('saveTrendyolSettings');
+            Route::post('/save-getir-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveGetirSettings'])->name('saveGetirSettings');
+            Route::post('/save-yemeksepeti-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveYemeksepetiSettings'])->name('saveYemeksepetiSettings');
         });
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
