@@ -99,7 +99,7 @@
                     </h1>
                     <p class="text-dark-70 mb-4 pb-2">İşletmenizin operasyonel süreçlerinde zamanında, güvenle, her
                         yerde 414 Express yanında!</p>
-                    <a href="" class="btn btn-light">İletişime Geç <span class="ms-2 right-icon">&#8594;</span></a>
+                    <a href="{{route("dashboard")}}" class="btn btn-light">Giriş Yap <span class="ms-2 right-icon">&#8594;</span></a>
                 </div>
             </div>
 
