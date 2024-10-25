@@ -236,4 +236,80 @@ class Orders extends Model
         ];
     }
 
+    public static function matchTrendyolOrders($trendyolContent)
+    {
+        $trendyolContent = json_decode(json_encode($trendyolContent));
+        foreach ($trendyolContent as $order) {
+            $controlOrder = self::where('marketplace_order_id', $order->id)->first();
+            if ($controlOrder) {
+                $controlOrder->status = (new Orders)->mapOrderStatusTrendyol($order->packageStatus);
+                $controlOrder->save();
+            } else {
+                $controlCustomer = Customers::where('marketplace_id', $order->customer->id)->first();
+                if ($controlCustomer) {
+                    $customer = $controlCustomer;
+                } else {
+                    $customer = new Customers();
+                    $customer->business_id = auth()->id();
+                    $customer->name = $order->customer->firstName . " " . $order->customer->lastName;
+                    $customer->marketplace_id = $order->customer->id;
+                    $customer->phone = (new Orders)->formatPhoneNumberForTrendyol($order->callCenterPhone);
+                    $customer->note = "Trendyol Müşterisi İletişim No:" . $order->orderNumber;
+                    $customer->save();
+                }
+                $controlAddress = CustomerAddresses::where('marketplace_id', $order->address->id)->first();
+                if ($controlAddress) {
+                    $address = $controlAddress;
+                } else {
+                    $address = new CustomerAddresses();
+                    $address->customer_id = $customer->id;
+                    $address->marketplace_id = $order->customer->id;
+                    $address->phone = (new Orders)->formatPhoneNumberForTrendyol($order->address->phone);
+                    $address->title = $order->address->addressDescription;
+                    $address->city = $order->address->city;
+                    $address->district = $order->address->district;
+                    $address->address = $order->address->address1 . " " . $order->address->address2 . " " . $order->address->addressDescription . " " . $order->address->neighborhood . " " . $order->address->apartmentNumber . " " . $order->address->floor . ".Kat " . $order->address->doorNumber . " Kapı No " . $order->address->postalCode;
+                    $address->note = "Trendyol Müşterisi Adres No:" . $order->orderNumber;
+                    $address->save();
+                }
+
+            }
+        }
+    }
+
+    public function mapOrderStatusTrendyol($apiStatus): string
+    {
+        switch ($apiStatus) {
+            case 'Created':
+                return 'draft';
+            case 'Picking':
+                return 'opened';
+            case 'Invoiced':
+                return 'opened';
+            case 'Shipped':
+                return 'transporting';
+            case 'Delivered':
+                return 'delivered';
+            case 'Returned':
+                return 'canceled';
+            case 'Cancelled':
+                return 'canceled';
+            case 'UnSupplied':
+                return 'deleted';
+            default:
+                return "draft"; // Bilinmeyen bir durum için
+        }
+    }
+
+    public function formatPhoneNumberForTrendyol($phoneNumber): string
+    {
+        $digits = preg_replace('/\D/', '', $phoneNumber);
+        $formatted = sprintf('(%s)-%s-%s',
+            substr($digits, 0, 3),
+            substr($digits, 3, 3),
+            substr($digits, 6, 4)
+        );
+        return $formatted;
+    }
+
 }

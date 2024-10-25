@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string("name");
             $table->string("phone");
             $table->string("note")->nullable();
+            $table->string("marketplace_id")->nullable();
             $table->timestamps();
         });
     }

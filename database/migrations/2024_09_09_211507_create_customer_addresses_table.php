@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('customer_addresses', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger("customer_id");
+            $table->string("marketplace_id")->nullable();
             $table->string("phone");
             $table->string("title");
             $table->string("city");

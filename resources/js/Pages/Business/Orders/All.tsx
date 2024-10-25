@@ -26,6 +26,8 @@ import {InputText} from "primereact/inputtext";
 import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {classNames} from "primereact/utils";
 import trendyolSvg from "@/icons/trendyol.svg";
+import yemeksepetiSvg from "@/icons/yemeksepeti.svg";
+import getirSvg from "@/icons/getir.svg";
 
 interface AllCouriersProps {
     auth?: any,
@@ -156,6 +158,10 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         {
             expander: true,
             style: {width: '3rem'},
+        },
+        {
+            field: "id",
+            header: "Sipariş ID"
         },
         {
             field: "customer.name",
@@ -382,9 +388,20 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             <Toolbar
                 start={<>
                     <Button label={"Siparişleri Güncelle"}
-                        onClick={() => {
-                            listTrendyolOrders(csrfToken)
-                        }}
+                            onClick={() => {
+                                listTrendyolOrders(csrfToken).then((response: any) => {
+                                    toast.current?.show({
+                                        severity: response.status ? "success" : "error",
+                                        summary: response.status ? "Başarılı" : "Hata",
+                                        detail: response.message + " Konsola Detaylar Listelendi."
+                                    });
+                                    if (response.status) {
+                                        console.log(response.data)
+                                    }
+                                })
+                            }}
+
+                            size={"small"}
                     >
                         <img src={trendyolSvg} className={"h-1rem ml-1"} alt={"trendyol"}/>
                     </Button>

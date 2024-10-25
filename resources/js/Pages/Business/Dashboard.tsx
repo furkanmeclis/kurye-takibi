@@ -40,20 +40,20 @@ function Dashboard({auth, csrfToken, errors}: {
     const changeOverviewWeek = (e: DropdownChangeEvent) => {
         setSelectedOverviewWeek(e.value);
         const dataSet1 = [
-            91,
-            70,
-            56,
-            86,
-            64,
+            0,
+            0,
+            0,
+            0,
+            0,
         ];
         const dataSet2 = [
-            52,
-            70,
-            55,
-            68,
-            79,
-            56,
-            74
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
         ];
         if (e.value.code === '1') {
             overviewChartData.datasets[0].data = dataSet2;
@@ -74,13 +74,13 @@ function Dashboard({auth, csrfToken, errors}: {
                 {
                     label: 'Sipariş Adedi',
                     data: [
-                        70,
-                        68,
-                        72,
-                        56,
-                        68,
-                        90,
-                        68
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
                     ],
                     backgroundColor: ['#007bff'],
                     hoverBackgroundColor: [primaryColor300],
@@ -225,7 +225,7 @@ function Dashboard({auth, csrfToken, errors}: {
                                 <i className="pi pi-users text-6xl text-blue-500"></i>
                                 <div className="ml-3">
                                     <span className="text-blue-500 block white-space-nowrap">TOPLAM MÜŞTERİ</span>
-                                    <span className="text-blue-500 block text-4xl font-bold">3882</span>
+                                    <span className="text-blue-500 block text-4xl font-bold">0</span>
                                 </div>
                             </div>
                             <img src={setSvg('users')} className="w-full" alt="users"/>
@@ -237,7 +237,7 @@ function Dashboard({auth, csrfToken, errors}: {
                                 <i className="pi pi-map text-6xl text-orange-500"></i>
                                 <div className="ml-3">
                                     <span className="text-orange-500 block white-space-nowrap">TOPLAM SİPARİŞ</span>
-                                    <span className="text-orange-500 block text-4xl font-bold">532</span>
+                                    <span className="text-orange-500 block text-4xl font-bold">0</span>
                                 </div>
                             </div>
                             <img src={setSvg('locations')} className="w-full" alt="locations"/>
@@ -250,7 +250,7 @@ function Dashboard({auth, csrfToken, errors}: {
                                 <div className="ml-3">
                                     <span
                                         className="text-green-500 block white-space-nowrap">ORTALAMA TESLİM SÜRESİ</span>
-                                    <span className="text-green-500 block text-4xl font-bold">25dk</span>
+                                    <span className="text-green-500 block text-4xl font-bold">0dk</span>
                                 </div>
                             </div>
                             <img src={setSvg('rate')} className="w-full" alt="conversion"/>
@@ -262,14 +262,14 @@ function Dashboard({auth, csrfToken, errors}: {
                                 <i className="pi pi-comments text-6xl text-purple-500"></i>
                                 <div className="ml-3">
                                     <span className="text-purple-500 block white-space-nowrap">KURYE BEKLEYEN SİPARİŞ ADEDİ</span>
-                                    <span className="text-purple-500 block text-4xl font-bold">5</span>
+                                    <span className="text-purple-500 block text-4xl font-bold">0</span>
                                 </div>
                             </div>
                             <img src={setSvg('interactions')} className="w-full mt-auto" alt="interactions"/>
                         </div>
                     </div>
 
-                    <div className="col-12 xl:col-6">
+                    <div className="col-12 ">
                         <div className="card h-full">
                             <div className="flex justify-content-between align-items-center mb-3">
                                 <h5>Günlük Sipariş Grafiği</h5>
@@ -284,7 +284,7 @@ function Dashboard({auth, csrfToken, errors}: {
                         </div>
                     </div>
 
-                    <div className="col-12 lg:col-6 xl:col-3">
+                    <div className="col-12 lg:col-6 xl:col-3 hidden">
                         <div className="card h-full">
                             <h5>Son Müşteriler</h5>
                             <ul className="list-none p-0 m-0">
@@ -363,7 +363,7 @@ function Dashboard({auth, csrfToken, errors}: {
                         </div>
                     </div>
 
-                    <div className="col-12 lg:col-6 xl:col-3">
+                    <div className="col-12 lg:col-6 xl:col-3 hidden">
                         <div className="card">
                             <div className="text-center mb-5">
                                 <img src={setSvg('completion-graph')} alt="graph" className="w-full"/>

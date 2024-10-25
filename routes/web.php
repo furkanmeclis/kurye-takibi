@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return view('front');
 });
 
 
@@ -132,7 +132,19 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
 });
-
+Route::post('/send-contact-mail', function () {
+    $to = "info@414express.com.tr";
+    $customerName = request()->input("name");
+    $customerEmail = request()->input("email");
+    $customerSubject = request()->input("subject");
+    $customerMessage = request()->input("message");
+    \Illuminate\Support\Facades\Mail::to('furkanmeclis@icloud.com')->send(new \App\Mail\ContactMessage(
+        $customerName,
+        $customerEmail,
+        $customerSubject,
+        $customerMessage
+    ));
+})->name("sendContactMail");
 Route::post('/add-location/{i}', function ($order_id) {
     return response()->json([
         'status' => false,
