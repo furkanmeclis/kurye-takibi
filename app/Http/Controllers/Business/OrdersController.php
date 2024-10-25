@@ -263,10 +263,10 @@ class OrdersController extends Controller
             if ($trendyol) {
                 $trendyolClient = new TrendyolYemekApi($trendyol->supplierId, 1, $trendyol->apiKey, $trendyol->apiSecret, auth()->user()->email);
                 $trendyolOrders = $trendyolClient->getPackages();
+                $response = Orders::matchTrendyolOrders($this->exampleContent()["content"]);
                 return response()->json([
-                    "status" => true,
-                    "message" => "Trendyol siparişleri başarıyla getirildi.Listelenmedi.",
-                    "data" => $trendyolOrders
+                    "status" => $response->status,
+                    "message" => $response->message,
                 ]);
             } else {
                 return response()->json([

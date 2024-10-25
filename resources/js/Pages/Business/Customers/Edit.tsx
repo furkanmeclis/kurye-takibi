@@ -210,7 +210,7 @@ const EditCustomerPage = ({auth, csrfToken, customerId}: {
         const [address, setAddress] = useState(addressProp);
         const [componentLoading, setComponentLoading] = useState(false);
         const [validationType2, setValidationType2] = useState(false);
-        const [selectedCity, setSelectedCity] = useState<City>(cities.find((city) => city.il_adi === address.city) as City);
+        const [selectedCity, setSelectedCity] = useState<City>(cities.find((city) => String(city.il_adi).toLowerCase() === String(address.city).toLowerCase()) as City);
         let initialValues = newAddress ? {
                 title: '',
                 city: cities[0].il_adi,
@@ -229,7 +229,7 @@ const EditCustomerPage = ({auth, csrfToken, customerId}: {
                 phone: address.phone,
                 notes: address.notes ?? '',
                 selectedCity: selectedCity,
-                selectedDistrict: selectedCity.ilceler.find((district) => district.ilce_adi === address.district) as State,
+                selectedDistrict: selectedCity.ilceler.find((district) => String(district.ilce_adi).toLocaleLowerCase() === String(address.district).toLocaleLowerCase()) as State,
             }
         let formik2 = useFormik({
             initialValues: initialValues,

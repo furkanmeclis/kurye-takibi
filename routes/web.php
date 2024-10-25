@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return Inertia::render('Courier/Dashboard');
         })->name('dashboard');
+        Route::post('/statics', [\App\Http\Controllers\Business\ProfileController::class, 'getStatics'])->name("getStatics");
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Business\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Business\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
         Route::prefix("customers")->name("customers.")->group(function () {

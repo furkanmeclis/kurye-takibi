@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Http\Controllers\Controller;
 use App\Models\BusinessDetails;
 use App\Models\CourierDetails;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -110,6 +111,14 @@ class ProfileController extends Controller
             "status" => true,
             "details" => $businessDetails,
             "courier" => $user,
+        ]);
+    }
+
+    public function getStatics(): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            "status" => true,
+            "statics" => Orders::getBusinessStats(14)
         ]);
     }
 }

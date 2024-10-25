@@ -238,7 +238,10 @@ class Orders extends Model
 
     public static function matchTrendyolOrders($trendyolContent)
     {
+        $business = auth()->user();
+        $businessDetails = $business->details();
         $trendyolContent = json_decode(json_encode($trendyolContent));
+        $transactionCount = 0;
         foreach ($trendyolContent as $order) {
             $controlOrder = self::where('marketplace_order_id', $order->id)->first();
             if ($controlOrder) {
@@ -257,7 +260,7 @@ class Orders extends Model
                     $customer->note = "Trendyol Müşterisi İletişim No:" . $order->orderNumber;
                     $customer->save();
                 }
-                $controlAddress = CustomerAddresses::where('marketplace_id', $order->address->id)->first();
+                $controlAddress = CustomerAddresses::where('marketplace_id', $order->customer->id)->where("notes", $order->address->addressDescription)->first();
                 if ($controlAddress) {
                     $address = $controlAddress;
                 } else {
@@ -265,15 +268,49 @@ class Orders extends Model
                     $address->customer_id = $customer->id;
                     $address->marketplace_id = $order->customer->id;
                     $address->phone = (new Orders)->formatPhoneNumberForTrendyol($order->address->phone);
-                    $address->title = $order->address->addressDescription;
+                    $address->title = "Trendyol Adresi";
                     $address->city = $order->address->city;
                     $address->district = $order->address->district;
                     $address->address = $order->address->address1 . " " . $order->address->address2 . " " . $order->address->addressDescription . " " . $order->address->neighborhood . " " . $order->address->apartmentNumber . " " . $order->address->floor . ".Kat " . $order->address->doorNumber . " Kapı No " . $order->address->postalCode;
-                    $address->note = "Trendyol Müşterisi Adres No:" . $order->orderNumber;
+                    $address->notes = $order->address->addressDescription;
                     $address->save();
                 }
-
+                $newOrder = new Orders();
+                $newOrder->business_id = auth()->id();
+                $newOrder->customer_id = $customer->id;
+                $newOrder->address_id = $address->id;
+                $newOrder->customer_note = $order->customerNote;
+                $newOrder->start_location = json_encode([
+                    "latitude" => $businessDetails->latitude,
+                    "longitude" => $businessDetails->longitude
+                ]);
+                $newOrder->status = (new Orders)->mapOrderStatusTrendyol($order->packageStatus);
+                $newOrder->marketplace = "trendyol";
+                $newOrder->marketplace_order_id = $order->id;
+                $newOrder->marketplace_customer = json_encode([
+                    "id" => $order->customer->id,
+                    "customer" => $order->customer,
+                    "address" => $order->address
+                ]);
+                $newOrder->marketplace_order_details = json_encode($order);
+                $newOrder->price = 1;
+                if ($newOrder->save()) {
+                    $transactionCount++;
+                } else {
+                    continue;
+                }
             }
+        }
+        if (count($trendyolContent) == $transactionCount) {
+            return (object)[
+                "status" => true,
+                "message" => "Trendyol Siparişleri Eşleştirildi"
+            ];
+        } else {
+            return (object)[
+                "status" => false,
+                "message" => "Toplamda " . count($trendyolContent) . " Siparişten " . $transactionCount . " Sipariş Eşleştirildi"
+            ];
         }
     }
 
@@ -303,13 +340,81 @@ class Orders extends Model
 
     public function formatPhoneNumberForTrendyol($phoneNumber): string
     {
-        $digits = preg_replace('/\D/', '', $phoneNumber);
-        $formatted = sprintf('(%s)-%s-%s',
-            substr($digits, 0, 3),
-            substr($digits, 3, 3),
-            substr($digits, 6, 4)
-        );
-        return $formatted;
+        $phoneNumber = str_replace(" ", "", $phoneNumber);
+        if (str_starts_with($phoneNumber, "0")) {
+            $phoneNumber = substr($phoneNumber, 1);
+        }
+        return $phoneNumber;
     }
 
+    public static function getBusinessStats(int $days = 7): object
+    {
+        $businessId = auth()->id();
+        $startDate = Carbon::now()->subDays($days);
+        $orders = self::where('business_id', $businessId)
+            ->where('status', 'delivered')
+            ->where('updated_at', '>=', $startDate)
+            ->orderBy('updated_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                $acceptedAt = Carbon::parse($order->courier_accepted_at);
+                $deliveredAt = Carbon::parse($order->delivered_at);
+                $order->delivery_time = $acceptedAt->diffInMinutes($deliveredAt);
+                return $order;
+            });
+        $sumTime = 0;
+        $ordersCount = count($orders);
+        foreach ($orders as $order) {
+            $sumTime += $order->delivery_time;
+        }
+        $averageTime = $ordersCount > 0 ? ($sumTime / $ordersCount) : 0;
+        $daysArray = [
+            "monday" => 0,
+            "tuesday" => 0,
+            "wednesday" => 0,
+            "thursday" => 0,
+            "friday" => 0,
+            "saturday" => 0,
+            "sunday" => 0,
+        ];
+        $weekOfYear = Carbon::now()->weekOfYear;
+        $thisWeekCounts = [...$daysArray];
+        $lastWeekCounts = [...$daysArray];
+        $thisWeekTimes = [...$daysArray];
+        $lastWeekTimes = [...$daysArray];
+        foreach ($orders as $order) {
+            $day = strtolower(Carbon::parse($order->updated_at)->format("l"));
+            $week = Carbon::parse($order->updated_at)->weekOfYear;
+            if ($week == $weekOfYear) {
+                $thisWeekCounts[$day]++;
+                $thisWeekTimes[$day] += $order->delivery_time;
+            } elseif ($week == $weekOfYear - 1) {
+                $lastWeekCounts[$day]++;
+                $lastWeekTimes[$day] += $order->delivery_time;
+            }
+        }
+        // average times
+        foreach ($thisWeekTimes as $key => $value) {
+            $thisWeekTimes[$key] = $thisWeekCounts[$key] > 0 ? $value / $thisWeekCounts[$key] : 0;
+        }
+        foreach ($lastWeekTimes as $key => $value) {
+            $lastWeekTimes[$key] = $lastWeekCounts[$key] > 0 ? $value / $lastWeekCounts[$key] : 0;
+        }
+        return (object)[
+            "time" => round($averageTime, 2),
+            "count" => $ordersCount,
+            "courierWaitOrdersCount" => self::where('business_id', $businessId)->where('status', 'opened')->count(),
+            "customerCount" => Customers::where('business_id', $businessId)->count(),
+            "graph" => [
+                "thisWeek" => [
+                    "counts" => array_values($thisWeekCounts),
+                    "times" => array_values($thisWeekTimes)
+                ],
+                "lastWeek" => [
+                    "counts" => array_values($lastWeekCounts),
+                    "times" => array_values($lastWeekTimes)
+                ]
+            ]
+        ];
+    }
 }

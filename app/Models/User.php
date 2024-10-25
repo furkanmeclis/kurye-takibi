@@ -100,11 +100,11 @@ class User extends Authenticatable implements MustVerifyEmail
             "details" => null,
             "message" => "Bu Servis Sadece Kurye Hesapları İçin Kullanılmaktadır."
         ];
-        if($this->role == "courier") {
+        if ($this->role == "courier") {
             $details = CourierDetails::where('courier_id', $this->id)->first();
             $returnObject->details = $details;
             $returnObject->available = $details->approved;
-            if(!$details->approved) {
+            if (!$details->approved) {
                 $returnObject->message = "Kurye Hesabınız Onaylanmadığı İçin Sipariş Alımı Yapamazsınız.";
             }
         }
@@ -113,16 +113,24 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isTransporting(): bool
     {
-        if($this->role == "courier") {
+        if ($this->role == "courier") {
             $orderCount = Orders::where('courier_id', $this->id)->where('status', 'transporting')->count();
-            if($orderCount == 1) {
+            if ($orderCount == 1) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
         }
         return false;
     }
 
+    public function details()
+    {
+        if ($this->role == "courier") {
+            return CourierDetails::where('courier_id', $this->id)->first();
+        } else if ($this->role == "business") {
+            return BusinessDetails::where('business_id', $this->id)->first();
+        }
+    }
 
 }

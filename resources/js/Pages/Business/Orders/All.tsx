@@ -161,7 +161,8 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         },
         {
             field: "id",
-            header: "Sipariş ID"
+            header: "Sipariş ID",
+            hidden: !selectedColumns.includes("id"),
         },
         {
             field: "customer.name",
@@ -200,6 +201,15 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             filterPlaceholder: "Fiyata'a Göre",
             body: (rowData: any) => {
                 return <span>{rowData.price} ₺</span>
+            }
+        },
+        {
+            field: "marketplace",
+            header: "Sipariş Kaynağı",
+            hidden: !selectedColumns.includes("marketplace"),
+            sortable: true,
+            body: (rowData: any) => {
+                return <span>{rowData.marketplace === "trendyol" ? <img src={trendyolSvg} alt={"Trendyol"} />:<i className={"pi pi-home"}></i>}</span>
             }
         },
         {
@@ -389,16 +399,23 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 start={<>
                     <Button label={"Siparişleri Güncelle"}
                             onClick={() => {
+                                setLoading(true);
                                 listTrendyolOrders(csrfToken).then((response: any) => {
                                     toast.current?.show({
                                         severity: response.status ? "success" : "error",
                                         summary: response.status ? "Başarılı" : "Hata",
-                                        detail: response.message + " Konsola Detaylar Listelendi."
+                                        detail: response.message
                                     });
                                     if (response.status) {
-                                        console.log(response.data)
+                                        getOrdersAll();
                                     }
-                                })
+                                }).catch(() => {
+                                    toast.current?.show({
+                                        severity: "error",
+                                        summary: "Hata",
+                                        detail: "Bir hata oluştu"
+                                    });
+                                }).finally(() => setLoading(false))
                             }}
 
                             size={"small"}

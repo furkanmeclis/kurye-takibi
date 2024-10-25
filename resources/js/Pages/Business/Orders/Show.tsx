@@ -151,6 +151,27 @@ const roadMarker = new L.Icon({
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
 });
+const bicycleMarker = new L.Icon({
+    iconUrl: bicycle,
+    iconSize: [32, 32],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+const motorcycleMarker = new L.Icon({
+    iconUrl: motorcycle,
+    iconSize: [32, 32],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+const carMarker = new L.Icon({
+    iconUrl: car,
+    iconSize: [32, 32],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
 const OrderShowPage = ({
                            page = true,
                            order = {},
@@ -382,7 +403,8 @@ const OrderShowPage = ({
                                         <TileLayer url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"/>
                                         {locations.map((location, index) => (
                                             <Marker key={index} position={[location.latitude, location.longitude]}
-                                                    icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.status === "delivered" ? finishMarker : roadMarker) : roadMarker}
+                                                // @ts-ignore
+                                                    icon={index === 0 ? startMarker : index === locations.length - 1 ? (orderData.courier.details.vehicle_type === "bicycle" ? bicycleMarker : orderData.courier.details.vehicle_type === "motorcycle" ? motorcycleMarker : carMarker) : roadMarker}
                                             >
                                                 <Popup>
                                             <span
