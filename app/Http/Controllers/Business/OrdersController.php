@@ -69,7 +69,7 @@ class OrdersController extends Controller
             $newOrder->address_id = $request->address_id;
             $newOrder->customer_note = $request->customer_note;
             $newOrder->business_id = auth()->user()->id;
-            $newOrder->status = "draft";
+            $newOrder->status = "opened";
             $newOrder->price = $request->price;
             if ($request->location != null) {
                 $newOrder->start_location = json_encode($request->location);
