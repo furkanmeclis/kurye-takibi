@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/cancellation-requests', [\App\Http\Controllers\Admin\OrdersController::class, 'cancellationRequests'])->name('cancellationRequests');
             Route::post('/list-cancellation-requests', [\App\Http\Controllers\Admin\OrdersController::class, 'listCancellationRequests'])->name('listCancellationRequests');
             Route::post('/approve-cancellation/{id}', [\App\Http\Controllers\Admin\OrdersController::class, 'approveCancellation'])->name('approveCancellation');
+            Route::post('/reject-cancellation/{id}', [\App\Http\Controllers\Admin\OrdersController::class, 'rejectCancellation'])->name('rejectCancellation');
+            Route::get('/', [\App\Http\Controllers\Admin\OrdersController::class, 'index'])->name('index');
+            Route::post('/list-orders', [\App\Http\Controllers\Admin\OrdersController::class, 'listOrders'])->name('listOrders');
         });
     });
     Route::prefix("business")->name("business.")->middleware("only:business")->group(function () {
@@ -104,6 +107,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/save-trendyol-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveTrendyolSettings'])->name('saveTrendyolSettings');
             Route::post('/save-getir-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveGetirSettings'])->name('saveGetirSettings');
             Route::post('/save-yemeksepeti-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveYemeksepetiSettings'])->name('saveYemeksepetiSettings');
+            Route::post('/trendyol-restaurant-info', [\App\Http\Controllers\Business\IntegrationsController::class, 'getTrendyolRestaurantInfo'])->name("getTrendyolRestaurantInfo");
         });
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {

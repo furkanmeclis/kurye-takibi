@@ -69,6 +69,11 @@ const AppMenu = () => {
                     label: "İptal İşlemleri",
                     icon: "pi pi-fw pi-hourglass",
                     to: route("admin.orders.cancellationRequests")
+                },
+                {
+                    label: "Siparişler",
+                    icon: "pi pi-fw pi-shopping-cart",
+                    to: route("admin.orders.index")
                 }
             ]
         },
@@ -119,9 +124,9 @@ const AppMenu = () => {
                     to: route("courier.orders.newOrders")
                 },
                 {
-                    label:"Geçmiş Siparişler",
-                    icon:"pi pi-fw pi-history",
-                    to:route("courier.orders.pastOrders")
+                    label: "Geçmiş Siparişler",
+                    icon: "pi pi-fw pi-history",
+                    to: route("courier.orders.pastOrders")
                 }
             ]
         },

@@ -26,7 +26,7 @@ export const getDetailKeysTranslation = (key: string) => {
     // @ts-ignore
     return labelTranslations[key];
 }
-export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false) => {
+export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false,accepted=true,rejected=false) => {
     // ["draft", "opened", "transporting", "delivered", "canceled", "deleted"]
     let statuses = {
         draft: {
@@ -60,6 +60,19 @@ export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "
             label: value.label,
             severity: value.severity
         }));
+    }
+    if(status === "canceled" && rejected && !accepted){
+        return {
+            label: "İptal - Reddedildi",
+            severity: "danger"
+        }
+    }
+
+    if(status === "canceled" && !accepted && !rejected){
+        return {
+            label: "İptal - Onay Bekliyor",
+            severity: "warning"
+        }
     }
     return statuses[status] as { label: string, severity: string };
 

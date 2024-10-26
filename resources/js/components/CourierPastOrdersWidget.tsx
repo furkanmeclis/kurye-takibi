@@ -93,9 +93,9 @@ const CourierPastOrdersWidget = ({csrfToken}: { csrfToken: any }) => {
                                 className="text-right flex-1 ">
                                 <Tag
                                     // @ts-ignore
-                                    value={getOrderStatuses(order.status)?.label}
+                                    value={getOrderStatuses(order.status,false, order.cancellation_accepted === 1, order.cancellation_rejected === 1)?.label}
                                     // @ts-ignore
-                                    severity={getOrderStatuses(order.status)?.severity}/>
+                                    severity={getOrderStatuses(order.status,false, order.cancellation_accepted === 1, order.cancellation_rejected === 1)?.severity}/>
                             </div>
                         </div>
                     </li>))}

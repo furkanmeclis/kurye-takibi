@@ -136,9 +136,9 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
             body: (rowData: any) => {
                 return <Tag
                     // @ts-ignore
-                    value={String(getOrderStatuses(rowData.status).label)}
+                    value={String(getOrderStatuses(rowData.status,false, rowData.cancellation_accepted === 1, rowData.cancellation_rejected === 1).label)}
                     // @ts-ignore
-                    severity={String(getOrderStatuses(rowData.status).severity)}
+                    severity={String(getOrderStatuses(rowData.status,false, rowData.cancellation_accepted === 1, rowData.cancellation_rejected === 1).severity)}
                 />
             }
         },
@@ -182,8 +182,9 @@ const PastOrders = ({auth, csrfToken, courierIsTransporting = false}: {
             },
             body: (rowData) => {
                 return <i className={classNames('pi', {
-                    'pi-check-circle text-green-400': rowData.cancellation_accepted,
-                    'pi-times-circle text-red-400': !rowData.cancellation_accepted
+                    'pi-check-circle text-green-400': rowData.cancellation_accepted && rowData.status === "canceled",
+                    'pi-times-circle text-red-400': !rowData.cancellation_accepted && rowData.status === "canceled" && rowData.cancellation_rejected,
+                    'pi-hourglass text-yellow-400': rowData.status === "canceled" && !rowData.cancellation_rejected && !rowData.cancellation_accepted,
                 })}></i>;
             }
         },

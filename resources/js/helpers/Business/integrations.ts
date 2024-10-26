@@ -9,7 +9,7 @@ export const getIntegrations = async (csrfToken: any) => {
     });
     return await response.json();
 }
-export const saveTrendyolSettings = async (credentials:any,csrfToken: any) => {
+export const saveTrendyolSettings = async (credentials: any, csrfToken: any) => {
     let url = route("business.integrations.saveTrendyolSettings");
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
@@ -21,7 +21,7 @@ export const saveTrendyolSettings = async (credentials:any,csrfToken: any) => {
     });
     return await response.json();
 }
-export const saveGetirSettings = async (credentials:any,csrfToken: any) => {
+export const saveGetirSettings = async (credentials: any, csrfToken: any) => {
     let url = route("business.integrations.saveGetirSettings");
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
@@ -33,7 +33,7 @@ export const saveGetirSettings = async (credentials:any,csrfToken: any) => {
     });
     return await response.json();
 }
-export const saveYemeksepetiSettings = async (credentials:any,csrfToken: any) => {
+export const saveYemeksepetiSettings = async (credentials: any, csrfToken: any) => {
     let url = route("business.integrations.saveYemeksepetiSettings");
     let headers = new Headers();
     headers.append("X-CSRF-TOKEN", csrfToken);
@@ -42,6 +42,17 @@ export const saveYemeksepetiSettings = async (credentials:any,csrfToken: any) =>
         method: "POST",
         headers: headers,
         body: JSON.stringify(credentials)
+    });
+    return await response.json();
+}
+export const getTrendyolRestaurantInfo = async (csrfToken: any) => {
+    let url = route("business.integrations.getTrendyolRestaurantInfo");
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
     });
     return await response.json();
 }

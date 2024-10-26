@@ -227,9 +227,9 @@ const ReviewOrder = ({auth, csrfToken, orderId, courierIsTransporting = false}: 
                             <Tag
                                 className={"ml-2"}
                                 // @ts-ignore
-                                value={getOrderStatuses(orderData?.status).label}
+                                value={getOrderStatuses(orderData?.status, false, orderData?.cancellation_accepted === 1, orderData?.cancellation_rejected === 1).label}
                                 // @ts-ignore
-                                severity={getOrderStatuses(orderData?.status).severity}
+                                severity={getOrderStatuses(orderData?.status, false, orderData?.cancellation_accepted === 1, orderData?.cancellation_rejected === 1).severity}
                             />
                         </div>
                         {orderData?.status === "canceled" && <>

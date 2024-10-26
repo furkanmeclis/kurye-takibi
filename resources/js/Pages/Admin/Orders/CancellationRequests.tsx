@@ -14,7 +14,7 @@ import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {classNames} from "primereact/utils";
-import {getCancellationOrders, approveCancellationOrder} from "@/helpers/Admin/orders";
+import {getCancellationOrders, approveCancellationOrder, rejectCancellationOrder} from "@/helpers/Admin/orders";
 import {Dropdown} from "primereact/dropdown";
 
 interface AllCouriersProps {
@@ -43,6 +43,7 @@ const CancellationRequestsPage = ({auth, csrfToken, flash}: AllCouriersProps) =>
                     return {
                         ...order,
                         cancellation_accepted: order.cancellation_accepted === 1,
+                        cancellation_rejected: order.cancellation_rejected === 1,
                     }
                 }));
                 setLoading(false);
@@ -88,7 +89,31 @@ const CancellationRequestsPage = ({auth, csrfToken, flash}: AllCouriersProps) =>
             }
         });
     }
-
+    const rejectCancellationRequestOrder = (event: any, id: number) => {
+        confirmPopup({
+            target: event.currentTarget,
+            message: "Sipariş İptalini Reddetmek İstediğinize Emin Misiniz?",
+            acceptLabel: "Reddet",
+            acceptClassName: "p-button-danger",
+            rejectLabel: "Vazgeç",
+            accept() {
+                setLoading(true)
+                rejectCancellationOrder(id, csrfToken)
+                    .then(({status, message}) => {
+                        if (status) {
+                            getCancellationOrdersData();
+                            toast.current?.show({severity: "success", summary: "Başarılı", detail: message});
+                        } else {
+                            toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                        }
+                    })
+                    .catch(error => {
+                        toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+                    })
+                    .finally(() => setLoading(false))
+            }
+        });
+    }
     let columns: ColumnProps[] = [
         {
             field: "business.name",
@@ -169,23 +194,23 @@ const CancellationRequestsPage = ({auth, csrfToken, flash}: AllCouriersProps) =>
             },
             body: (rowData) => {
                 return <span><i className={classNames('pi', {
-                    'pi-check-circle text-green-400': rowData.cancellation_accepted,
-                    'pi-times-circle text-red-400': !rowData.cancellation_accepted
-                })}></i> {rowData.cancellation_accepted ? "Onaylandı" : "Onay Bekliyor"}
-
+                    'pi-check-circle text-green-400': rowData.cancellation_accepted && rowData.status === "canceled",
+                    'pi-times-circle text-red-400': !rowData.cancellation_accepted && rowData.status === "canceled" && rowData.cancellation_rejected,
+                    'pi-hourglass text-yellow-400': rowData.status === "canceled" && !rowData.cancellation_rejected && !rowData.cancellation_accepted,
+                })}></i> {rowData.cancellation_accepted ? "Onaylandı" : rowData.cancellation_rejected ? "Reddedildi" : "Onay Bekliyor"}
                 </span>;
             }
         },
         {
             field: "cancellation_accepted_by.name",
-            header: "İptali Onaylayan Yetkili",
+            header: "İptali İşleyen Yetkili",
             hidden: !selectedColumns.includes("cancellation_accepted_by.name"),
             sortable: true,
             filter: true,
-            filterPlaceholder: "İptali Onaylayan Yetkili'ye Göre",
+            filterPlaceholder: "İptali İşleyen Yetkili'ye Göre",
             body: (rowData: any) => {
                 return <span>{rowData.cancellation_accepted_by ? rowData.cancellation_accepted_by.name :
-                    <span><i className={"pi pi-exclamation-circle text-red-400"}></i> Onay Bekliyor</span>}</span>
+                    <span>{rowData.cancellation_accepted ? "Onaylandı" : rowData.cancellation_rejected ? "Reddedildi" : "Onay Bekliyor"}</span>}</span>
             }
         },
         {
@@ -298,13 +323,24 @@ const CancellationRequestsPage = ({auth, csrfToken, flash}: AllCouriersProps) =>
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
-                    <Button visible={!rowData.cancellation_accepted} size={"small"} icon={"pi pi-check-circle"} severity={"success"}
+                    <Button visible={!rowData.cancellation_accepted && !rowData.cancellation_rejected} size={"small"}
+                            icon={"pi pi-check-circle"} severity={"success"}
                             tooltip={"İptali Onayla"}
                             tooltipOptions={{
                                 position: "top"
                             }}
                             onClick={(event) => {
                                 approveCancellationRequestOrder(event, rowData.id);
+                            }}
+                    />
+                    <Button visible={!rowData.cancellation_accepted && !rowData.cancellation_rejected} size={"small"}
+                            icon={"pi pi-times-circle"} severity={"danger"}
+                            tooltip={"Reddet"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={(event) => {
+                                rejectCancellationRequestOrder(event, rowData.id);
                             }}
                     />
                 </div>

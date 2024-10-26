@@ -317,9 +317,9 @@ const ActiveOrder = ({auth, csrfToken}: {
                             <Tag
                                 className={"ml-2"}
                                 // @ts-ignore
-                                value={getOrderStatuses(order.status).label}
+                                value={getOrderStatuses(order.status, false, order.cancellation_accepted === 1, order.cancellation_rejected === 1).label}
                                 // @ts-ignore
-                                severity={getOrderStatuses(order.status).severity}
+                                severity={getOrderStatuses(order.status, false, order.cancellation_accepted === 1, order.cancellation_rejected === 1).severity}
                             />
                         </div>
                         {order.status === "canceled" && <>

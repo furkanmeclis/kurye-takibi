@@ -10,7 +10,7 @@ const AppFooter = () => {
             <div className="footer-start">
                 <img src={'/layout/images/logo-' + (layoutConfig.colorScheme === 'light' ? 'dark' : 'light') + '.png'}
                      alt="logo"/>
-                <span className="app-name">{import.meta.env.VITE_APP_NAME}</span>
+
             </div>
             <div className="footer-right">
                 <span>© Your Organization</span>

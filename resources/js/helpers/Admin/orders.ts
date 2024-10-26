@@ -27,3 +27,31 @@ export const approveCancellationOrder = async (id: number, csrfToken: any) => {
         return false;
     }
 }
+export const rejectCancellationOrder = async (id: number, csrfToken: any) => {
+    if (csrfToken) {
+        let url = route("admin.orders.rejectCancellation", id);
+        let headers = new Headers();
+        headers.append("X-CSRF-TOKEN", csrfToken);
+        let response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+        });
+        return await response.json();
+    } else {
+        return false;
+    }
+}
+export const getOrders = async (csrfToken: any) => {
+    if (csrfToken) {
+        let url = route("admin.orders.listOrders");
+        let headers = new Headers();
+        headers.append("X-CSRF-TOKEN", csrfToken);
+        let response = await fetch(url, {
+            method: "POST",
+            headers: headers
+        });
+        return await response.json();
+    } else {
+        return false;
+    }
+}

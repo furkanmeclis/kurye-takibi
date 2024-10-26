@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Business;
 
 use App\Models\Integrations;
+use App\Services\IntegrationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -41,11 +42,13 @@ class IntegrationsController
                 'apiKey' => 'required',
                 'apiSecret' => 'required',
                 'supplierId' => 'required',
+                'restaurantId' => 'required',
             ]);
             $data = [
                 'apiKey' => $request->apiKey,
                 'apiSecret' => $request->apiSecret,
                 'supplierId' => $request->supplierId,
+                'restaurantId' => $request->restaurantId,
             ];
             $result = Integrations::saveTrendyol(auth()->id(), $data);
             if ($result) {
@@ -63,6 +66,38 @@ class IntegrationsController
             return response()->json([
                 'message' => $e->getMessage(),
                 "status" => false
+            ]);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getTrendyolRestaurantInfo(): \Illuminate\Http\JsonResponse
+    {
+        $trendyolClient = IntegrationHelper::getTrendyolClient();
+        if ($trendyolClient->status) {
+            $response = $trendyolClient->client->getRestaurantInfo();
+            if ($response == null) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Bağlantı Hatası Kimlik Bilgilerinizi Kontrol Edin"
+                ]);
+            }
+            if ($response["totalElements"] == 0) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Trendyol Restoran Bilgisi Bulunamadı"
+                ]);
+            }
+            return response()->json([
+                "status" => true,
+                "data" => $response["restaurants"][0]
+            ]);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => $trendyolClient->message
             ]);
         }
     }
