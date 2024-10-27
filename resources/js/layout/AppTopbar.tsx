@@ -83,7 +83,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                 })}
                 {/*{!tabs || (tabs.length === 0 && <li className="topbar-menu-empty">v1.0</li>)}*/}
             </ul>
-            <div
+            {auth?.user?.role === "business" && <div
                 className={classNames('topbar-search')}
             >
                 <Button
@@ -100,7 +100,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                         setVisible(true)
                     }}
                 />
-            </div>
+            </div>}
             {searchActive === true && (<div
                 className={classNames('topbar-search', {
                     'topbar-search-active': searchActive
