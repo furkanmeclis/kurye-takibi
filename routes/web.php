@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/save-getir-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveGetirSettings'])->name('saveGetirSettings');
             Route::post('/save-yemeksepeti-settings', [\App\Http\Controllers\Business\IntegrationsController::class, 'saveYemeksepetiSettings'])->name('saveYemeksepetiSettings');
             Route::post('/trendyol-restaurant-info', [\App\Http\Controllers\Business\IntegrationsController::class, 'getTrendyolRestaurantInfo'])->name("getTrendyolRestaurantInfo");
+            Route::post("/trendyol-update-working-status", [\App\Http\Controllers\Business\IntegrationsController::class, 'updateWorkingStatusTrendyol'])->name("updateWorkingStatusTrendyol");
         });
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {

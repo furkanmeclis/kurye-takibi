@@ -6,9 +6,11 @@ import {Ripple} from 'primereact/ripple';
 import {Link, router} from "@inertiajs/react";
 import {StyleClass} from 'primereact/styleclass';
 import {classNames} from 'primereact/utils';
+import {Button} from "primereact/button";
+import RestauranSettingsSidebar from "@/components/RestauranSettingsSidebar";
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
-    const {onMenuToggle, layoutConfig, tabs, closeTab, auth} = useContext(LayoutContext);
+    const {onMenuToggle, layoutConfig, tabs, closeTab, auth, csrfToken} = useContext(LayoutContext);
     const [searchActive, setSearchActive] = useState<boolean | null>(false);
 
     const pathname = window.location.pathname;
@@ -57,13 +59,13 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         }
         closeTab(index);
     };
-
+    const [visible, setVisible] = useState(false);
     return (
         <div className="layout-topbar">
             <Link href={route("dashboard")} className="app-logo">
                 <img alt="app logo" src={logo()}/>
             </Link>
-
+            <RestauranSettingsSidebar csrfToken={csrfToken} visible={visible} setVisible={setVisible}/>
             <button ref={menubuttonRef} className="topbar-menubutton p-link" type="button" onClick={onMenuButtonClick}>
                 <span></span>
             </button>
@@ -79,9 +81,26 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                         </li>
                     );
                 })}
-                {!tabs || (tabs.length === 0 && <li className="topbar-menu-empty">v1.0</li>)}
+                {/*{!tabs || (tabs.length === 0 && <li className="topbar-menu-empty">v1.0</li>)}*/}
             </ul>
-
+            <div
+                className={classNames('topbar-search')}
+            >
+                <Button
+                    rounded
+                    icon={"pi pi-cog"}
+                    raised
+                    tooltip={"Restoran Ayarları"}
+                    tooltipOptions={{
+                        position: 'bottom'
+                    }}
+                    severity={"secondary"}
+                    size={"small"}
+                    onClick={() => {
+                        setVisible(true)
+                    }}
+                />
+            </div>
             {searchActive === true && (<div
                 className={classNames('topbar-search', {
                     'topbar-search-active': searchActive

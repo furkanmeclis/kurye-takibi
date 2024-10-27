@@ -642,16 +642,16 @@
         },
         {
             "name": "furkanmeclis/trendyol-yemek-api",
-            "version": "v0.1",
+            "version": "v0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/furkanmeclis/trendyol-yemek-api.git",
-                "reference": "31b7ac65c8e702a87a00d7c142705eb297ab4b08"
+                "reference": "8634c1f48e44611bf59c4579f0c3d795e8418d84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/furkanmeclis/trendyol-yemek-api/zipball/31b7ac65c8e702a87a00d7c142705eb297ab4b08",
-                "reference": "31b7ac65c8e702a87a00d7c142705eb297ab4b08",
+                "url": "https://api.github.com/repos/furkanmeclis/trendyol-yemek-api/zipball/8634c1f48e44611bf59c4579f0c3d795e8418d84",
+                "reference": "8634c1f48e44611bf59c4579f0c3d795e8418d84",
                 "shasum": ""
             },
             "require": {
@@ -678,9 +678,9 @@
             "description": "Trendyol Yemek API PHP Client",
             "support": {
                 "issues": "https://github.com/furkanmeclis/trendyol-yemek-api/issues",
-                "source": "https://github.com/furkanmeclis/trendyol-yemek-api/tree/v0.1"
+                "source": "https://github.com/furkanmeclis/trendyol-yemek-api/tree/v0.1.1"
             },
-            "time": "2024-10-10T23:34:45+00:00"
+            "time": "2024-10-27T22:29:40+00:00"
         },
         {
             "name": "graham-campbell/result-type",

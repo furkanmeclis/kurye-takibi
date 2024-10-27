@@ -101,4 +101,43 @@ class IntegrationsController
             ]);
         }
     }
+
+    public function updateWorkingStatusTrendyol(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $request->validate([
+                'workingStatus' => 'required'
+            ]);
+            $trendyolClient = IntegrationHelper::getTrendyolClient();
+            if ($trendyolClient->status) {
+                $status = $trendyolClient->client->updateRestaurantStatus($request->workingStatus);
+                if ($status) {
+                    return response()->json([
+                        "status" => true,
+                        "message" => "Durum Güncellendi : " . ($request->workingStatus == "OPEN" ? "Açık" : "Kapalı")
+                    ]);
+                } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Durum Güncellenemedi"
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => $trendyolClient->message
+                ]);
+            }
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                "status" => false
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => "Kimlik Bilgilerinizi Kontrol Edin",
+                "status" => false
+            ]);
+        }
+    }
 }

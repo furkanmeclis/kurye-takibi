@@ -56,3 +56,16 @@ export const getTrendyolRestaurantInfo = async (csrfToken: any) => {
     });
     return await response.json();
 }
+export const updateTrendyolRestaurantWorkingStatus = async (workingStatus: "OPEN" | "CLOSED", csrfToken: any) => {
+    let url = route("business.integrations.updateWorkingStatusTrendyol");
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({workingStatus})
+    });
+    return await response.json();
+
+}
