@@ -43,12 +43,21 @@ class IntegrationsController
                 'apiSecret' => 'required',
                 'supplierId' => 'required',
                 'restaurantId' => 'required',
+                'autoApprove' => 'boolean',
+                'preparationTime' => [
+                    'required_if:autoApprove,true',
+                    'nullable',
+                    'min:1',
+                ],
             ]);
+
             $data = [
                 'apiKey' => $request->apiKey,
                 'apiSecret' => $request->apiSecret,
                 'supplierId' => $request->supplierId,
                 'restaurantId' => $request->restaurantId,
+                'autoApprove' => $request->autoApprove,
+                'preparationTime' => $request->preparationTime,
             ];
             $result = Integrations::saveTrendyol(auth()->id(), $data);
             if ($result) {
@@ -90,14 +99,20 @@ class IntegrationsController
                     "message" => "Trendyol Restoran Bilgisi Bulunamadı"
                 ]);
             }
+            $restaurant = $response["restaurants"][0];
+            $settings = [
+                "autoApprove" => $trendyolClient->settings->autoApprove,
+                "preparationTime" => $trendyolClient->settings->preparationTime,
+            ];
             return response()->json([
                 "status" => true,
-                "data" => $response["restaurants"][0]
+                "data" => array_merge($restaurant, $settings)
             ]);
         } else {
             return response()->json([
                 "status" => false,
-                "message" => $trendyolClient->message
+                "message" => $trendyolClient->message,
+                "empty" => true
             ]);
         }
     }
@@ -136,6 +151,41 @@ class IntegrationsController
         } catch (\Exception $e) {
             return response()->json([
                 'message' => "Kimlik Bilgilerinizi Kontrol Edin",
+                "status" => false
+            ]);
+        }
+    }
+
+    public function updateAutoApproveTrendyol(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $request->validate([
+                'autoApprove' => 'required|boolean',
+                'preparationTime' => [
+                    'required_if:autoApprove,true',
+                    'nullable',
+                    'min:1',
+                ],
+            ]);
+            $preparationTime = $request->preparationTime;
+            if(!$request->autoApprove){
+                $preparationTime = 0;
+            }
+            $result = Integrations::updateAutoApprove(auth()->id(), $request->autoApprove, $preparationTime);
+            if ($result) {
+                return response()->json([
+                    "status" => true,
+                    'message' => 'Otomatik Onaylama Ayarları Güncellendi'
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Bir Sorun Oluştu',
+                    "status" => false
+                ]);
+            }
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
                 "status" => false
             ]);
         }

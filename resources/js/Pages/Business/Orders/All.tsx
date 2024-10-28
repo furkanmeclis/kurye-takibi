@@ -499,11 +499,10 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     />
                 }
                 {!loading && orders.length === 0 && <Message
-                    className={"w-full"}
+                    className={"w-full mb-3"}
                     severity="info" text={"Sipariş bulunamadı."}
                 />}
                 <DataTable
-                    hidden={!loading && orders.length === 0 || error !== null}
                     loading={loading}
                     value={orders}
                     removableSort paginator

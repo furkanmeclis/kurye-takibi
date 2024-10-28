@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\IntegrationHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -236,17 +237,48 @@ class Orders extends Model
         ];
     }
 
-    public static function matchTrendyolOrders($trendyolContent)
+    /**
+     * @throws \Exception
+     */
+    public static function matchTrendyolOrders($trendyolContent, $businessId = false): object
     {
-        $business = auth()->user();
+        if (!$businessId) {
+            $business = auth()->user();
+        } else {
+            $business = User::find($businessId);
+        }
         $businessDetails = $business->details();
         $trendyolContent = json_decode(json_encode($trendyolContent));
-        $transactionCount = 0;
+        $addedOrdersCount = 0;
+        $existOrdersCount = 0;
         foreach ($trendyolContent as $order) {
             $controlOrder = self::where('marketplace_order_id', $order->id)->first();
             if ($controlOrder) {
-                $controlOrder->status = (new Orders)->mapOrderStatusTrendyol($order->packageStatus);
-                $controlOrder->save();
+                $newStatus = (new Orders)->mapOrderStatusTrendyol($order->packageStatus);
+                if ($controlOrder->status != $newStatus) {
+                    $controlOrder->status = $newStatus;
+                    $controlOrder->updated_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
+                    if ($order->packageStatus == "Delivered") {
+                        $controlOrder->courier_accepted_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
+                        $controlOrder->delivered_at = Carbon::createFromTimestamp($order->packageModificationDate / 1000);
+                    }
+                    if ($order->packageStatus == "Cancelled") {
+                        $controlOrder->cancellation_accepted_by = User::where('role', "admin")->first(["id"])->id;
+                        $controlOrder->canceled_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
+                        if (isset($order->cancelInfo)) {
+                            $controlOrder->cancellation_reason = IntegrationHelper::getCancellationReasonForTrendyol($order->cancelInfo->reasonCode);
+                        } else {
+                            $controlOrder->cancellation_reason = "Bilinmeyen Sebep";
+                        }
+                        $controlOrder->cancellation_requested_by = "business";
+                        $controlOrder->cancellation_accepted = 1;
+                        $controlOrder->cancellation_rejected = 0;
+                    }
+                    $controlOrder->save();
+                    $existOrdersCount++;
+                } else {
+                    $existOrdersCount++;
+                }
             } else {
                 $controlCustomer = Customers::where('marketplace_id', $order->customer->id)->first();
                 if ($controlCustomer) {
@@ -255,7 +287,7 @@ class Orders extends Model
                     $customer = new Customers();
                     $customer->business_id = auth()->id();
                     $customer->name = $order->customer->firstName . " " . $order->customer->lastName;
-                    $customer->marketplace_id = $order->customer->id;
+                    $customer->marketplace_id = $order->customer->id . $business->id;
                     $customer->phone = (new Orders)->formatPhoneNumberForTrendyol($order->callCenterPhone);
                     $customer->note = "Trendyol Müşterisi İletişim No:" . $order->orderNumber;
                     $customer->save();
@@ -264,14 +296,25 @@ class Orders extends Model
                 if ($controlAddress) {
                     $address = $controlAddress;
                 } else {
+                    $addressParts = [
+                        $order->address->neighborhood ?? null,
+                        $order->address->address1 ?? null,
+                        $order->address->address2 ?? null,
+                        $order->address->addressDescription ?? null,
+                        ($order->address->floor ? $order->address->floor . ". Kat" : null),
+                        ($order->address->doorNumber ? "Daire " . $order->address->doorNumber : null),
+                        $order->address->district ?? null,
+                        $order->address->city ?? null,
+                        $order->address->postalCode ?? null
+                    ];
                     $address = new CustomerAddresses();
                     $address->customer_id = $customer->id;
-                    $address->marketplace_id = $order->customer->id;
+                    $address->marketplace_id = $order->customer->id . $business->id;
                     $address->phone = (new Orders)->formatPhoneNumberForTrendyol($order->address->phone);
                     $address->title = "Trendyol Adresi";
                     $address->city = $order->address->city;
                     $address->district = $order->address->district;
-                    $address->address = $order->address->address1 . " " . $order->address->address2 . " " . $order->address->addressDescription . " " . $order->address->neighborhood . " " . $order->address->apartmentNumber . " " . $order->address->floor . ".Kat " . $order->address->doorNumber . " Kapı No " . $order->address->postalCode;
+                    $address->address = implode(", ", array_filter($addressParts));
                     $address->notes = $order->address->addressDescription;
                     $address->save();
                 }
@@ -294,14 +337,35 @@ class Orders extends Model
                 ]);
                 $newOrder->marketplace_order_details = json_encode($order);
                 $newOrder->price = 1;
+                $newOrder->updated_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
+                $newOrder->created_at = Carbon::createFromTimestamp($order->packageCreationDate / 1000);
+                if ($order->packageStatus == "Delivered") {
+                    $newOrder->courier_accepted_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
+                    $newOrder->delivered_at = Carbon::createFromTimestamp($order->packageModificationDate / 1000);
+                }
+                if ($order->packageStatus == "Cancelled") {
+                    $newOrder->cancellation_accepted_by = User::where('role', "admin")->first(["id"])->id;
+                    $newOrder->canceled_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
+                    if (isset($order->cancelInfo)) {
+                        $newOrder->cancellation_reason = IntegrationHelper::getCancellationReasonForTrendyol($order->cancelInfo->reasonCode);
+                    } else {
+                        $newOrder->cancellation_reason = "Bilinmeyen Sebep";
+                    }
+                    $newOrder->cancellation_requested_by = "business";
+                    $newOrder->cancellation_accepted = 1;
+                    $newOrder->cancellation_rejected = 0;
+                }
                 if ($newOrder->save()) {
-                    $transactionCount++;
+                    if ($order->packageStatus == "Created") {
+                        $newOrder->approveOrder();
+                    }
+                    $addedOrdersCount++;
                 } else {
-                    continue;
+                    $existOrdersCount++;
                 }
             }
         }
-        if (count($trendyolContent) == $transactionCount) {
+        if (count($trendyolContent) == ($addedOrdersCount + $existOrdersCount)) {
             return (object)[
                 "status" => true,
                 "message" => "Trendyol Siparişleri Eşleştirildi"
@@ -309,7 +373,7 @@ class Orders extends Model
         } else {
             return (object)[
                 "status" => false,
-                "message" => "Toplamda " . count($trendyolContent) . " Siparişten " . $transactionCount . " Sipariş Eşleştirildi"
+                "message" => "Toplamda " . count($trendyolContent) . " Siparişten " . $addedOrdersCount . " Sipariş Eşleştirildi"
             ];
         }
     }
@@ -344,7 +408,36 @@ class Orders extends Model
         if (str_starts_with($phoneNumber, "0")) {
             $phoneNumber = substr($phoneNumber, 1);
         }
-        return $phoneNumber;
+        if (strlen($phoneNumber) != 10) {
+            return $phoneNumber;
+        }
+        return sprintf("(%s)-%s-%s",
+            substr($phoneNumber, 0, 3),
+            substr($phoneNumber, 3, 3),
+            substr($phoneNumber, 6)
+        );
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function approveOrder()
+    {
+        if ($this->marketplace == "trendyol") {
+            $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
+            if ($trendyol->status) {
+                if ($trendyol->settings->autoApprove) {
+                    return $trendyol->client->acceptOrder($this->marketplace_order_id, $trendyol->settings->preparationTime);
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     public static function getBusinessStats(int $days = 7): object

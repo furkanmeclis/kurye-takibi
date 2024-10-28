@@ -29,6 +29,16 @@ class Integrations extends Model
         return $integration->save();
     }
 
+    public static function updateAutoApprove($businessId, $autoApprove, $preparationTime): bool
+    {
+        $integration = self::findOrCreateBusiness($businessId);
+        $data = json_decode($integration->trendyol);
+        $data->autoApprove = $autoApprove;
+        $data->preparationTime = $preparationTime;
+        $integration->trendyol = json_encode($data);
+        return $integration->save();
+    }
+
     public static function saveYemeksepeti($businessId, $data): bool
     {
         $integration = self::findOrCreateBusiness($businessId);

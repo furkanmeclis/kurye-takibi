@@ -69,3 +69,15 @@ export const updateTrendyolRestaurantWorkingStatus = async (workingStatus: "OPEN
     return await response.json();
 
 }
+export const updateAutoApproveTrendyol = async (autoApprove: boolean, preparationTime: any, csrfToken: any) => {
+    let url = route("business.integrations.updateAutoApproveTrendyol");
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({autoApprove, preparationTime})
+    });
+    return await response.json();
+}

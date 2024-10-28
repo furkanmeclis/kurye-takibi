@@ -3,10 +3,10 @@ import {Accordion, AccordionTab} from "primereact/accordion";
 import {Badge} from "primereact/badge";
 import {Avatar} from "primereact/avatar";
 import trendyolSvg from "@/icons/trendyol.svg";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     getIntegrations,
-    getTrendyolRestaurantInfo,
+    getTrendyolRestaurantInfo, updateAutoApproveTrendyol,
     updateTrendyolRestaurantWorkingStatus
 } from "@/helpers/Business/integrations";
 import {Toast} from "primereact/toast";
@@ -16,6 +16,9 @@ import {SelectButton} from 'primereact/selectbutton';
 import {Formik} from "formik";
 import {Button} from "primereact/button";
 import {Message} from "primereact/message";
+import * as Yup from "yup";
+import {InputSwitch} from "primereact/inputswitch";
+import {InputNumber} from "primereact/inputnumber";
 
 const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
     csrfToken: any,
@@ -146,6 +149,100 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
                                     }}
                                     value={props.values.workingStatus}
                                 />
+                                {props.dirty && <Button label={"Kaydet"} icon={"pi pi-save"}
+                                                        loading={props.isSubmitting}
+                                                        type={"submit"}
+                                                        severity={"success"} className={"mt-2"} size={"small"}/>}
+                            </form>)}
+                        </Formik>
+                        <Formik
+                            initialValues={{
+                                autoApprove: trendyolRestaurant?.autoApprove,
+                                preparationTime: trendyolRestaurant?.preparationTime,
+                            }}
+                            validationSchema={Yup.object().shape({
+                                preparationTime: Yup.string().when('autoApprove', {
+                                    is: true,
+                                    then: () => Yup.string()
+                                        .required('Zorunlu Alan')
+                                        .matches(/^[0-9]+$/, 'Geçerli bir süre giriniz'),
+                                    otherwise: () => Yup.string().notRequired(),
+                                })
+                            })}
+                            onSubmit={(values, {setSubmitting, resetForm}) => {
+                                setSubmitting(true)
+                                updateAutoApproveTrendyol(values.autoApprove, values.preparationTime, csrfToken).then((response) => {
+                                    if (response.status) {
+                                        toast.current?.show({
+                                            severity: 'success',
+                                            summary: 'Başarılı',
+                                            detail: response.message
+                                        });
+                                        resetForm({
+                                            values
+                                        });
+                                        syncData();
+                                    } else {
+                                        toast.current?.show({
+                                            severity: 'error',
+                                            summary: 'Hata',
+                                            detail: response.message
+                                        });
+                                    }
+                                }).catch((err) => {
+                                    console.log(err);
+                                    toast.current?.show({
+                                        severity: 'error',
+                                        summary: 'Hata',
+                                        detail: "Bir hata oluştu."
+                                    });
+                                }).finally(() => {
+                                    setSubmitting(false);
+                                })
+                            }}>
+                            {(props) => (<form onSubmit={props.handleSubmit} className={"mt-2 border-y-1 py-3"}>
+                                <div className="flex align-items-center h-full gap-2">
+
+                                    <InputSwitch id="autoApprove"
+                                                 name={"autoApprove"}
+                                                 checked={props.values.autoApprove}
+                                                 onChange={props.handleChange}
+                                    />
+                                    <label htmlFor="autoApprove"
+                                           onClick={() => props.setFieldValue('autoApprove', !props.values.autoApprove)}
+                                           className="font-semibold">
+                                        Otomatik Sipariş Onayı
+                                    </label>
+                                </div>
+                                {props.values.autoApprove &&
+                                    <div className={"mt-2"}>
+                                        <label htmlFor="preparationTime" className={classNames("font-semibold")}>
+                                            Sipariş Hazırlama Süresi
+                                        </label>
+                                        <InputNumber
+                                            id="preparationTime"
+                                            type="text"
+                                            name={"preparationTime"}
+                                            onValueChange={(e) => props.setFieldValue('preparationTime', e.value)}
+                                            value={props.values.preparationTime}
+                                            suffix={" Dakika"}
+                                            showButtons
+                                            // @ts-ignore
+                                            tooltip={(props.errors?.preparationTime)}
+                                            buttonLayout="horizontal"
+                                            min={0}
+                                            step={5}
+                                            incrementButtonIcon="pi pi-plus"
+                                            decrementButtonIcon="pi pi-minus"
+                                            tooltipOptions={{
+                                                position: 'top',
+                                            }}
+                                            onBlur={props.handleBlur}
+                                            className={classNames('w-full', {
+                                                'p-invalid': !!props.errors.preparationTime,
+                                            })}
+                                        />
+                                    </div>}
                                 {props.dirty && <Button label={"Kaydet"} icon={"pi pi-save"}
                                                         loading={props.isSubmitting}
                                                         type={"submit"}

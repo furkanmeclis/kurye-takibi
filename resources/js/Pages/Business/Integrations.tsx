@@ -25,6 +25,7 @@ import L from "leaflet";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import finishMarkerIcon from "@/icons/finishMarker.png";
+import {InputNumber} from "primereact/inputnumber";
 
 const finishMarker = new L.Icon({
     iconUrl: finishMarkerIcon,
@@ -86,17 +87,32 @@ const Integrations = ({auth, csrfToken, errors}: {
                             apiSecret: trendyolSettings?.apiSecret || '',
                             restaurantId: trendyolSettings?.restaurantId || '',
                             autoApprove: trendyolSettings?.autoApprove || false,
-                            loading: false
+                            loading: false,
+                            preparationTime: trendyolSettings?.preparationTime || 0,
                         }}
                         validationSchema={Yup.object({
                             supplierId: Yup.string().required('Zorunlu Alan'),
                             apiKey: Yup.string().required('Zorunlu Alan'),
                             apiSecret: Yup.string().required('Zorunlu Alan'),
-
+                            restaurantId: Yup.string().required('Zorunlu Alan'),
+                            preparationTime: Yup.string().when('autoApprove', {
+                                is: true,
+                                then: () => Yup.string()
+                                    .required('Zorunlu Alan')
+                                    .matches(/^[0-9]+$/, 'Geçerli bir süre giriniz'),
+                                otherwise: () => Yup.string().notRequired(),
+                            })
                         })}
                         onSubmit={(values, {setSubmitting}) => {
-
-                            saveTrendyolSettings(values, csrfToken).then((response) => {
+                            let postData = {
+                                supplierId: values.supplierId,
+                                apiKey: values.apiKey,
+                                apiSecret: values.apiSecret,
+                                restaurantId: values.restaurantId,
+                                autoApprove: values.autoApprove,
+                                preparationTime: values.preparationTime
+                            };
+                            saveTrendyolSettings(postData, csrfToken).then((response) => {
                                 if (response.status) {
                                     toast.current?.show({
                                         severity: 'success',
@@ -213,8 +229,8 @@ const Integrations = ({auth, csrfToken, errors}: {
                                     />
                                 </div>
 
-                                <div className="col-12">
-                                    <div className="flex align-items-center gap-2">
+                                <div className="col-12 md:col-3">
+                                    <div className="flex align-items-center h-full gap-2">
 
                                         <InputSwitch id="autoApprove"
                                                      name={"autoApprove"}
@@ -228,6 +244,35 @@ const Integrations = ({auth, csrfToken, errors}: {
                                         </label>
                                     </div>
                                 </div>
+                                {props.values.autoApprove &&
+                                    <div className="field mb-4 col-12 md:col-3 p-input-icon-right">
+                                        <label htmlFor="preparationTime" className={classNames("font-medium text-900")}>
+                                            Sipariş Hazırlama Süresi
+                                        </label>
+                                        <InputNumber
+                                            id="preparationTime"
+                                            type="text"
+                                            name={"preparationTime"}
+                                            onValueChange={(e) => props.setFieldValue('preparationTime', e.value)}
+                                            value={props.values.preparationTime}
+                                            suffix={" Dakika"}
+                                            showButtons
+                                            // @ts-ignore
+                                            tooltip={(props.errors?.preparationTime)}
+                                            buttonLayout="horizontal"
+                                            min={0}
+                                            step={5}
+                                            incrementButtonIcon="pi pi-plus"
+                                            decrementButtonIcon="pi pi-minus"
+                                            tooltipOptions={{
+                                                position: 'top',
+                                            }}
+                                            onBlur={props.handleBlur}
+                                            className={classNames('w-full', {
+                                                'p-invalid': !!props.errors.preparationTime,
+                                            })}
+                                        />
+                                    </div>}
                                 <div className="col-12 mb-4">
                                     <Button label="Kaydet"
                                             size={"small"}
@@ -273,11 +318,11 @@ const Integrations = ({auth, csrfToken, errors}: {
                                         <Card
                                             className={"bg-primary-50"}
                                             title={<>{trendyolRestaurantInfo.name} <Tag
-                                                value={"Restoran Durumu : "+(trendyolRestaurantInfo.workingStatus === "CLOSED" ? "Kapalı" : "Açık")}
+                                                value={"Restoran Durumu : " + (trendyolRestaurantInfo.workingStatus === "CLOSED" ? "Kapalı" : "Açık")}
                                                 className={"mr-2"}
                                                 severity={trendyolRestaurantInfo.workingStatus === "CLOSED" ? "danger" : "success"}/>
                                                 <Tag
-                                                    value={"Kurye : "+(trendyolRestaurantInfo.deliveryType === "STORE" ? "Restoran Kuryesi" : "Trendyol Go Kuryesi")}
+                                                    value={"Kurye : " + (trendyolRestaurantInfo.deliveryType === "STORE" ? "Restoran Kuryesi" : "Trendyol Go Kuryesi")}
                                                     severity={trendyolRestaurantInfo.deliveryType === "STORE" ? "info" : "warning"}/>
                                             </>}
                                             subTitle={<>

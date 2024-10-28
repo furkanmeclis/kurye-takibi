@@ -30,6 +30,7 @@ class TrendyolYemekApi
         $this->restaurantId = $restaurantId;
         $this->apiUsername = $apiUsername;
         $this->apiPassword = $apiPassword;
+        $this->executionUser = $executionUser;
     }
 
 
