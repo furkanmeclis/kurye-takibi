@@ -4,7 +4,7 @@ import {Head, router} from "@inertiajs/react";
 import {Button} from 'primereact/button';
 import React, {useEffect, useRef, useState} from 'react';
 import {Toast} from "primereact/toast";
-import OrderShowPage from "@/Pages/Business/Orders/Show";
+import OrderShowPage from "@/components/OrderShow";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
 import {Message} from "primereact/message";
@@ -19,7 +19,7 @@ import {
     subscribeUpdateOrder,
     updateOrderStatus
 } from "@/helpers/Business/orders";
-import {getOrderStatuses} from "@/helpers/globalHelper"
+import {getOrderStatuses, listenOrderEvents} from "@/helpers/globalHelper"
 import {Tag} from "primereact/tag";
 import {Dropdown} from "primereact/dropdown";
 import {InputText} from "primereact/inputtext";
@@ -59,6 +59,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     return {
                         ...order,
                         cancellation_accepted: order.cancellation_accepted === 1,
+                        cancellation_rejected: order.cancellation_rejected === 1,
                     }
                 }));
                 setLoading(false);
@@ -73,18 +74,20 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         }).finally(() => setLoading(false))
     }
     useEffect(() => {
-
         getOrdersAll();
         if (flash?.message) {
             // @ts-ignore
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
         }
         if (auth?.user?.id) {
-            subscribeUpdateOrder(auth?.user?.id, (data: any) => {
-                if (data?.reload) {
+            let client = listenOrderEvents((data:any) => {
+                if(data.reload){
                     getOrdersAll();
                 }
             });
+            return () => {
+                client();
+            }
         }
     }, []);
     const deleteOrder = (event: any, id: number) => {
@@ -235,9 +238,9 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             body: (rowData: any) => {
                 return <Tag
                     // @ts-ignore
-                    value={String(getOrderStatuses(rowData.status, false, rowData.cancellation_accepted === 1, rowData.cancellation_rejected === 1).label)}
+                    value={String(getOrderStatuses(rowData.status, false, rowData.cancellation_accepted, rowData.cancellation_rejected).label)}
                     // @ts-ignore
-                    severity={String(getOrderStatuses(rowData.status, false, rowData.cancellation_accepted === 1, rowData.cancellation_rejected === 1).severity)}
+                    severity={String(getOrderStatuses(rowData.status, false, rowData.cancellation_accepted, rowData.cancellation_rejected).severity)}
                 />
             }
         },
@@ -374,6 +377,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         }}
                     />}
                     {rowData.status !== "draft" && rowData.status !== "deleted" && rowData.status !== "canceled" &&
+                        rowData.status !== "delivered" &&
                         <Button
                             size={"small"}
                             icon={"pi pi-ban"}
@@ -516,8 +520,6 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     onRowToggle={(e) => setExpandedRows(e?.data)}
                     rowExpansionTemplate={(data) => {
                         return <OrderShowPage
-                            page={false}
-                            order={data}
                             // @ts-ignore
                             orderId={data.id}
                             csrfToken={csrfToken}

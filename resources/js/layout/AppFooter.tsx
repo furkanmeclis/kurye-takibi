@@ -13,7 +13,7 @@ const AppFooter = () => {
 
             </div>
             <div className="footer-right">
-                <span>© Your Organization</span>
+                <span>© 414Express</span>
             </div>
         </div>
     );

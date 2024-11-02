@@ -89,6 +89,7 @@ const Integrations = ({auth, csrfToken, errors}: {
                             autoApprove: trendyolSettings?.autoApprove || false,
                             loading: false,
                             preparationTime: trendyolSettings?.preparationTime || 0,
+                            defaultPackagePrice: trendyolSettings?.defaultPackagePrice || 0
                         }}
                         validationSchema={Yup.object({
                             supplierId: Yup.string().required('Zorunlu Alan'),
@@ -101,7 +102,8 @@ const Integrations = ({auth, csrfToken, errors}: {
                                     .required('Zorunlu Alan')
                                     .matches(/^[0-9]+$/, 'Geçerli bir süre giriniz'),
                                 otherwise: () => Yup.string().notRequired(),
-                            })
+                            }),
+                            defaultPackagePrice: Yup.number().required('Zorunlu Alan').min(0, 'Paket ücreti 0 dan küçük olamaz')
                         })}
                         onSubmit={(values, {setSubmitting}) => {
                             let postData = {
@@ -110,7 +112,8 @@ const Integrations = ({auth, csrfToken, errors}: {
                                 apiSecret: values.apiSecret,
                                 restaurantId: values.restaurantId,
                                 autoApprove: values.autoApprove,
-                                preparationTime: values.preparationTime
+                                preparationTime: values.preparationTime,
+                                defaultPackagePrice: values.defaultPackagePrice
                             };
                             saveTrendyolSettings(postData, csrfToken).then((response) => {
                                 if (response.status) {
@@ -142,7 +145,7 @@ const Integrations = ({auth, csrfToken, errors}: {
                             <form onSubmit={props.handleSubmit} className="grid formgrid p-fluid">
 
 
-                                <div className="field mb-4 col-12 md:col-3 p-input-icon-right">
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
                                     <label htmlFor="supplierId" className={classNames("font-medium text-900")}>
                                         Satıcı Id
                                     </label>
@@ -163,7 +166,7 @@ const Integrations = ({auth, csrfToken, errors}: {
                                                })}
                                     />
                                 </div>
-                                <div className="field mb-4 col-12 md:col-3 p-input-icon-right">
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
                                     <label htmlFor="restaurantId" className={classNames("font-medium text-900")}>
                                         Restoran Id
                                     </label>
@@ -184,7 +187,7 @@ const Integrations = ({auth, csrfToken, errors}: {
                                                })}
                                     />
                                 </div>
-                                <div className="field mb-4 col-12 md:col-3 p-input-icon-right">
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
                                     <label htmlFor="apiKey" className={classNames("font-medium text-900")}>
                                         API Key
                                     </label>
@@ -206,7 +209,7 @@ const Integrations = ({auth, csrfToken, errors}: {
                                               })}
                                     />
                                 </div>
-                                <div className="field mb-4 col-12 md:col-3 p-input-icon-right">
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
                                     <label htmlFor="apiSecret" className={classNames("font-medium text-900")}>
                                         API Secret
                                     </label>
@@ -228,8 +231,57 @@ const Integrations = ({auth, csrfToken, errors}: {
                                               })}
                                     />
                                 </div>
-
-                                <div className="col-12 md:col-3">
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="apiSecret" className={classNames("font-medium text-900")}>
+                                        API Secret
+                                    </label>
+                                    <Password id="apiSecret"
+                                              feedback={false}
+                                              toggleMask
+                                              autoComplete={"off"}
+                                              name={"apiSecret"}
+                                        // @ts-ignore
+                                              tooltip={props.errors?.apiSecret}
+                                              tooltipOptions={{
+                                                  position: 'top',
+                                              }}
+                                              onChange={props.handleChange}
+                                              value={props.values.apiSecret}
+                                              onBlur={props.handleBlur}
+                                              className={classNames('w-full', {
+                                                  'p-invalid': !!props.errors.apiSecret,
+                                              })}
+                                    />
+                                </div>
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="defaultPackagePrice" className={classNames("font-medium text-900")}>
+                                        Varsayılan Paket Ücreti
+                                    </label>
+                                    <InputNumber
+                                        id="defaultPackagePrice"
+                                        type="text"
+                                        name={"defaultPackagePrice"}
+                                        onValueChange={(e) => props.setFieldValue('defaultPackagePrice', e.value)}
+                                        value={props.values.defaultPackagePrice}
+                                        suffix={" ₺"}
+                                        showButtons
+                                        // @ts-ignore
+                                        tooltip={(props.errors?.defaultPackagePrice)}
+                                        buttonLayout="horizontal"
+                                        min={0}
+                                        step={5}
+                                        incrementButtonIcon="pi pi-plus"
+                                        decrementButtonIcon="pi pi-minus"
+                                        tooltipOptions={{
+                                            position: 'top',
+                                        }}
+                                        onBlur={props.handleBlur}
+                                        className={classNames('w-full', {
+                                            'p-invalid': !!props.errors.defaultPackagePrice,
+                                        })}
+                                    />
+                                </div>
+                                <div className="col-12 md:col-4">
                                     <div className="flex align-items-center h-full gap-2">
 
                                         <InputSwitch id="autoApprove"
@@ -245,7 +297,7 @@ const Integrations = ({auth, csrfToken, errors}: {
                                     </div>
                                 </div>
                                 {props.values.autoApprove &&
-                                    <div className="field mb-4 col-12 md:col-3 p-input-icon-right">
+                                    <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
                                         <label htmlFor="preparationTime" className={classNames("font-medium text-900")}>
                                             Sipariş Hazırlama Süresi
                                         </label>

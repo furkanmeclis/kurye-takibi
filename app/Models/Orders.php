@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\Orders\OrderEvent;
 use App\Services\IntegrationHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -285,7 +286,7 @@ class Orders extends Model
                     $customer = $controlCustomer;
                 } else {
                     $customer = new Customers();
-                    $customer->business_id = auth()->id();
+                    $customer->business_id = $business->id;
                     $customer->name = $order->customer->firstName . " " . $order->customer->lastName;
                     $customer->marketplace_id = $order->customer->id . $business->id;
                     $customer->phone = (new Orders)->formatPhoneNumberForTrendyol($order->callCenterPhone);
@@ -319,7 +320,7 @@ class Orders extends Model
                     $address->save();
                 }
                 $newOrder = new Orders();
-                $newOrder->business_id = auth()->id();
+                $newOrder->business_id = $business->id;
                 $newOrder->customer_id = $customer->id;
                 $newOrder->address_id = $address->id;
                 $newOrder->customer_note = $order->customerNote;
@@ -336,7 +337,7 @@ class Orders extends Model
                     "address" => $order->address
                 ]);
                 $newOrder->marketplace_order_details = json_encode($order);
-                $newOrder->price = 1;
+                $newOrder->price = IntegrationHelper::getTrendyolClient($businessId)->settings->defaultPackagePrice;
                 $newOrder->updated_at = Carbon::createFromTimestamp($order->lastModifiedDate / 1000);
                 $newOrder->created_at = Carbon::createFromTimestamp($order->packageCreationDate / 1000);
                 if ($order->packageStatus == "Delivered") {
@@ -359,6 +360,12 @@ class Orders extends Model
                     if ($order->packageStatus == "Created") {
                         $newOrder->approveOrder();
                     }
+                    $message = (object)[
+                        "title" => "Yeni Sipariş",
+                        "message" => "Yeni bir sipariş oluşturuldu. Sipariş No: " . $newOrder->id,
+                        "severity" => "success"
+                    ];
+                    broadcast(new OrderEvent($newOrder->id, $message, true, false, true, "business"))->toOthers();
                     $addedOrdersCount++;
                 } else {
                     $existOrdersCount++;

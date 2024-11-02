@@ -32,7 +32,7 @@ class OrderLocations extends Model
             }
         }
         if ($orderLocation->save()) {
-            broadcast(new \App\Events\Orders\LocationChange($order_id, $latitude, $longitude))->toOthers();
+            broadcast(new \App\Events\Orders\OrderEvent($order_id,null,false,true))->toOthers();
             return true;
         } else {
             return false;

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Integrations;
+use App\Models\User;
 use Exception;
 use furkanmeclis\Tools\TrendyolYemekApi;
 
@@ -18,11 +19,12 @@ class IntegrationHelper
             $businessId = auth()->id();
         }
         $trendyol = Integrations::findOrCreateBusiness($businessId)->trendyol();
+        $businessEmail = User::where('id', $businessId)->first("email")->email;
         if ($trendyol) {
             return (object)[
                 "status" => true,
                 "settings" => $trendyol,
-                "client" => new TrendyolYemekApi($trendyol->supplierId, $trendyol->restaurantId, $trendyol->apiKey, $trendyol->apiSecret, auth()->user()->email)
+                "client" => new TrendyolYemekApi($trendyol->supplierId, $trendyol->restaurantId, $trendyol->apiKey, $trendyol->apiSecret, $businessEmail)
             ];
         } else {
             return (object)[

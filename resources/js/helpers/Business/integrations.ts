@@ -81,3 +81,15 @@ export const updateAutoApproveTrendyol = async (autoApprove: boolean, preparatio
     });
     return await response.json();
 }
+export const updateDefaultPackagePriceForTrendyol = async (price: any, csrfToken: any) => {
+    let url = route("business.integrations.updateDefaultPackagePriceForTrendyol");
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({defaultPackagePrice: price})
+    });
+    return await response.json();
+}

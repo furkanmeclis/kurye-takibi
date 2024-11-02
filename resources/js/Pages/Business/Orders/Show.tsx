@@ -1,13 +1,13 @@
 import PageContainer from "@/PageContainer";
 import MainLayout from "@/Layouts/MainLayout";
-import {useContext, useEffect, useRef, useState} from "react";
+import {useContext, useEffect, useMemo, useRef, useState} from "react";
 import {
     getLocations,
     getOrder,
     subscribeOrderEvents, subscribeOrderLocationChange,
     unsubscribeOrderEvents
 } from "@/helpers/Business/orders";
-import {getOrderStatuses} from "@/helpers/globalHelper"
+import {getOrderStatuses, listenOrderEvents} from "@/helpers/globalHelper"
 import {Toast} from "primereact/toast";
 import {Avatar} from "primereact/avatar";
 import {Tooltip} from "primereact/tooltip";
@@ -283,26 +283,27 @@ const OrderShowPage = ({
     }, []);
     useEffect(() => {
         if (orderData.id !== 0 && page) {
-            subscribeOrderEvents(orderId, (data: any) => {
-                if (data?.message !== undefined) {
-                    toast.current?.show({severity: data.severity, summary: data.title, detail: data.message});
-                }
-                if (data?.reload) {
-                    getOrder(orderId, csrfToken)
-                        .then((response) => {
-                            if (response.status) {
-                                setOrderData(response.order as Order);
-                            } else {
-                                toast.current?.show({severity: "error", summary: "Hata", detail: response.message});
-                            }
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            toast.current?.show({severity: "error", summary: "Hata", detail: "Bir hata oluştu."});
-                        });
+            let disconnect = listenOrderEvents((data: any) => {
+                console.log(data);
+                if (data.orderId === orderData.id) {
+                    if (data?.reload) {
+                        getOrder(orderId, csrfToken)
+                            .then((response) => {
+                                if (response.status) {
+                                    setOrderData(response.order as Order);
+                                } else {
+                                    toast.current?.show({severity: "error", summary: "Hata", detail: response.message});
+                                }
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                toast.current?.show({severity: "error", summary: "Hata", detail: "Bir hata oluştu."});
+                            });
+                    }
                 }
             });
-            return () => unSubscribeChannel();
+
+            return () => disconnect();
         }
     }, [orderData]);
     useEffect(() => {
@@ -324,17 +325,40 @@ const OrderShowPage = ({
                 });
             if (orderData.status === "transporting") {
                 setWatchingLocation(true);
-                subscribeOrderLocationChange(orderId, (data: any) => {
-                    setLocations((prevState) => ([...prevState, {
-                        latitude: data.latitude,
-                        longitude: data.longitude
-                    } as Location]));
-                }, true);
-                return () => unSubscribeChannel();
+                let disconnect = listenOrderEvents((data: any) => {
+                    if (data.orderId === orderData.id) {
+                        if (data?.onlyLocation) {
+                            getOrder(orderId, csrfToken)
+                                .then((response) => {
+                                    if (response.status) {
+                                        setOrderData(response.order as Order);
+                                    } else {
+                                        toast.current?.show({
+                                            severity: "error",
+                                            summary: "Hata",
+                                            detail: response.message
+                                        });
+                                    }
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                    toast.current?.show({
+                                        severity: "error",
+                                        summary: "Hata",
+                                        detail: "Bir hata oluştu."
+                                    });
+                                });
+                        }
+                    }
+                })
+                return () => {
+                    disconnect();
+                }
             }
         }
     }, [orderData]);
-    const prepareTimeLine = (order: Order) => {
+    const prepareTimeLine = useMemo(() => {
+        let order = orderData;
         let created_at = new Date(order.created_at);
         let courier_accepted_at = order.courier_accepted_at !== null ? new Date(order.courier_accepted_at) : null;
         let delivered_at = order.delivered_at !== null ? new Date(order.delivered_at) : null;
@@ -374,7 +398,7 @@ const OrderShowPage = ({
 
         });
         return timeline;
-    }
+    }, [orderData]);
     const PageComponent = () => {
         return <div className={`grid ${!page && 'bg-primary-50 py-2 px-3'}`}>
 
@@ -395,7 +419,7 @@ const OrderShowPage = ({
                                 {orderData.status === "transporting" && locations.length > 0 &&
                                     <MapContainer
                                         // @ts-ignore
-                                        center={[locations[0].latitude, locations[0].longitude]} zoom={15}
+                                        center={[locations[0].latitude, locations[0].longitude]} zoom={17}
                                         zoomControl
                                         attributionControl={false}
                                         style={{height: "350px", borderRadius: "10px"}}
@@ -673,7 +697,7 @@ const OrderShowPage = ({
                 <Timeline layout={"vertical"} marker={(item) => <span
                     className={`bg-${item.bg} flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1`}>
                 <i className={item.icon}></i>
-            </span>} value={prepareTimeLine(orderData)} opposite={(item) => item.status} content={(item) => <small
+            </span>} value={prepareTimeLine} opposite={(item) => item.status} content={(item) => <small
                     className="text-color-secondary">{item.date.toLocaleString()}</small>}/>
             </div>
         </div>

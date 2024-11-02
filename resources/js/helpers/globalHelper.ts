@@ -1,4 +1,5 @@
 import {Toast} from "primereact/toast";
+import Pusher from "pusher-js";
 
 export const getDetailKeysTranslation = (key: string) => {
     const labelTranslations = {
@@ -26,7 +27,24 @@ export const getDetailKeysTranslation = (key: string) => {
     // @ts-ignore
     return labelTranslations[key];
 }
-export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false,accepted=true,rejected=false) => {
+export const getRoleTag = (role: "admin" | "business" | "courier") => {
+    let roles = {
+        admin: {
+            label: "Yönetici",
+            severity: "danger"
+        },
+        business: {
+            label: "İşletme",
+            severity: "info"
+        },
+        courier: {
+            label: "Kurye",
+            severity: "warning"
+        }
+    }
+    return roles[role];
+}
+export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false, accepted = true, rejected = false) => {
     // ["draft", "opened", "transporting", "delivered", "canceled", "deleted"]
     let statuses = {
         draft: {
@@ -61,14 +79,14 @@ export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "
             severity: value.severity
         }));
     }
-    if(status === "canceled" && rejected && !accepted){
+    if (status === "canceled" && rejected && !accepted) {
         return {
             label: "İptal - Reddedildi",
             severity: "danger"
         }
     }
 
-    if(status === "canceled" && !accepted && !rejected){
+    if (status === "canceled" && !accepted && !rejected) {
         return {
             label: "İptal - Onay Bekliyor",
             severity: "warning"
@@ -163,4 +181,46 @@ export const getEmergencyStatuses = (key: any, getAll = false) => {
         // @ts-ignore
         return statuses[key];
     }
+}
+export const subscribeOrderEventsGlobal = () => {
+    let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    });
+    pusher.subscribe(`order-channel`).bind(`order-event`, (data: any) => {
+        window.dispatchEvent(new CustomEvent("order-event", {detail: data}));
+    });
+    return () => {
+        pusher.unsubscribe(`order-channel`);
+    }
+}
+export const listenOrderEvents = (callback: any) => {
+    let listenerCallback = (event: any) => {
+        callback(event.detail);
+    }
+    window.addEventListener("order-event", listenerCallback);
+    return () => {
+        window.removeEventListener("order-event", listenerCallback);
+    }
+}
+export const getOrderDetails = async (orderId: number, csrfToken: string) => {
+    let url = route("getOrderDetails", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
+}
+export const getOrderLocations = async (orderId: number, csrfToken: string) => {
+    let url = route("getOrderLocations", orderId);
+    let headers = new Headers();
+    headers.append("X-CSRF-TOKEN", csrfToken);
+    headers.append("Content-Type", "application/json");
+    let response = await fetch(url, {
+        method: "POST",
+        headers: headers
+    });
+    return await response.json();
 }

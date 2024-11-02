@@ -4,7 +4,7 @@ import PageContainer from "@/PageContainer";
 import MainLayout from "@/Layouts/MainLayout";
 import {Toast} from "primereact/toast";
 import {LayoutContext} from "@/layout/context/layoutcontext";
-import {getLocation, getOrderStatuses} from "@/helpers/globalHelper"
+import {getLocation, getOrderDetails, getOrderStatuses} from "@/helpers/globalHelper"
 import {Tooltip} from "primereact/tooltip";
 import WatchingIcon from "@/components/WatchingIcon";
 import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet";
@@ -22,6 +22,7 @@ import finishMarkerIcon from "@/icons/finishMarker.png";
 import roadDotIcon from "@/icons/roadDot.png";
 import "leaflet/dist/leaflet.css";
 import {confirmDialog} from "primereact/confirmdialog";
+import OrderShow from "@/components/OrderShow";
 
 const startMarker = new L.Icon({
     iconUrl: startMarkerIcon,
@@ -56,7 +57,7 @@ const ReviewOrder = ({auth, csrfToken, orderId, courierIsTransporting = false}: 
     const toast = useRef<Toast>(null);
     const getOrder = () => {
         setLoading(true)
-        getReviewOrderDetails(orderId, csrfToken)
+        getOrderDetails(orderId, csrfToken)
             .then((response) => {
                 if (response.status) {
                     setOrderData(response.order)
@@ -538,7 +539,7 @@ const ReviewOrder = ({auth, csrfToken, orderId, courierIsTransporting = false}: 
                 </div>
             </div>}
             <div className="card">
-                {orderData !== null && <PageComponent/>}
+                {orderData !== null && <OrderShow orderId={orderId} auth={auth} csrfToken={csrfToken} />}
             </div>
 
         </MainLayout>

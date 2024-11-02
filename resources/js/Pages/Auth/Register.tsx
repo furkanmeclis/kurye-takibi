@@ -1,7 +1,7 @@
 'use client';
 import {Button} from 'primereact/button';
 import {InputText} from 'primereact/inputtext';
-import React, {useEffect, useRef} from 'react';
+import React, {useContext, useEffect, useRef} from 'react';
 import type {LaravelInertiaProps, Page} from '@/types';
 import {Password} from 'primereact/password';
 import {useState} from 'react';
@@ -12,9 +12,21 @@ import {InputMask} from "primereact/inputmask";
 import {Head, Link, router} from "@inertiajs/react";
 import * as Yup from 'yup';
 import {Toast} from "primereact/toast";
+import {LayoutContext} from "@/layout/context/layoutcontext";
 
 // @ts-ignore
 const AccessDenied: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) => {
+    const {layoutConfig} = useContext(LayoutContext);
+    const logo = () => {
+        const path = '/layout/images/logo-';
+        let logo;
+        if (layoutConfig.layoutTheme === 'primaryColor' && layoutConfig.theme !== 'yellow') {
+            logo = 'light.png';
+        } else {
+            logo = layoutConfig.colorScheme === 'light' ? 'dark.png' : 'light.png';
+        }
+        return path + logo;
+    };
     const [loading, setLoading] = useState(false);
     const toast = useRef<Toast>(null);
     const [validationType, setValidationType] = useState(false);
@@ -92,6 +104,9 @@ const AccessDenied: Page = ({csrfToken = '', auth = {}}: LaravelInertiaProps) =>
                 <form onSubmit={handleSubmit}
                       className="surface-card py-7 px-5 sm:px-7 shadow-2 flex flex-column w-11 sm:w-30rem"
                       style={{borderRadius: '14px'}}>
+                    <div className="flex justify-content-center mb-4">
+                        <img src={logo()} alt="logo" className="tw-h-20"/>
+                    </div>
                     <h1 className="font-bold text-2xl mt-0 mb-2">Kayıt Formu</h1>
                     <p className="text-color-secondary mb-4">
                         Kayıt olmak için lütfen aşağıdaki bilgileri doldurunuz.

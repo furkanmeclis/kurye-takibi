@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Events\Orders\NewOrder;
-use App\Events\Orders\UpdateOrder;
+use App\Events\Orders\OrderEvent;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerAddresses;
 use App\Models\Customers;
@@ -74,10 +73,19 @@ class OrdersController extends Controller
             $newOrder->price = $request->price;
             if ($request->location != null) {
                 $newOrder->start_location = json_encode($request->location);
+                $location = json_decode($newOrder->start_location);
+                User::find(auth()->user()->id)->update([
+                    "latitude" => $location->latitude,
+                    "longitude" => $location->longitude
+                ]);
             }
             if ($newOrder->save()) {
-                broadcast(new NewOrder($newOrder->id))->toOthers();
-                broadcast(new UpdateOrder(null, "", "", "", true, $newOrder->business_id))->toOthers();
+                $message = (object)[
+                    "title" => "Yeni Sipariş",
+                    "message" => "Yeni bir sipariş oluşturuldu. Sipariş No: " . $newOrder->id,
+                    "severity" => "success"
+                ];
+                broadcast(new OrderEvent($newOrder->id, $message, true, false, true, "business"))->toOthers();
                 if ($request->location != null) {
                     OrderLocations::addLocation($newOrder->id, $request->location['latitude'], $request->location['longitude']);
                 }
@@ -111,10 +119,13 @@ class OrdersController extends Controller
                     $order->cancellation_reason = $request->cancellation_reason;
                     $order->status = "canceled";
                     if ($order->save()) {
-                        $message = "Sipariş İptal Talebi Oluşturuldu";
-                        $title = "Sipariş İptal Talebi";
-                        broadcast(new UpdateOrder($order->id, "error", $message, $title, true, $order->business_id))->toOthers();
-                        broadcast(new UpdateOrder(null, "error", $message, $title, true, $order->business_id))->toOthers();
+                        $message = (object)[
+                            "title" => "Başarılı",
+                            "message" => "Sipariş iptal talebi oluşturuldu.",
+                            "severity" => "info"
+                        ];
+
+                        broadcast(new OrderEvent($order->id, $message, true, "business"))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş iptal edildi. Yönetici onayından sonra iptal işlemi tamamlanacaktır."
@@ -133,8 +144,12 @@ class OrdersController extends Controller
                     ]);
                     $order->status = $request->status;
                     if ($order->save()) {
-                        broadcast(new UpdateOrder($order->id, "info", "Sipariş Durumu Güncellendi", "Sipariş Durumu", true, $order->business_id))->toOthers();
-                        broadcast(new UpdateOrder(null, "info", "Sipariş Durumu Güncellendi", "Sipariş Durumu", true, $order->business_id))->toOthers();
+                        $message = (object)[
+                            "title" => "Başarılı",
+                            "message" => "Sipariş durumu güncellendi.",
+                            "severity" => "info"
+                        ];
+                        broadcast(new OrderEvent($order->id, $message, true, "business"))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş durumu güncellendi."
@@ -167,7 +182,11 @@ class OrdersController extends Controller
         if ($order) {
             if ($order->status == "draft") {
                 if ($order->delete()) {
-                    broadcast(new UpdateOrder(null, "info", "", "", true, $order->business_id))->toOthers();
+                    broadcast(new OrderEvent($order->id, (object)[
+                        "title" => "Sipariş Silme",
+                        "message" => "Sipariş başarıyla silindi.",
+                        "severity" => "success"
+                    ], true))->toOthers();
                     return response()->json([
                         "status" => true,
                         "message" => "Sipariş başarıyla silindi."

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use furkanmeclis\Tools\TrendyolYemekApi;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -105,6 +104,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/trendyol-restaurant-info', [\App\Http\Controllers\Business\IntegrationsController::class, 'getTrendyolRestaurantInfo'])->name("getTrendyolRestaurantInfo");
             Route::post("/trendyol-update-working-status", [\App\Http\Controllers\Business\IntegrationsController::class, 'updateWorkingStatusTrendyol'])->name("updateWorkingStatusTrendyol");
             Route::post('/trendyol-update-auto-approve', [\App\Http\Controllers\Business\IntegrationsController::class, 'updateAutoApproveTrendyol'])->name('updateAutoApproveTrendyol');
+            Route::post('/trendyol-update-default-package-price', [\App\Http\Controllers\Business\IntegrationsController::class, 'updateDefaultPackagePriceForTrendyol'])->name('updateDefaultPackagePriceForTrendyol');
         });
     });
     Route::prefix("courier")->name("courier.")->middleware("only:courier")->group(function () {
@@ -133,39 +133,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile-information-get-details', [\App\Http\Controllers\Courier\ProfileController::class, 'getPersonalInformation'])->name('getPersonalInformation');
         Route::post('/profile-information-save', [\App\Http\Controllers\Courier\ProfileController::class, 'savePersonalInformation'])->name('savePersonalInformation');
     });
-});
-Route::post('/send-contact-mail', function () {
-    $to = "info@414express.com.tr";
-    $customerName = request()->input("name");
-    $customerEmail = request()->input("email");
-    $customerSubject = request()->input("subject");
-    $customerMessage = request()->input("message");
-    \Illuminate\Support\Facades\Mail::to('furkanmeclis@icloud.com')->send(new \App\Mail\ContactMessage(
-        $customerName,
-        $customerEmail,
-        $customerSubject,
-        $customerMessage
-    ));
-})->name("sendContactMail");
-Route::post('/add-location/{i}', function ($order_id) {
-    return response()->json([
-        'status' => false,
-        'message' => 'Bu Özellik Kullanıma Kapatıldı(DEV)'
-    ]);
-})->name("demoAddLocation");
-Route::post("/demo-deliver-order/{id}", function ($id) {
-    return response()->json([
-        'status' => false,
-        'message' => 'Bu Özellik Kullanıma Kapatıldı(DEV)'
-    ]);
-})->name("demoDeliverOrder");
-
-Route::get('/demo3', function () {
-    return response()->json(\App\Models\Orders::getCourierStatics());
-});
-Route::get('/trendyol', function () {
-    $api = new TrendyolYemekApi('1030310', '313143', 'ixLUAtJST8gKT4bEA7O5', 'N1wIvCznqVHJMIOVWVOR', 'furkanmeclis@icloud.com');
-    $restaurant = $api->getPackages();
-    return response()->json($restaurant);
+    Route::post('/get-order-details/{id}', [\App\Http\Controllers\OrdersController::class, 'getOrderDetails'])->name('getOrderDetails')->middleware("only:business,courier,admin");
+    Route::post('/get-order-locations/{id}', [\App\Http\Controllers\OrdersController::class, 'getOrderLocations'])->name('getOrderLocations')->middleware("only:business,courier,admin");
 });
 require __DIR__ . '/auth.php';

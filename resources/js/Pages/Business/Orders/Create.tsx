@@ -396,7 +396,7 @@ const CreateOrderPage = ({auth, csrfToken}: {
             <Dialog onHide={() => setVisible(false)} visible={visible} header="Yeni Müşteri Ekle"
                     style={{width: '60vw'}}
                     draggable={false} resizable={false}
-                    className="mx-3 sm:mx-0 sm:w-full md:w-8 lg:w-8 p-fluid" modal>
+                    className="mx-3 w-full sm:mx-0 md:w-8 lg:w-6 p-fluid" modal>
                 <CreateCustomerPage auth={auth} csrfToken={csrfToken} page={false} onComplete={() => {
                     setVisible(false);
                     fetchCustomers();

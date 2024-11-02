@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Courier;
 
+use App\Events\Orders\OrderEvent;
 use App\Models\OrderLocations;
 use App\Models\Orders;
 use App\Models\User;
@@ -134,6 +135,12 @@ class OrdersController extends \App\Http\Controllers\Controller
                 $order->courier_id = auth()->user()->id;
                 $order->courier_accepted_at = now();
                 $order->status = "transporting";
+                $message = (object)[
+                    "title" => "Sipariş Kabul Edildi",
+                    "message" => "Siparişiniz Kurye Tarafından Kabul Edildi",
+                    "severity" => "success"
+                ];
+                broadcast(new OrderEvent($order->id, $message, true, false))->toOthers();
                 $location = json_decode($order->start_location);
                 if ($location->latitude == 0) {
                     $location->latitude = $request->latitude;
@@ -250,6 +257,12 @@ class OrdersController extends \App\Http\Controllers\Controller
                 "longitude" => $lastLocation->longitude,
             ]);
             if ($order->save()) {
+                $message = (object)[
+                    "title" => "Sipariş Teslim Edildi",
+                    "message" => "Siparişiniz Başarıyla Teslim Edildi",
+                    "severity" => "success"
+                ];
+                broadcast(new OrderEvent($order->id, $message, true, false))->toOthers();
                 return response()->json([
                     "status" => true,
                     "message" => "Sipariş Başarıyla Teslim Edildi"
@@ -299,6 +312,12 @@ class OrdersController extends \App\Http\Controllers\Controller
                     $order->cancellation_accepted_by = User::where("role", "admin")->first()->id;
                     $order->canceled_at = now();
                     if ($order->save()) {
+                        $message = (object)[
+                            "title" => "Sipariş İptal Edildi",
+                            "message" => "Siparişiniz Kurye Tarafından İptal Edildi. İptal Sebebi: " . $this->getStatusMessage($request->reason),
+                            "severity" => "error"
+                        ];
+                        broadcast(new OrderEvent($order->id, $message, true, false))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş İptal Edildi.İptal Sebebi: " . $this->getStatusMessage($request->reason)

@@ -1,3 +1,5 @@
+@tailwind components;
+@tailwind utilities;
 .blinking-dot {
     width: 10px;
     height: 10px;

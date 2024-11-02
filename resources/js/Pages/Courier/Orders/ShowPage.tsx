@@ -1,4 +1,6 @@
-import Show from "@/Pages/Courier/Orders/Show";
+import Show from "@/components/OrderShow";
+import MainLayout from "@/Layouts/MainLayout";
+import PageContainer from "@/PageContainer";
 
 const ShowPage = ({
                       orderId = 0,
@@ -6,6 +8,10 @@ const ShowPage = ({
                       auth = {},
                       courierIsTransporting = false
                   }) => {
-    return <Show orderId={orderId} csrfToken={csrfToken} auth={auth} page={true} courierIsTransporting={courierIsTransporting}/>;
+    return <PageContainer auth={auth} csrfToken={csrfToken} courierIsTransporting={courierIsTransporting}>
+        <MainLayout>
+            <Show orderId={orderId} csrfToken={csrfToken} auth={auth}/>
+        </MainLayout>
+    </PageContainer>;
 }
 export default ShowPage;

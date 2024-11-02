@@ -29,12 +29,21 @@ class Integrations extends Model
         return $integration->save();
     }
 
-    public static function updateAutoApprove($businessId, $autoApprove, $preparationTime): bool
+    public static function updateAutoApproveTrendyol($businessId, $autoApprove, $preparationTime): bool
     {
         $integration = self::findOrCreateBusiness($businessId);
         $data = json_decode($integration->trendyol);
         $data->autoApprove = $autoApprove;
         $data->preparationTime = $preparationTime;
+        $integration->trendyol = json_encode($data);
+        return $integration->save();
+    }
+
+    public static function updateDefaultPackagePrice($businessId, $defaultPackagePrice): bool
+    {
+        $integration = self::findOrCreateBusiness($businessId);
+        $data = json_decode($integration->trendyol);
+        $data->defaultPackagePrice = $defaultPackagePrice;
         $integration->trendyol = json_encode($data);
         return $integration->save();
     }

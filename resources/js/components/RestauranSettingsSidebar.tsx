@@ -6,7 +6,7 @@ import trendyolSvg from "@/icons/trendyol.svg";
 import React, {useEffect, useRef, useState} from "react";
 import {
     getIntegrations,
-    getTrendyolRestaurantInfo, updateAutoApproveTrendyol,
+    getTrendyolRestaurantInfo, updateAutoApproveTrendyol, updateDefaultPackagePriceForTrendyol,
     updateTrendyolRestaurantWorkingStatus
 } from "@/helpers/Business/integrations";
 import {Toast} from "primereact/toast";
@@ -102,6 +102,75 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
                     <div className={"flex flex-column gap-2"}>
                         <Formik
                             initialValues={{
+                                defaultPackagePrice: trendyolRestaurant?.defaultPackagePrice || 0,
+                            }}
+                            validationSchema={Yup.object().shape({
+                                defaultPackagePrice: Yup.number().required('Zorunlu Alan').min(0, 'Geçerli bir fiyat giriniz')
+                            })}
+                            onSubmit={(values, {setSubmitting, resetForm}) => {
+                                setSubmitting(true)
+                                updateDefaultPackagePriceForTrendyol(values.defaultPackagePrice, csrfToken).then((response) => {
+                                    if (response.status) {
+                                        toast.current?.show({
+                                            severity: 'success',
+                                            summary: 'Başarılı',
+                                            detail: response.message
+                                        });
+                                        resetForm({
+                                            values
+                                        });
+                                        syncData();
+                                    } else {
+                                        toast.current?.show({
+                                            severity: 'error',
+                                            summary: 'Hata',
+                                            detail: response.message
+                                        });
+                                    }
+                                }).catch((err) => {
+                                    console.log(err);
+                                    toast.current?.show({
+                                        severity: 'error',
+                                        summary: 'Hata',
+                                        detail: "Bir hata oluştu."
+                                    });
+                                }).finally(() => {
+                                    setSubmitting(false);
+                                })
+                            }}>
+                            {(props) => (<form onSubmit={props.handleSubmit} >
+                                <div className="font-semibold mb-2">Varsayılan Paket Ücreti</div>
+                                <InputNumber
+                                    id="defaultPackagePrice"
+                                    type="text"
+                                    name={"defaultPackagePrice"}
+                                    onValueChange={(e) => props.setFieldValue('defaultPackagePrice', e.value)}
+                                    value={props.values.defaultPackagePrice}
+                                    suffix={" ₺"}
+                                    showButtons
+                                    // @ts-ignore
+                                    tooltip={(props.errors?.defaultPackagePrice)}
+                                    buttonLayout="horizontal"
+                                    min={0}
+                                    step={5}
+                                    incrementButtonIcon="pi pi-plus"
+                                    decrementButtonIcon="pi pi-minus"
+                                    tooltipOptions={{
+                                        position: 'top',
+                                    }}
+                                    onBlur={props.handleBlur}
+                                    className={classNames('w-full', {
+                                        'p-invalid': !!props.errors.defaultPackagePrice,
+                                    })}
+                                />
+                                {props.dirty && <Button label={"Kaydet"} icon={"pi pi-save"}
+                                                        loading={props.isSubmitting}
+                                                        type={"submit"}
+                                                        severity={"success"} className={"mt-2"} size={"small"}/>}
+                            </form>)}
+                        </Formik>
+                        <Formik
+                            initialValues={{
                                 workingStatus: trendyolRestaurant?.workingStatus === "OPEN" ? "Açık" : "Kapalı",
                             }}
                             onSubmit={(values, {setSubmitting, setValues, resetForm}) => {
@@ -138,7 +207,7 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
                                     setSubmitting(false);
                                 })
                             }}>
-                            {(props) => (<form onSubmit={props.handleSubmit}>
+                            {(props) => (<form onSubmit={props.handleSubmit} className={"py-3"}>
                                 <div className="font-semibold mb-2">Restoran Durumu</div>
                                 <SelectButton
                                     disabled={props.isSubmitting}

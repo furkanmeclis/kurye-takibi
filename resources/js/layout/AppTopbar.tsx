@@ -8,7 +8,9 @@ import {StyleClass} from 'primereact/styleclass';
 import {classNames} from 'primereact/utils';
 import {Button} from "primereact/button";
 import RestauranSettingsSidebar from "@/components/RestauranSettingsSidebar";
-
+import FastAddOrder from "@/components/FastAddOrder";
+import {Tag} from "primereact/tag";
+import {getRoleTag} from "@/helpers/globalHelper";
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const {onMenuToggle, layoutConfig, tabs, closeTab, auth, csrfToken} = useContext(LayoutContext);
     const [searchActive, setSearchActive] = useState<boolean | null>(false);
@@ -60,12 +62,16 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         closeTab(index);
     };
     const [visible, setVisible] = useState(false);
+    const [visibleFastAddOrder, setVisibleFastAddOrder] = useState(false);
     return (
         <div className="layout-topbar">
             <Link href={route("dashboard")} className="app-logo">
                 <img alt="app logo" src={logo()}/>
             </Link>
-            <RestauranSettingsSidebar csrfToken={csrfToken} visible={visible} setVisible={setVisible}/>
+            {auth?.user?.role === "business" && <>
+                <RestauranSettingsSidebar csrfToken={csrfToken} visible={visible} setVisible={setVisible}/>
+                <FastAddOrder visible={visibleFastAddOrder} setVisible={setVisibleFastAddOrder} auth={auth} csrfToken={csrfToken}/>
+            </>}
             <button ref={menubuttonRef} className="topbar-menubutton p-link" type="button" onClick={onMenuButtonClick}>
                 <span></span>
             </button>
@@ -86,6 +92,21 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             {auth?.user?.role === "business" && <div
                 className={classNames('topbar-search')}
             >
+                <Button
+                    rounded
+                    icon={"pi pi-shop"}
+                    raised
+                    tooltip={"Hızlı Sipariş Ekle"}
+                    tooltipOptions={{
+                        position: 'bottom'
+                    }}
+                    severity={"success"}
+                    size={"small"}
+                    className={"mr-2"}
+                    onClick={() => {
+                        setVisibleFastAddOrder(true)
+                    }}
+                />
                 <Button
                     rounded
                     icon={"pi pi-cog"}
@@ -125,7 +146,11 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                         <img alt="avatar" src="/demo/images/avatar/onyamalimba.png"/>
                         <span className="profile-details">
                             <span className="profile-name">{auth?.user?.name}</span>
-                            <span className="profile-job">{auth?.user?.role}</span>
+                            <span className="profile-job">
+                                <Tag
+                                    // @ts-ignore
+                                    value={getRoleTag(auth?.user?.role).label} severity={getRoleTag(auth?.user?.role).severity}/>
+                            </span>
                         </span>
                         <i className="pi pi-angle-down"></i>
                     </button>

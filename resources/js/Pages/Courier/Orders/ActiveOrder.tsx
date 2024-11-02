@@ -20,6 +20,7 @@ import {useSessionStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 import {confirmDialog} from "primereact/confirmdialog";
 import {Sidebar} from "primereact/sidebar";
+import OrderShow from "@/components/OrderShow";
 
 const startMarker = new L.Icon({
     iconUrl: startMarkerIcon,
@@ -551,7 +552,7 @@ const ActiveOrder = ({auth, csrfToken}: {
             </div>
         </Sidebar>
         <div className="card">
-            {order !== null && <PageComponent/>}
+            {order !== null && <OrderShow orderId={order.id} csrfToken={csrfToken} auth={auth} />}
         </div>
     </BlockUI>
 }

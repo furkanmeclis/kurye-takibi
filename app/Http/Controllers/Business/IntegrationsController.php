@@ -49,6 +49,7 @@ class IntegrationsController
                     'nullable',
                     'min:1',
                 ],
+                'defaultPackagePrice' => 'required|min:0',
             ]);
 
             $data = [
@@ -58,6 +59,7 @@ class IntegrationsController
                 'restaurantId' => $request->restaurantId,
                 'autoApprove' => $request->autoApprove,
                 'preparationTime' => $request->preparationTime,
+                'defaultPackagePrice' => $request->defaultPackagePrice,
             ];
             $result = Integrations::saveTrendyol(auth()->id(), $data);
             if ($result) {
@@ -103,6 +105,7 @@ class IntegrationsController
             $settings = [
                 "autoApprove" => $trendyolClient->settings->autoApprove,
                 "preparationTime" => $trendyolClient->settings->preparationTime,
+                "defaultPackagePrice" => $trendyolClient->settings->defaultPackagePrice,
             ];
             return response()->json([
                 "status" => true,
@@ -171,11 +174,37 @@ class IntegrationsController
             if(!$request->autoApprove){
                 $preparationTime = 0;
             }
-            $result = Integrations::updateAutoApprove(auth()->id(), $request->autoApprove, $preparationTime);
+            $result = Integrations::updateAutoApproveTrendyol(auth()->id(), $request->autoApprove, $preparationTime);
             if ($result) {
                 return response()->json([
                     "status" => true,
                     'message' => 'Otomatik Onaylama Ayarları Güncellendi'
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Bir Sorun Oluştu',
+                    "status" => false
+                ]);
+            }
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                "status" => false
+            ]);
+        }
+    }
+
+    public function updateDefaultPackagePriceForTrendyol(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $request->validate([
+                'defaultPackagePrice' => 'required|min:0',
+            ]);
+            $result = Integrations::updateDefaultPackagePrice(auth()->id(), $request->defaultPackagePrice);
+            if ($result) {
+                return response()->json([
+                    "status" => true,
+                    'message' => 'Varsayılan Paket Fiyatı Güncellendi'
                 ]);
             } else {
                 return response()->json([
