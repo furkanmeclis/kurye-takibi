@@ -21,6 +21,9 @@ import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {classNames} from "primereact/utils";
+import {Dialog} from "primereact/dialog";
+import {useReactToPrint} from "react-to-print";
+import {getDetailKeysTranslation, getDetailsValueTranslation} from "@/helpers/globalHelper";
 
 interface AllCouriersProps {
     auth?: any,
@@ -38,6 +41,30 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const [selectedCouriers, setSelectedCouriers] = useState([] as any[]);
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminCouriersApprovedColumns");
     const [error, setError] = useState(null);
+    const [visiblePrint, setVisiblePrint] = useState(false);
+    const [selectedBusiness, setSelectedBusiness] = useState(null);
+    const contentRef  = React.useRef(null);
+    const reactToPrint = useReactToPrint({
+        contentRef
+    });const getValuesForDetails = (courier: any) => {
+        let returnData = [] as {
+            label: string,
+            value: any
+        }[];
+        if (courier === null) return returnData;
+        Object.entries(courier).forEach(([key, value]) => {
+            if (typeof value === "string") {
+                // @ts-ignore
+                if (key !== "courier" || key !== "status" || key !== "completed" || key !== "approved" || key !== "latitude" || key !== "longitude" || key !== "id" || key !== "courier_id" || key !== "created_at" || key !== "updated_at") {
+                    returnData.push({
+                        label: getDetailKeysTranslation(String(key)),
+                        value: getDetailsValueTranslation(String(key), String(value))
+                    });
+                }
+            }
+        });
+        return returnData;
+    }
     const getCouriersData = () => {
         setLoading(true);
         getCouriers("all", csrfToken).then(data => {
@@ -276,6 +303,18 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
+                    <Button icon={"pi pi-print"} tooltip={"Kurye Bilgilerini Yazdır"}
+                            severity={"help"}
+                            size={"small"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={(event) => {
+                                setSelectedBusiness(rowData.details);
+                                setVisiblePrint(true);
+                            }}
+
+                    />
                     <Button size={"small"} icon={"pi pi-check-circle"} severity={"success"} tooltip={"Aktifleştir"}
                             tooltipOptions={{
                                 position: "top"
@@ -429,6 +468,47 @@ const AllCouriersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     })}
                 </DataTable>
             </div>
+            <Dialog
+                header={"Kurye Bilgilerini Yazdır"}
+                draggable={false}
+                footer={<div className={"gap-2"}>
+                    <Button size={"small"} icon={"pi pi-times"} label={"Kapat"} severity={"danger"}
+                            tooltip={"Kapat"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => setVisiblePrint(false)}
+                    />
+                    <Button size={"small"} icon={"pi pi-print"} label={"Yazdır"} severity={"success"}
+                            tooltip={"Yazdır"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => {
+                                reactToPrint();
+                            }}
+                    />
+                </div>}
+                onHide={() => setVisiblePrint(false)} visible={visiblePrint}
+                style={{width: '50vw'}} resizable={false}
+                className="mx-3 sm:mx-0 w-full md:w-8 lg:w-6 p-fluid" modal
+            >
+                <div >
+                    <dl ref={contentRef} className="tw-max-w-md tw-text-gray-900 tw-divide-y tw-divide-gray-300 tw-print:tw-text-black tw-print:tw-divide-gray-400">
+
+                        {getValuesForDetails(selectedBusiness).map((item: any, index: any) => (
+                            <div key={index} className="tw-flex tw-flex-col tw-pb-3 tw-mb-1 tw-print:tw-pb-2 tw-print:tw-mb-2 tw-border-b tw-border-gray-300">
+                                <dt className="tw-mb-1 tw-text-gray-600 tw-print:tw-text-gray-800 tw-text-sm">
+                                    {item.label}
+                                </dt>
+                                <dd className="tw-font-semibold tw-m-0 tw-text-base tw-print:tw-font-bold">
+                                    {item.value}
+                                </dd>
+                            </div>
+                        ))}
+                    </dl>
+                </div>
+            </Dialog>
         </MainLayout>
     </PageContainer>
 }

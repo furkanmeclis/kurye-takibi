@@ -90,6 +90,7 @@ class CouriersController extends \App\Http\Controllers\Controller
         if ($couriers) {
             $couriers = $couriers->get()->map(function ($courier) {
                 $courier->phone = "0" . str_replace(["(", ")", "-", " "], "", $courier->phone);
+                $courier->details = CourierDetails::where("courier_id", $courier->id)->first();
                 return $courier;
             });
             return response()->json([

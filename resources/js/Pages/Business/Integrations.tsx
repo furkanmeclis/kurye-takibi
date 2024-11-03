@@ -6,6 +6,9 @@ import {Head} from "@inertiajs/react";
 import {Toast} from "primereact/toast";
 import {Accordion, AccordionTab} from "primereact/accordion";
 import trendyolSvg from "@/icons/trendyol.svg"
+import getirSvg from "@/icons/getir.svg"
+import yemeksepetiSvg from "@/icons/yemeksepeti.svg"
+import netgsmLogo from "@/icons/netgsm.png"
 import {classNames} from "primereact/utils";
 import {InputText} from "primereact/inputtext";
 import {Password} from "primereact/password";
@@ -76,8 +79,8 @@ const Integrations = ({auth, csrfToken, errors}: {
             <Head title={"Entegrasyonlar"}/>
             <Toast ref={toast}/>
             <Accordion>
-                {!loading && <AccordionTab header={<span className="flex align-items-center gap-2 w-full">
-                    <img src={trendyolSvg} className={"w-4"} alt=""/>
+                {!loading && <AccordionTab header={<span className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-w-full">
+                    <img src={trendyolSvg} className={"tw-h-8 my-2 tw-w-auto"} alt=""/>
                     <span className="font-bold white-space-nowrap">Trendyol Yemek</span>
                     </span>}>
                     <Formik
@@ -466,6 +469,379 @@ const Integrations = ({auth, csrfToken, errors}: {
                                         </Card>
                                     </div>
                                 </>}
+                            </form>
+                        </BlockUI>}
+                    </Formik>
+
+                </AccordionTab>}
+                {!loading && <AccordionTab header={<span className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-w-full">
+                    <img src={getirSvg} className={"tw-h-12"} alt=""/>
+                    <span className="font-bold white-space-nowrap">Getir Yemek</span>
+                    </span>}>
+                    <Formik
+                        initialValues={{
+                            apiKey: "",
+                            autoApprove:false,
+                            loading: false,
+                            preparationTime: 0,
+                            defaultPackagePrice: 0
+                        }}
+                        onSubmit={(values, {setSubmitting}) => {
+                            toast.current?.show({
+                                severity: 'info',
+                                summary: 'Bilgi',
+                                detail: "Getir Yemek entegrasyonu henüz aktif değil"
+                            });
+                            setSubmitting(false);
+                        }}
+                    >
+                        {(props) => <BlockUI blocked={props.values.loading}>
+                            <form onSubmit={props.handleSubmit} className="grid formgrid p-fluid">
+
+
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="apiKey" className={classNames("font-medium text-900")}>
+                                        API Key
+                                    </label>
+                                    <Password id="apiKey"
+                                              feedback={false}
+                                              toggleMask
+                                              autoComplete={"off"}
+                                              name={"apiKey"}
+                                        // @ts-ignore
+                                              tooltip={props.errors?.apiKey}
+                                              tooltipOptions={{
+                                                  position: 'top',
+                                              }}
+                                              onChange={props.handleChange}
+                                              value={props.values.apiKey}
+                                              onBlur={props.handleBlur}
+                                              className={classNames('w-full', {
+                                                  'p-invalid': !!props.errors.apiKey,
+                                              })}
+                                    />
+                                </div>
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="defaultPackagePrice" className={classNames("font-medium text-900")}>
+                                        Varsayılan Paket Ücreti
+                                    </label>
+                                    <InputNumber
+                                        id="defaultPackagePrice"
+                                        type="text"
+                                        name={"defaultPackagePrice"}
+                                        onValueChange={(e) => props.setFieldValue('defaultPackagePrice', e.value)}
+                                        value={props.values.defaultPackagePrice}
+                                        suffix={" ₺"}
+                                        showButtons
+                                        // @ts-ignore
+                                        tooltip={(props.errors?.defaultPackagePrice)}
+                                        buttonLayout="horizontal"
+                                        min={0}
+                                        step={5}
+                                        incrementButtonIcon="pi pi-plus"
+                                        decrementButtonIcon="pi pi-minus"
+                                        tooltipOptions={{
+                                            position: 'top',
+                                        }}
+                                        onBlur={props.handleBlur}
+                                        className={classNames('w-full', {
+                                            'p-invalid': !!props.errors.defaultPackagePrice,
+                                        })}
+                                    />
+                                </div>
+                                <div className="col-12 md:col-4" />
+                                <div className="col-12 md:col-4">
+                                    <div className="flex align-items-center h-full gap-2">
+
+                                        <InputSwitch id="autoApprove"
+                                                     name={"autoApprove"}
+                                                     checked={props.values.autoApprove}
+                                                     onChange={props.handleChange}
+                                        />
+                                        <label htmlFor="autoApprove"
+                                               onClick={() => props.setFieldValue('autoApprove', !props.values.autoApprove)}
+                                               className="font-medium text-900">
+                                            Otomatik Sipariş Onayı
+                                        </label>
+                                    </div>
+                                </div>
+                                {props.values.autoApprove &&
+                                    <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                        <label htmlFor="preparationTime" className={classNames("font-medium text-900")}>
+                                            Sipariş Hazırlama Süresi
+                                        </label>
+                                        <InputNumber
+                                            id="preparationTime"
+                                            type="text"
+                                            name={"preparationTime"}
+                                            onValueChange={(e) => props.setFieldValue('preparationTime', e.value)}
+                                            value={props.values.preparationTime}
+                                            suffix={" Dakika"}
+                                            showButtons
+                                            // @ts-ignore
+                                            tooltip={(props.errors?.preparationTime)}
+                                            buttonLayout="horizontal"
+                                            min={0}
+                                            step={5}
+                                            incrementButtonIcon="pi pi-plus"
+                                            decrementButtonIcon="pi pi-minus"
+                                            tooltipOptions={{
+                                                position: 'top',
+                                            }}
+                                            onBlur={props.handleBlur}
+                                            className={classNames('w-full', {
+                                                'p-invalid': !!props.errors.preparationTime,
+                                            })}
+                                        />
+                                    </div>}
+                                <div className="col-12 mb-4">
+                                    <Button label="Kaydet"
+                                            size={"small"}
+                                            severity={"success"}
+                                            type={"submit"}
+                                            disabled={!props.dirty || !props.isValid}
+                                            loading={props.isSubmitting}
+                                            className="w-auto mt-3 mr-2"/>
+                                </div>
+                            </form>
+                        </BlockUI>}
+                    </Formik>
+
+                </AccordionTab>}
+                {!loading && <AccordionTab header={<span className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-w-full">
+                    <img src={yemeksepetiSvg} className={"tw-h-12 tw-w-auto"} alt=""/>
+                    <span className="font-bold white-space-nowrap">Yemek Sepeti</span>
+                    </span>}>
+                    <Formik
+                        initialValues={{
+                            apiPassword: "",
+                            apiUser: "",
+                            autoApprove:false,
+                            loading: false,
+                            preparationTime: 0,
+                            defaultPackagePrice: 0
+                        }}
+                        onSubmit={(values, {setSubmitting}) => {
+                            toast.current?.show({
+                                severity: 'info',
+                                summary: 'Bilgi',
+                                detail: "Yemeksepeti entegrasyonu henüz aktif değil"
+                            });
+                            setSubmitting(false);
+                        }}
+                    >
+                        {(props) => <BlockUI blocked={props.values.loading}>
+                            <form onSubmit={props.handleSubmit} className="grid formgrid p-fluid">
+
+
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="apiUser" className={classNames("font-medium text-900")}>
+                                        API User
+                                    </label>
+                                    <Password id="apiUser"
+                                              feedback={false}
+                                              toggleMask
+                                              autoComplete={"off"}
+                                              name={"apiUser"}
+                                        // @ts-ignore
+                                              tooltip={props.errors?.apiUser}
+                                              tooltipOptions={{
+                                                  position: 'top',
+                                              }}
+                                              onChange={props.handleChange}
+                                              value={props.values.apiUser}
+                                              onBlur={props.handleBlur}
+                                              className={classNames('w-full', {
+                                                  'p-invalid': !!props.errors.apiUser,
+                                              })}
+                                    />
+                                </div>
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="apiPassword" className={classNames("font-medium text-900")}>
+                                        API Password
+                                    </label>
+                                    <Password id="apiPassword"
+                                              feedback={false}
+                                              toggleMask
+                                              autoComplete={"off"}
+                                              name={"apiPassword"}
+                                        // @ts-ignore
+                                              tooltip={props.errors?.apiPassword}
+                                              tooltipOptions={{
+                                                  position: 'top',
+                                              }}
+                                              onChange={props.handleChange}
+                                              value={props.values.apiPassword}
+                                              onBlur={props.handleBlur}
+                                              className={classNames('w-full', {
+                                                  'p-invalid': !!props.errors.apiPassword,
+                                              })}
+                                    />
+                                </div>
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="defaultPackagePrice" className={classNames("font-medium text-900")}>
+                                        Varsayılan Paket Ücreti
+                                    </label>
+                                    <InputNumber
+                                        id="defaultPackagePrice"
+                                        type="text"
+                                        name={"defaultPackagePrice"}
+                                        onValueChange={(e) => props.setFieldValue('defaultPackagePrice', e.value)}
+                                        value={props.values.defaultPackagePrice}
+                                        suffix={" ₺"}
+                                        showButtons
+                                        // @ts-ignore
+                                        tooltip={(props.errors?.defaultPackagePrice)}
+                                        buttonLayout="horizontal"
+                                        min={0}
+                                        step={5}
+                                        incrementButtonIcon="pi pi-plus"
+                                        decrementButtonIcon="pi pi-minus"
+                                        tooltipOptions={{
+                                            position: 'top',
+                                        }}
+                                        onBlur={props.handleBlur}
+                                        className={classNames('w-full', {
+                                            'p-invalid': !!props.errors.defaultPackagePrice,
+                                        })}
+                                    />
+                                </div>
+                                <div className="col-12 md:col-4">
+                                    <div className="flex align-items-center h-full gap-2">
+
+                                        <InputSwitch id="autoApprove"
+                                                     name={"autoApprove"}
+                                                     checked={props.values.autoApprove}
+                                                     onChange={props.handleChange}
+                                        />
+                                        <label htmlFor="autoApprove"
+                                               onClick={() => props.setFieldValue('autoApprove', !props.values.autoApprove)}
+                                               className="font-medium text-900">
+                                            Otomatik Sipariş Onayı
+                                        </label>
+                                    </div>
+                                </div>
+                                {props.values.autoApprove &&
+                                    <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                        <label htmlFor="preparationTime" className={classNames("font-medium text-900")}>
+                                            Sipariş Hazırlama Süresi
+                                        </label>
+                                        <InputNumber
+                                            id="preparationTime"
+                                            type="text"
+                                            name={"preparationTime"}
+                                            onValueChange={(e) => props.setFieldValue('preparationTime', e.value)}
+                                            value={props.values.preparationTime}
+                                            suffix={" Dakika"}
+                                            showButtons
+                                            // @ts-ignore
+                                            tooltip={(props.errors?.preparationTime)}
+                                            buttonLayout="horizontal"
+                                            min={0}
+                                            step={5}
+                                            incrementButtonIcon="pi pi-plus"
+                                            decrementButtonIcon="pi pi-minus"
+                                            tooltipOptions={{
+                                                position: 'top',
+                                            }}
+                                            onBlur={props.handleBlur}
+                                            className={classNames('w-full', {
+                                                'p-invalid': !!props.errors.preparationTime,
+                                            })}
+                                        />
+                                    </div>}
+                                <div className="col-12 mb-4">
+                                    <Button label="Kaydet"
+                                            size={"small"}
+                                            severity={"success"}
+                                            type={"submit"}
+                                            disabled={!props.dirty || !props.isValid}
+                                            loading={props.isSubmitting}
+                                            className="w-auto mt-3 mr-2"/>
+                                </div>
+                            </form>
+                        </BlockUI>}
+                    </Formik>
+
+                </AccordionTab>}{!loading && <AccordionTab header={<span className="tw-flex tw-items-center tw-gap-2 tw-justify-between tw-w-full">
+                    <img src={netgsmLogo} className={"tw-h-12 tw-w-auto"} alt=""/>
+                    <span className="font-bold white-space-nowrap">NetSantral</span>
+                    </span>}>
+                    <Formik
+                        initialValues={{
+                            apiPassword: "",
+                            apiUser: "",
+                            autoApprove:false,
+                            loading: false,
+                            preparationTime: 0,
+                            defaultPackagePrice: 0
+                        }}
+                        onSubmit={(values, {setSubmitting}) => {
+                            toast.current?.show({
+                                severity: 'info',
+                                summary: 'Bilgi',
+                                detail: "Net Santral entegrasyonu henüz aktif değil"
+                            });
+                            setSubmitting(false);
+                        }}
+                    >
+                        {(props) => <BlockUI blocked={props.values.loading}>
+                            <form onSubmit={props.handleSubmit} className="grid formgrid p-fluid">
+
+
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="apiUser" className={classNames("font-medium text-900")}>
+                                        API Username
+                                    </label>
+                                    <Password id="apiUser"
+                                              feedback={false}
+                                              toggleMask
+                                              autoComplete={"off"}
+                                              name={"apiUser"}
+                                        // @ts-ignore
+                                              tooltip={props.errors?.apiUser}
+                                              tooltipOptions={{
+                                                  position: 'top',
+                                              }}
+                                              onChange={props.handleChange}
+                                              value={props.values.apiUser}
+                                              onBlur={props.handleBlur}
+                                              className={classNames('w-full', {
+                                                  'p-invalid': !!props.errors.apiUser,
+                                              })}
+                                    />
+                                </div>
+                                <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                                    <label htmlFor="apiPassword" className={classNames("font-medium text-900")}>
+                                        API Password
+                                    </label>
+                                    <Password id="apiPassword"
+                                              feedback={false}
+                                              toggleMask
+                                              autoComplete={"off"}
+                                              name={"apiPassword"}
+                                        // @ts-ignore
+                                              tooltip={props.errors?.apiPassword}
+                                              tooltipOptions={{
+                                                  position: 'top',
+                                              }}
+                                              onChange={props.handleChange}
+                                              value={props.values.apiPassword}
+                                              onBlur={props.handleBlur}
+                                              className={classNames('w-full', {
+                                                  'p-invalid': !!props.errors.apiPassword,
+                                              })}
+                                    />
+                                </div>
+                                <div className="col-12 mb-4">
+                                    <Button label="Kaydet"
+                                            size={"small"}
+                                            severity={"success"}
+                                            type={"submit"}
+                                            disabled={!props.dirty || !props.isValid}
+                                            loading={props.isSubmitting}
+                                            className="w-auto mt-3 mr-2"/>
+                                </div>
                             </form>
                         </BlockUI>}
                     </Formik>

@@ -97,6 +97,7 @@ class BusinessesController extends Controller
         if ($businesses) {
             $businesses = $businesses->get()->map(function ($business) {
                 $business->phone = "0" . str_replace(["(", ")", "-", " "], "", $business->phone);
+                $business->details = BusinessDetails::where("business_id", $business->id)->first();
                 return $business;
             });
             return response()->json([
