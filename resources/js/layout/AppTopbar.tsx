@@ -143,7 +143,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                 <StyleClass nodeRef={searchRef} selector="@next" enterClassName="hidden" enterActiveClassName="scalein"
                             leaveToClassName="hidden" leaveActiveClassName="fadeout" hideOnOutsideClick>
                     <button ref={searchRef} className="topbar-profile-button p-link" type="button">
-                        <img alt="avatar" src="/demo/images/avatar/onyamalimba.png"/>
+                        <img alt="avatar" src="/demo/images/avatar/login.png"/>
                         <span className="profile-details">
                             <span className="profile-name">{auth?.user?.name}</span>
                             <span className="profile-job">
