@@ -4,7 +4,7 @@ import {Head, router} from "@inertiajs/react";
 import {Button} from 'primereact/button';
 import React, {useEffect, useRef, useState} from 'react';
 import {Toast} from "primereact/toast";
-import OrderShowPage from "@/Pages/Business/Orders/Show";
+import OrderShowPage from "@/components/OrderShow";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
 import {Message} from "primereact/message";
@@ -397,7 +397,6 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     rowExpansionTemplate={(data) => {
                         return <OrderShowPage
                             page={false}
-                            order={data}
                             // @ts-ignore
                             orderId={data.id}
                             csrfToken={csrfToken}

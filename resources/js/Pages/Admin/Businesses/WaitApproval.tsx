@@ -18,6 +18,7 @@ import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
 import {getDetailKeysTranslation, getDetailsValueTranslation} from "@/helpers/globalHelper";
 import {Dialog} from "primereact/dialog";
+import {useReactToPrint} from "react-to-print";
 
 const WaitApprovalBusinesses = ({auth, csrfToken}: {
     auth?: any,
@@ -25,6 +26,7 @@ const WaitApprovalBusinesses = ({auth, csrfToken}: {
 }) => {
     const [loading, setLoading] = useState(true);
     const [visible, setVisible] = useState(false);
+    const [visiblePrint, setVisiblePrint] = useState(false);
     const [businesses, setBusinesses] = useState([]);
     const [selectedBusiness, setSelectedBusiness] = useState(null);
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "details_button", "created_at", "actions"], "adminBusinessesWaitApprovalDetailsColumns");
@@ -106,6 +108,7 @@ const WaitApprovalBusinesses = ({auth, csrfToken}: {
             align: "center",
             body: (rowData: any) => {
                 return <>
+
                     <Button icon={"pi pi-file"} tooltip={"İşletme Bilgileri"}
                             severity={"info"}
                             size={"small"}
@@ -139,6 +142,18 @@ const WaitApprovalBusinesses = ({auth, csrfToken}: {
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
+                    <Button icon={"pi pi-print"} tooltip={"İşletme Bilgilerini Yazdır"}
+                            severity={"help"}
+                            size={"small"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={(event) => {
+                                setSelectedBusiness(rowData);
+                                setVisiblePrint(true);
+                            }}
+
+                    />
                     <Button size={"small"} icon={"pi pi-check-circle"} severity={"success"} tooltip={"Onayla"}
                             tooltipOptions={{
                                 position: "top"
@@ -183,6 +198,10 @@ const WaitApprovalBusinesses = ({auth, csrfToken}: {
         </>
     }
     const toast = React.useRef<Toast>(null);
+    const contentRef  = React.useRef(null);
+    const reactToPrint = useReactToPrint({
+        contentRef
+    });
     return <PageContainer auth={auth} csrfToken={csrfToken}>
         <MainLayout>
             <Head title="Onay Bekleyen İşletmeler"/>
@@ -274,7 +293,7 @@ const WaitApprovalBusinesses = ({auth, csrfToken}: {
                     </div>}
                     onHide={() => setVisible(false)} visible={visible}
                     style={{width: '50vw'}} resizable={false}
-                    className="mx-3 sm:mx-0 sm:w-full md:w-8 lg:w-6 p-fluid" modal
+                    className="mx-3 sm:mx-0 w-full md:w-8 lg:w-6 p-fluid" modal
                 >
                     <DataTable value={getValuesForDetails(selectedBusiness)}
                                filters={{
@@ -285,6 +304,47 @@ const WaitApprovalBusinesses = ({auth, csrfToken}: {
                         <Column field="label" showFilterMenu={false} filter header="Anahtar"/>
                         <Column field="value" showFilterMenu={false} filter header="Değer"/>
                     </DataTable>
+                </Dialog>
+                <Dialog
+                    header={"İşletme Bilgilerini Yazdır"}
+                    draggable={false}
+                    footer={<div className={"gap-2"}>
+                        <Button size={"small"} icon={"pi pi-times"} label={"Kapat"} severity={"danger"}
+                                tooltip={"Kapat"}
+                                tooltipOptions={{
+                                    position: "top"
+                                }}
+                                onClick={() => setVisiblePrint(false)}
+                        />
+                        <Button size={"small"} icon={"pi pi-print"} label={"Yazdır"} severity={"success"}
+                                tooltip={"Yazdır"}
+                                tooltipOptions={{
+                                    position: "top"
+                                }}
+                                onClick={() => {
+                                    reactToPrint();
+                                }}
+                        />
+                    </div>}
+                    onHide={() => setVisiblePrint(false)} visible={visiblePrint}
+                    style={{width: '50vw'}} resizable={false}
+                    className="mx-3 sm:mx-0 w-full md:w-8 lg:w-6 p-fluid" modal
+                >
+                    <div >
+                        <dl ref={contentRef} className="tw-max-w-md tw-text-gray-900 tw-divide-y tw-divide-gray-300 tw-print:tw-text-black tw-print:tw-divide-gray-400">
+
+                            {getValuesForDetails(selectedBusiness).map((item: any, index: any) => (
+                                <div key={index} className="tw-flex tw-flex-col tw-pb-3 tw-mb-1 tw-print:tw-pb-2 tw-print:tw-mb-2 tw-border-b tw-border-gray-300">
+                                    <dt className="tw-mb-1 tw-text-gray-600 tw-print:tw-text-gray-800 tw-text-sm">
+                                        {item.label}
+                                    </dt>
+                                    <dd className="tw-font-semibold tw-m-0 tw-text-base tw-print:tw-font-bold">
+                                        {item.value}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    </div>
                 </Dialog>
             </div>
         </MainLayout>

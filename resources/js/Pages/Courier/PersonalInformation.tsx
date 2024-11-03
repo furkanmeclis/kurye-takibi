@@ -350,7 +350,6 @@ const PersonalInformation = ({
 
         if (!profilePage) {
             setBreadcrumbs([]);
-            setLayoutConfig(prevState => ({...prevState, menuMode: "overlay"}));
         }
 
     }, []);

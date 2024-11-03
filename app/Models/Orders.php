@@ -365,7 +365,7 @@ class Orders extends Model
                         "message" => "Yeni bir sipariş oluşturuldu. Sipariş No: " . $newOrder->id,
                         "severity" => "success"
                     ];
-                    broadcast(new OrderEvent($newOrder->id, $message, true, false, true, "business"))->toOthers();
+                    broadcast(new OrderEvent($newOrder->business_id, $message, true, false, true, "business"))->toOthers();
                     $addedOrdersCount++;
                 } else {
                     $existOrdersCount++;

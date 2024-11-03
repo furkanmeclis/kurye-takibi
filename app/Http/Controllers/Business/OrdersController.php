@@ -85,7 +85,7 @@ class OrdersController extends Controller
                     "message" => "Yeni bir sipariş oluşturuldu. Sipariş No: " . $newOrder->id,
                     "severity" => "success"
                 ];
-                broadcast(new OrderEvent($newOrder->id, $message, true, false, true, "business"))->toOthers();
+                broadcast(new OrderEvent($newOrder->business_id, $message, true, false, true, "business"))->toOthers();
                 if ($request->location != null) {
                     OrderLocations::addLocation($newOrder->id, $request->location['latitude'], $request->location['longitude']);
                 }
@@ -125,7 +125,7 @@ class OrdersController extends Controller
                             "severity" => "info"
                         ];
 
-                        broadcast(new OrderEvent($order->id, $message, true, "business"))->toOthers();
+                        broadcast(new OrderEvent($order->business_id, $message, true, "business"))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş iptal edildi. Yönetici onayından sonra iptal işlemi tamamlanacaktır."
@@ -149,7 +149,7 @@ class OrdersController extends Controller
                             "message" => "Sipariş durumu güncellendi.",
                             "severity" => "info"
                         ];
-                        broadcast(new OrderEvent($order->id, $message, true, "business"))->toOthers();
+                        broadcast(new OrderEvent($order->business_id, $message, true, "business"))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş durumu güncellendi."
@@ -182,7 +182,7 @@ class OrdersController extends Controller
         if ($order) {
             if ($order->status == "draft") {
                 if ($order->delete()) {
-                    broadcast(new OrderEvent($order->id, (object)[
+                    broadcast(new OrderEvent($order->business_id, (object)[
                         "title" => "Sipariş Silme",
                         "message" => "Sipariş başarıyla silindi.",
                         "severity" => "success"

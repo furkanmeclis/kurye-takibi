@@ -21,6 +21,7 @@ import {Timeline} from "primereact/timeline";
 import UserCard from "@/demo/components/apps/chat/UserCard";
 import trendyolSvg from "@/icons/trendyol.svg";
 import webSvg from "@/icons/web.svg";
+import {BlockUI} from "primereact/blockui";
 
 const startMarker = new L.Icon({
     iconUrl: startMarkerIcon,
@@ -324,7 +325,7 @@ const OrderShow = ({
             return getOrderStatuses(orderData?.status, false, orderData?.cancellation_accepted === 1, orderData?.cancellation_rejected === 1);
         }
     },[orderData])
-    return <div>
+    return <BlockUI blocked={loading} template={<i className="pi pi-spin pi-spinner" style={{ fontSize: '3rem' }}></i>}>
         {orderData !== null && <div className="tw-grid md:tw-grid-cols-2 tw-grid-cols-1 tw-gap-3 tw-mb-3">
             {orderData.status === "transporting" && orderData.courier !== false && orderData.courier !== null && locations.length > 0 &&
                 <div className={"md:tw-col-span-2 grid"}>
@@ -760,7 +761,7 @@ const OrderShow = ({
             </div>
         </div>}
         <Toast ref={toast}/>
-    </div>
+    </BlockUI>
 
 };
 export default OrderShow;

@@ -15,7 +15,7 @@ class OrderEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $orderId = null;
+    public $businessId = null;
     public $title = null;
     public $message = null;
     public $severity = null;
@@ -29,10 +29,10 @@ class OrderEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct($orderId, $message = null, $reload = false, $onlyLocation = false, $playSound = false, $forRole = "business")
+    public function __construct($businessId, $message = null, $reload = false, $onlyLocation = false, $playSound = false, $forRole = "business")
     {
         $this->forRole = $forRole;
-        $this->orderId = $orderId;
+        $this->businessId = $businessId;
         if ($message == null) {
             $this->showMessage = false;
         } else {

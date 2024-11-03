@@ -32,7 +32,8 @@ class OrderLocations extends Model
             }
         }
         if ($orderLocation->save()) {
-            broadcast(new \App\Events\Orders\OrderEvent($order_id,null,false,true))->toOthers();
+            $businessId = \App\Models\Orders::where('id', $order_id)->first("business_id")->business_id;
+            broadcast(new \App\Events\Orders\OrderEvent($businessId,null,false,true))->toOthers();
             return true;
         } else {
             return false;

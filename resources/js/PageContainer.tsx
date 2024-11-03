@@ -18,22 +18,56 @@ const PageContainer = ({auth, csrfToken, errors = [], children, profilePage = fa
     courierIsTransporting?: boolean
 }) => {
     const toast = useRef<Toast>(null);
-    const {setAuth, setCsrfToken} = useContext(LayoutContext);
+    const {setAuth, setCsrfToken, layoutConfig, setLayoutConfig} = useContext(LayoutContext);
     useEffect(() => {
         setAuth(auth);
         setCsrfToken(csrfToken);
     }, [auth, csrfToken]);
+    const logo = () => {
+        const path = '/layout/images/logo-';
+        let logo;
+        if (layoutConfig.layoutTheme === 'primaryColor' && layoutConfig.theme !== 'yellow') {
+            logo = 'light.png';
+        } else {
+            logo = layoutConfig.colorScheme === 'light' ? 'dark.png' : 'light.png';
+        }
+        return path + logo;
+    };
+    const showNotification = (data: any) => {
+        if (Notification.permission === "granted") {
+            let notification = new Notification(data.title, {
+                body: data.message,
+                icon: logo()
+            });
+            notification.onclick = function () {
+                window.focus();
+            };
+        } else {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === "granted") {
+                    let notification = new Notification(data.title, {
+                        body: data.message,
+                        icon: logo()
+                    });
+                    notification.onclick = function () {
+                        window.focus();
+                    };
+                }
+            });
+        }
+    }
     useEffect(() => {
         let bellAudioClient = new Audio(bellAudio);
         let notificationAudioClient = new Audio(notificationAudio);
         notificationAudioClient.volume = 1;
         bellAudioClient.volume = 1;
-        if (auth?.user?.role === "courier" || auth?.user?.role === "business") {
-            let client = subscribeOrderEventsGlobal();
+        if (auth?.user?.role === "business") {
+            let client = subscribeOrderEventsGlobal(auth?.user?.id);
             let disconnect = listenOrderEvents((data: any) => {
                 if (data.forRole === auth?.user?.role) {
                     if (data.showMessage) {
-                        if(!data.playSound) notificationAudioClient.play().then(r => r).catch(e => e);
+                        if (!data.playSound) notificationAudioClient.play().then(r => r).catch(e => e);
+                        showNotification(data);
                         toast.current?.show({severity: data.severity, summary: data.title, detail: data.message});
                     }
                     if (data.playSound) {

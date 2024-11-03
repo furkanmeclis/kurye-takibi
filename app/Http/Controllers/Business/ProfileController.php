@@ -53,6 +53,8 @@ class ProfileController extends Controller
             $businessDetails->tax_office = null;
             $businessDetails->latitude = $request->get("latitude");
             $businessDetails->longitude = $request->get("longitude");
+            $businessDetails->sector = $request->get("sector");
+            $businessDetails->businessPhone = $request->get("businessPhone");
             if ($request->get("billing") == "individual") {
                 $businessDetails->identity = $request->get("identity");
                 $businessDetails->birth_date = $request->get("birth_date");

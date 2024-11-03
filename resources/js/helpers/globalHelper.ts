@@ -22,12 +22,14 @@ export const getDetailKeysTranslation = (key: string) => {
         "identity": "Kimlik Numarası",
         "birth_date": "Doğum Tarihi",
         "latitude": "Enlem",
-        "longitude": "Boylam"
+        "longitude": "Boylam",
+        "sector": "Sektör",
+        "businessPhone": "İşletme Telefonu",
     };
     // @ts-ignore
     return labelTranslations[key];
 }
-export const getRoleTag = (role: "admin" | "business" | "courier") => {
+export const getRoleTag = (role: any) => {
     let roles = {
         admin: {
             label: "Yönetici",
@@ -42,7 +44,15 @@ export const getRoleTag = (role: "admin" | "business" | "courier") => {
             severity: "warning"
         }
     }
-    return roles[role];
+    // @ts-ignore
+    if (roles[role]) {
+        // @ts-ignore
+        return roles[role];
+    }
+    return {
+        label: role,
+        severity: "secondary"
+    }
 }
 export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false, accepted = true, rejected = false) => {
     // ["draft", "opened", "transporting", "delivered", "canceled", "deleted"]
@@ -182,12 +192,14 @@ export const getEmergencyStatuses = (key: any, getAll = false) => {
         return statuses[key];
     }
 }
-export const subscribeOrderEventsGlobal = () => {
+export const subscribeOrderEventsGlobal = (businessId: any) => {
     let pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
         cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     });
     pusher.subscribe(`order-channel`).bind(`order-event`, (data: any) => {
-        window.dispatchEvent(new CustomEvent("order-event", {detail: data}));
+        if (data.businessId === businessId) {
+            window.dispatchEvent(new CustomEvent("order-event", {detail: data}));
+        }
     });
     return () => {
         pusher.unsubscribe(`order-channel`);
@@ -223,4 +235,95 @@ export const getOrderLocations = async (orderId: number, csrfToken: string) => {
         headers: headers
     });
     return await response.json();
+}
+export const getSectors = () => {
+    return [
+        "Restoran",
+        "Market",
+        "Eczane",
+        "Kırtasiye",
+        "Çiçekçi",
+        "Elektronik",
+        "Giyim",
+        "Mobilya",
+        "Ev ve Bahçe",
+        "Hizmet",
+        "Otel",
+        "Temizlik",
+        "Pet Shop",
+        "Oto Servis",
+        "Kuaför",
+        "Eğitim",
+        "Kargo",
+        "Yemek Dağıtım",
+        "Sağlık",
+        "Spor ve Fitness",
+        "İnşaat Malzemeleri",
+        "Büro Malzemeleri",
+        "Emlak",
+        "Yazılım",
+        "Tarım ve Hayvancılık",
+        "Toptan Ticaret",
+        "Sigorta",
+        "Danışmanlık",
+        "Medya ve Yayıncılık",
+        "Lojistik",
+        "Sanayi ve Üretim",
+        "Gıda Üretimi",
+        "Finans ve Bankacılık",
+        "Kimya",
+        "Turizm",
+        "Mücevher ve Takı",
+        "Kitapçı",
+        "Oyun ve Eğlence",
+        "Optik",
+        "Sanat Galerisi",
+        "Nakliye",
+        "Bahçe ve Peyzaj",
+        "Mobilya ve Dekorasyon",
+        "Fotoğrafçılık",
+        "Sinema ve Tiyatro",
+        "Yapı Market",
+        "Güzellik ve Kozmetik",
+        "Dondurma ve Tatlı",
+        "Balıkçı",
+        "Bilişim Teknolojileri",
+        "Hukuk Bürosu",
+        "Mimarlık ve İç Mimarlık",
+        "Bireysel Eğitim ve Dershane",
+        "Hayvancılık ve Ürünleri",
+        "Çocuk Giyim",
+        "Kadın Giyim",
+        "Erkek Giyim",
+        "Saat ve Aksesuar",
+        "Turizm Acentası",
+        "Veteriner",
+        "Küçük Ev Aletleri",
+        "Bebek ve Çocuk Ürünleri",
+        "Araba Kiralama",
+        "Tatil Köyü",
+        "Kuruyemiş",
+        "Mobilya İmalatı",
+        "Ayakkabı ve Çanta",
+        "Moda ve Tekstil",
+        "Organizasyon",
+        "Spor Salonu",
+        "Kahve Dükkanı",
+        "Atölye",
+        "Seramik ve Çömlekçilik",
+        "Çikolata ve Şekerleme",
+        "Seyahat Acentası",
+        "Fırın",
+        "Tasarım ve Grafik",
+        "İkinci El Mağaza",
+        "Antikacılık",
+        "Biyoteknoloji",
+        "Ambalaj ve Paketleme",
+        "Sigorta ve Finans",
+        "Motosiklet Aksesuarları",
+        "Online Eğitim",
+        "Hediye ve Aksesuar",
+        "Deniz Ürünleri",
+        "Bahçe ve Çiçek Düzenleme",
+    ];
 }

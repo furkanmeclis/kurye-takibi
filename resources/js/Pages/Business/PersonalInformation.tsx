@@ -17,7 +17,7 @@ import {getPersonalInformation, savePersonalInformation} from "@/helpers/Busines
 import {Steps} from "primereact/steps";
 import {Message} from "primereact/message";
 import {LayoutContext} from "@/layout/context/layoutcontext";
-import {getLocation} from "@/helpers/globalHelper";
+import {getLocation, getSectors} from "@/helpers/globalHelper";
 
 interface State {
     plaka_kodu: string;
@@ -88,7 +88,7 @@ const PersonalInformation = ({
     profileApproved?: any,
     csrfToken?: any
 }) => {
-
+    const sectors = getSectors() as string[];
     const {setBreadcrumbs, setLayoutConfig} = useContext(LayoutContext);
     const [completed, setCompleted] = useState(false);
     const [approved, setApproved] = useState(profileApproved === 1);
@@ -108,6 +108,7 @@ const PersonalInformation = ({
             .required('Telefon numarası giriniz')
             .matches(/^\(\d{3}\)-\d{3}-\d{4}$/, 'Geçerli bir telefon numarası giriniz'),
         address: Yup.string().required('Adresinizi giriniz').min(10, 'Adres en az 10 karakter olmalıdır'),
+        sector: Yup.string().required('Sektör bilgisini seçiniz'),
         city: Yup.string().required('Şehir bilgisini seçiniz'),
         state: Yup.string().required('İlçe bilgisini seçiniz'),
         zip: Yup.string().required('Posta kodu giriniz').matches(/^\d{5}$/, 'Geçerli bir posta kodu giriniz'),
@@ -147,7 +148,7 @@ const PersonalInformation = ({
         }),
     });
     let cityNames = cities.map((city) => city.il_adi);
-    let selectedCity: City = cities[0];
+    let selectedCity: City = cities.find((city) => city.plaka_kodu === "63") as City;
     let selectedState: State = selectedCity.ilceler[0];
     let selectedTaxOffice: VergiDairesi = taxOfficies[0];
     let {
@@ -172,6 +173,7 @@ const PersonalInformation = ({
             state: selectedState.ilce_adi,
             selectedState: selectedState,
             zip: '',
+            businessPhone: '',
             country: 'turkey',
             billing: 'individual',
             identity: '',
@@ -182,7 +184,8 @@ const PersonalInformation = ({
             tax_office: selectedTaxOffice.vergi_dairesi,
             selectedTaxOffice,
             latitude: "",
-            longitude: ""
+            longitude: "",
+            sector: ""
         },
         validationSchema,
         validateOnChange: validationType,
@@ -223,6 +226,7 @@ const PersonalInformation = ({
                         state: newData.state,
                         selectedState: {} as State,
                         zip: newData.zip,
+                        businessPhone: newData.businessPhone,
                         country: newData.country,
                         billing: newData.billing,
                         identity: newData.identity || '',
@@ -233,7 +237,9 @@ const PersonalInformation = ({
                         tax_office: newData.tax_office || '',
                         selectedTaxOffice: {} as VergiDairesi,
                         latitude: newData.latitude || '',
-                        longitude: newData.longitude || ''
+                        longitude: newData.longitude || '',
+                        sector: newData.sector || ''
+
                     };
                     resetData.selectedCity = cities.find((city) => city.il_adi === newData.city) as City;
                     resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === newData.state) as State;
@@ -294,6 +300,7 @@ const PersonalInformation = ({
                     country: "turkey",
                     billing: details.billing,
                     identity: details.identity || '',
+                    businessPhone: details.businessPhone || '',
                     birth_date: new Date(),
                     tax_name: details.tax_name || '',
                     tax_number: details.tax_number || '',
@@ -302,7 +309,8 @@ const PersonalInformation = ({
                     selectedTaxOffice: {} as VergiDairesi,
                     vehicle_type: details.vehicle_type,
                     latitude: details.latitude || '',
-                    longitude: details.longitude || ''
+                    longitude: details.longitude || '',
+                    sector: details.sector || ''
                 };
                 if (details.city !== null) {
                     resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
@@ -313,10 +321,10 @@ const PersonalInformation = ({
                         resetData.state = resetData.selectedCity.ilceler[0].ilce_adi;
                     }
                 } else {
-                    resetData.selectedCity = cities[0];
-                    resetData.selectedState = cities[0].ilceler[0];
-                    resetData.city = cities[0].il_adi;
-                    resetData.state = cities[0].ilceler[0].ilce_adi;
+                    resetData.selectedCity = cities.find((city) => city.plaka_kodu === "63") as City;
+                    resetData.selectedState = resetData.selectedCity.ilceler[0];
+                    resetData.city = resetData.selectedCity.il_adi;
+                    resetData.state = resetData.selectedCity.ilceler[0].ilce_adi;
                 }
 
                 if (resetData.billing === 'individual') {
@@ -351,7 +359,6 @@ const PersonalInformation = ({
 
         if (!profilePage) {
             setBreadcrumbs([]);
-            setLayoutConfig(prevState => ({...prevState, menuMode: "overlay"}));
         }
 
     }, []);
@@ -645,6 +652,57 @@ const PersonalInformation = ({
                                            'p-invalid': !!errors.zip,
                                        })}
                             />
+                        </div>
+                        <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                            <label htmlFor="businessPhone" className={classNames("font-medium text-900", {
+                                'text-red-500': !!errors.businessPhone,
+                                'text-green-500': !errors.businessPhone && submitCount > 0,
+                            })}>
+                                <i className={classNames("pi", {
+                                    'pi-times-circle text-red-500 text-sm': !!errors.businessPhone,
+                                    'pi-check-circle text-green-500 text-sm': !errors.businessPhone && submitCount > 0,
+                                })}></i> İşletme Telefon Numarası
+                            </label>
+                            <InputMask
+                                autoComplete={"off"}
+                                name={"businessPhone"}
+                                tooltip={errors?.businessPhone}
+                                tooltipOptions={{
+                                    position: 'top',
+                                    event: 'focus',
+                                    className: 'text-red-500'
+                                }}
+                                onChange={(event) => {
+                                    setFieldValue("businessPhone", event.value);
+                                }}
+                                value={values.businessPhone}
+                                mask={"(999)-999-9999"}
+                                className={classNames('w-full', {
+                                    'p-invalid': !!errors.businessPhone,
+                                })}
+                            />
+                        </div>
+                        <div className="field mb-4 col-12 md:col-4 p-input-icon-right">
+                            <label htmlFor="sector" className={classNames("font-medium text-900", {
+                                'text-red-500': !!errors.sector,
+                                'text-green-500': !errors.sector && submitCount > 0,
+                            })}>
+                                <i className={classNames("pi", {
+                                    'pi-times-circle text-red-500 text-sm': !!errors.sector,
+                                    'pi-check-circle text-green-500 text-sm': !errors.sector && submitCount > 0,
+                                })}></i> Sektör
+                            </label>
+                            <Dropdown value={values.sector}
+                                      onChange={(e) => {
+                                          setFieldValue("sector", e.value);
+                                      }}
+                                      options={sectors}
+                                      inputId={"sector"}
+                                      placeholder="Sektör Seçiniz" className={classNames('w-full', {
+                                'p-invalid': !!errors.sector,
+                            })}
+                                      filter virtualScrollerOptions={{itemSize: 38}}
+                                      emptyMessage={"Şehir Bulunamadı"} emptyFilterMessage={"Şehir Bulunamadı"}/>
                         </div>
                         <div className="field mb-4 col-12  p-input-icon-right">
                             <label htmlFor="address" className={classNames("font-medium text-900", {

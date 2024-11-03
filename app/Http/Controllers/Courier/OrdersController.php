@@ -140,7 +140,7 @@ class OrdersController extends \App\Http\Controllers\Controller
                     "message" => "Siparişiniz Kurye Tarafından Kabul Edildi",
                     "severity" => "success"
                 ];
-                broadcast(new OrderEvent($order->id, $message, true, false))->toOthers();
+                broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
                 $location = json_decode($order->start_location);
                 if ($location->latitude == 0) {
                     $location->latitude = $request->latitude;
@@ -262,7 +262,7 @@ class OrdersController extends \App\Http\Controllers\Controller
                     "message" => "Siparişiniz Başarıyla Teslim Edildi",
                     "severity" => "success"
                 ];
-                broadcast(new OrderEvent($order->id, $message, true, false))->toOthers();
+                broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
                 return response()->json([
                     "status" => true,
                     "message" => "Sipariş Başarıyla Teslim Edildi"
@@ -317,7 +317,7 @@ class OrdersController extends \App\Http\Controllers\Controller
                             "message" => "Siparişiniz Kurye Tarafından İptal Edildi. İptal Sebebi: " . $this->getStatusMessage($request->reason),
                             "severity" => "error"
                         ];
-                        broadcast(new OrderEvent($order->id, $message, true, false))->toOthers();
+                        broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
                         return response()->json([
                             "status" => true,
                             "message" => "Sipariş İptal Edildi.İptal Sebebi: " . $this->getStatusMessage($request->reason)

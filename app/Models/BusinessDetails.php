@@ -24,6 +24,10 @@ class BusinessDetails extends Model
         'tax_address',
         'tax_office',
         'vehicle_type',
+        'latitude',
+        'longitude',
+        'sector',
+        'businessPhone',
     ];
     public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
