@@ -25,7 +25,7 @@ export const storeOrder = async (order: any, csrfToken: any) => {
 }
 
 
-export const updateOrderStatus = async (orderId: any, status: "opened" | "transporting" | "delivered" | "canceled", csrfToken: any, cancellationReason = "") => {
+export const updateOrderStatus = async (orderId: any, status: "opened" | "preparing" | "transporting" | "delivered" | "canceled", csrfToken: any, cancellationReason = "") => {
     if (status === "canceled") {
         if (cancellationReason === "") {
             return Promise.resolve({

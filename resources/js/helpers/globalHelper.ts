@@ -54,12 +54,16 @@ export const getRoleTag = (role: any) => {
         severity: "secondary"
     }
 }
-export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false, accepted = true, rejected = false) => {
+export const getOrderStatuses = (status: "draft" |"preparing"| "opened" | "transporting" | "delivered" | "canceled" | "deleted", getAll = false, accepted = true, rejected = false) => {
     // ["draft", "opened", "transporting", "delivered", "canceled", "deleted"]
     let statuses = {
         draft: {
             label: "Taslak",
             severity: "secondary"
+        },
+        preparing: {
+            label: "Hazırlanıyor",
+            severity: "warning"
         },
         opened: {
             label: "Açık",
@@ -80,7 +84,8 @@ export const getOrderStatuses = (status: "draft" | "opened" | "transporting" | "
         deleted: {
             label: "Silindi",
             severity: "danger"
-        }
+        },
+
     }
     if (getAll) {
         return Object.entries(statuses).map(([key, value]) => ({

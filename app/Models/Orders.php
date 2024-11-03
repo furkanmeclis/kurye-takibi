@@ -238,6 +238,21 @@ class Orders extends Model
         ];
     }
 
+    public static function generateOrderNumber($businessId): string
+    {
+        // Gün numarasını al (Carbon ile)
+        $dayOfYear = Carbon::now()->dayOfYear; // Yılın günü (1-365)
+        $dayOfYear = str_pad($dayOfYear, 3, '0', STR_PAD_LEFT);
+        // Günlük sıralama numarasını belirleyin (Carbon ile)
+        $todayDate = Carbon::now()->toDateString(); // Yalnızca bugünün tarihi
+        $orderCountToday = self::whereDate('created_at', $todayDate)->where("business_id", $businessId)->count() + 1;
+        $orderCountToday = str_pad($orderCountToday, 3, '0', STR_PAD_LEFT);
+
+        // Sipariş numarasını oluştur
+        return "W{$businessId}-{$dayOfYear}-{$orderCountToday}";
+    }
+
+
     /**
      * @throws \Exception
      */
@@ -290,12 +305,14 @@ class Orders extends Model
                     $customer->name = $order->customer->firstName . " " . $order->customer->lastName;
                     $customer->marketplace_id = $order->customer->id . $business->id;
                     $customer->phone = (new Orders)->formatPhoneNumberForTrendyol($order->callCenterPhone);
-                    $customer->note = "Trendyol Müşterisi İletişim No:" . $order->orderNumber;
+                    $customer->note = "Trendyol Müşterisi";
                     $customer->save();
                 }
                 $controlAddress = CustomerAddresses::where('marketplace_id', $order->customer->id)->where("notes", $order->address->addressDescription)->first();
                 if ($controlAddress) {
                     $address = $controlAddress;
+                    $address->note = $order->address->addressDescription;
+                    $address->save();
                 } else {
                     $addressParts = [
                         $order->address->neighborhood ?? null,
@@ -324,6 +341,7 @@ class Orders extends Model
                 $newOrder->customer_id = $customer->id;
                 $newOrder->address_id = $address->id;
                 $newOrder->customer_note = $order->customerNote;
+                $newOrder->order_number = "T".$business->id."-".$order->orderNumber;
                 $newOrder->start_location = json_encode([
                     "latitude" => $businessDetails->latitude,
                     "longitude" => $businessDetails->longitude
@@ -362,7 +380,7 @@ class Orders extends Model
                     }
                     $message = (object)[
                         "title" => "Yeni Sipariş",
-                        "message" => "Yeni bir sipariş oluşturuldu. Sipariş No: " . $newOrder->id,
+                        "message" => "Yeni bir sipariş oluşturuldu. Sipariş No: " . $newOrder->order_number,
                         "severity" => "success"
                     ];
                     broadcast(new OrderEvent($newOrder->business_id, $message, true, false, true, "business"))->toOthers();
@@ -391,7 +409,7 @@ class Orders extends Model
             case 'Created':
                 return 'draft';
             case 'Picking':
-                return 'opened';
+                return 'preparing';
             case 'Invoiced':
                 return 'opened';
             case 'Shipped':
@@ -403,7 +421,7 @@ class Orders extends Model
             case 'Cancelled':
                 return 'canceled';
             case 'UnSupplied':
-                return 'deleted';
+                return 'canceled';
             default:
                 return "draft"; // Bilinmeyen bir durum için
         }
@@ -517,4 +535,88 @@ class Orders extends Model
             ]
         ];
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function finishPrepare(): bool
+    {
+        if($this->marketplace == "trendyol") {
+            $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
+            if ($trendyol->status) {
+                $res = $trendyol->client->finishPrepareOrder($this->marketplace_order_id);
+                if($res) {
+                    $this->status = "opened";
+                    return $this->save();
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } elseif($this->marketplace == "web"){
+            $this->status = "opened";
+            return $this->save();
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function startTransporting(): bool
+    {
+        if($this->marketplace == "trendyol") {
+            $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
+            if ($trendyol->status) {
+                $res = $trendyol->client->shipOrder($this->marketplace_order_id);
+                if($res) {
+                    $this->courier_accepted_at = Carbon::now();
+                    $this->status = "transporting";
+                    return $this->save();
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } elseif($this->marketplace == "web"){
+            $this->status = "transporting";
+            $this->courier_accepted_at = Carbon::now();
+            return $this->save();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function deliveryOrder(): bool
+    {
+        if($this->marketplace == "trendyol") {
+            $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
+            if ($trendyol->status) {
+                $res = $trendyol->client->deliverOrder($this->marketplace_order_id);
+                if($res) {
+                    $this->delivered_at = Carbon::now();
+                    $this->status = "delivered";
+                    return $this->save();
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } elseif($this->marketplace == "web"){
+            $this->status = "delivered";
+            $this->delivered_at = Carbon::now();
+            return $this->save();
+        } else {
+            return false;
+        }
+    }
+
 }

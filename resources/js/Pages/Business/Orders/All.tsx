@@ -80,8 +80,8 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
         }
         if (auth?.user?.id) {
-            let client = listenOrderEvents((data:any) => {
-                if(data.reload){
+            let client = listenOrderEvents((data: any) => {
+                if (data.reload) {
                     getOrdersAll();
                 }
             });
@@ -135,6 +135,26 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             })
             .finally(() => setLoading(false))
     }
+    const finishPrepare = (id: number) => {
+        setLoading(true);
+        updateOrderStatus(id, "opened", csrfToken)
+            .then(({status, message}) => {
+                if (status) {
+                    getOrdersAll();
+                    toast.current?.show({
+                        severity: "success",
+                        summary: "Başarılı",
+                        detail: message
+                    });
+                } else {
+                    toast.current?.show({severity: "error", summary: "Hata", detail: message});
+                }
+            })
+            .catch(error => {
+                toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
+            })
+            .finally(() => setLoading(false))
+    }
     const cancelOrder = (id: number, reason: string) => {
         setLoading(true);
         updateOrderStatus(id, "canceled", csrfToken, reason)
@@ -163,9 +183,12 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             style: {width: '3rem'},
         },
         {
-            field: "id",
-            header: "Sipariş ID",
-            hidden: !selectedColumns.includes("id"),
+            field: "order_number",
+            header: "Sipariş Numarası",
+            hidden: !selectedColumns.includes("order_number"),
+            style: {minWidth: '12rem'},
+            filter: true,
+            filterPlaceholder: "Sipariş Numarası'na Göre",
         },
         {
             field: "customer.name",
@@ -174,6 +197,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             sortable: true,
             filter: true,
             filterPlaceholder: "Ad'a Göre",
+            style: {minWidth: '12rem'},
         }, {
             field: "customer.phone",
             header: "Müşteri Telefon Numarası",
@@ -181,6 +205,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             sortable: true,
             filter: true,
             filterPlaceholder: "Müşteri Telefon Numarası'na Göre",
+            style: {minWidth: '12rem'},
         },
         {
             field: "customer_note",
@@ -189,6 +214,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             sortable: true,
             filter: true,
             filterPlaceholder: "Sipariş Notu'na Göre",
+            style: {minWidth: '12rem'},
             body: (rowData: any) => {
                 return rowData.customer_note ?
                     <span>{rowData.customer_note}</span> :
@@ -201,6 +227,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("price"),
             sortable: true,
             filter: true,
+            style: {minWidth: '12rem'},
             filterPlaceholder: "Fiyata'a Göre",
             body: (rowData: any) => {
                 return <span>{rowData.price} ₺</span>
@@ -209,6 +236,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         {
             field: "marketplace",
             header: "Sipariş Kaynağı",
+            style: {width: '6rem'},
             hidden: !selectedColumns.includes("marketplace"),
             sortable: true,
             body: (rowData: any) => {
@@ -219,6 +247,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         {
             field: "status",
             header: "Sipariş Durumu",
+            style: {minWidth: '9rem'},
             hidden: !selectedColumns.includes("status"),
             sortable: true,
             filter: true,
@@ -252,6 +281,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             filter: true,
             filterPlaceholder: "Kurye Teslim Alma Tarihine Göre",
             filterType: "date",
+            style: {minWidth: '12rem'},
             body: (rowData: any) => {
                 return rowData.courier_accepted_at ?
                     <span>{new Date(rowData.courier_accepted_at).toLocaleString()}</span> :
@@ -266,6 +296,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             filter: true,
             filterPlaceholder: "Teslim Tarihine Göre",
             filterType: "date",
+            style: {minWidth: '12rem'},
             body: (rowData: any) => {
                 return rowData.delivered_at ?
                     <span>{new Date(rowData.delivered_at).toLocaleString()}</span> :
@@ -279,6 +310,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             sortable: true,
             filter: true,
             dataType: "boolean",
+            style: {minWidth: '6rem'},
             filterElement: (options) => {
                 return <TriStateCheckbox value={options.value} onChange={(e) => options.filterApplyCallback(e.value)}/>;
             },
@@ -297,6 +329,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("canceled_at"),
             sortable: true,
             filter: true,
+            style: {minWidth: '12rem'},
             filterPlaceholder: "İptal Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
@@ -311,6 +344,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("created_at"),
             sortable: true,
             filter: true,
+            style: {minWidth: '12rem'},
             filterPlaceholder: "Eklenme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
@@ -323,6 +357,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             hidden: !selectedColumns.includes("updated_at"),
             sortable: true,
             filter: true,
+            style: {minWidth: '12rem'},
             filterPlaceholder: "Güncellenme Tarihine Göre",
             filterType: "date",
             body: (rowData: any) => {
@@ -332,21 +367,21 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         {
             field: "actions",
             header: "İşlemler",
+            style: {minWidth: '15rem'},
             hidden: !selectedColumns.includes("actions"),
             body: (rowData: any) => {
                 return <div className={"flex gap-2"}>
-                    {rowData.status === "draft" && <Button
+                    {rowData.status === "preparing" && <Button
                         size={"small"}
-                        icon={"pi pi-check-circle"}
-                        severity={"success"}
-                        tooltip={"Yayınla"}
+                        icon={"pi pi-box"}
+                        severity={"warning"}
+                        tooltip={"Hazırlığı Bitir"}
                         loading={loading}
                         tooltipOptions={{
                             position: "top"
                         }}
-                        disabled={rowData.status !== "draft"}
+                        disabled={rowData.status !== "preparing"}
                         onClick={() => {
-                            console.log(rowData)
                             openOrder(rowData.id);
                         }}
                     />}
@@ -527,6 +562,7 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         />
                     }}
                     filters={{
+                        "order_number": {value: null, matchMode: 'contains'},
                         "customer.name": {value: null, matchMode: 'contains'},
                         "customer.phone": {value: null, matchMode: 'contains'},
                         created_at: {value: null, matchMode: 'contains'},
@@ -539,7 +575,6 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         price: {value: null, matchMode: 'contains'},
                         customer_note: {value: null, matchMode: 'contains'},
                         cancellation_accepted: {value: null, matchMode: 'equals'},
-
                     }}
                     emptyMessage="Sipariş bulunamadı."
                     currentPageReportTemplate="{first}. ile {last}. arası toplam {totalRecords} kayıttan"

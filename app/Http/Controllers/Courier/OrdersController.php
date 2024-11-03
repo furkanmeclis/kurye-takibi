@@ -135,12 +135,7 @@ class OrdersController extends \App\Http\Controllers\Controller
                 $order->courier_id = auth()->user()->id;
                 $order->courier_accepted_at = now();
                 $order->status = "transporting";
-                $message = (object)[
-                    "title" => "Sipariş Kabul Edildi",
-                    "message" => "Siparişiniz Kurye Tarafından Kabul Edildi",
-                    "severity" => "success"
-                ];
-                broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
+
                 $location = json_decode($order->start_location);
                 if ($location->latitude == 0) {
                     $location->latitude = $request->latitude;
@@ -148,11 +143,35 @@ class OrdersController extends \App\Http\Controllers\Controller
                     $order->start_location = json_encode($location);
                 }
                 OrderLocations::addLocation($order->id, $request->latitude, $request->longitude, auth()->user()->id);
+
+
                 if ($order->save()) {
-                    return response()->json([
-                        "status" => true,
-                        "message" => "Sipariş Başarıyla Kabul Edildi"
-                    ]);
+                    $returnResponse = false;
+                    $message = (object)[
+                        "title" => "Sipariş Kabul Edildi",
+                        "message" => "Siparişiniz Kurye Tarafından Kabul Edildi",
+                        "severity" => "success"
+                    ];
+
+                    if ($order->startTransporting()) {
+                        $returnResponse = response()->json([
+                            "status" => true,
+                            "message" => "Sipariş Kabul Edildi"
+                        ]);
+                        $message->message = "Siparişiniz Taşınmaya Başlandı. Sipariş Numarası: " . $order->order_number;
+                        $message->title = "Sipariş Taşınıyor";
+                        $message->severity = "success";
+                    } else {
+                        $message->message = "Siparişiniz Taşınmaya Başlandı İlgili Firmaya Bildirim Yapılmadı. Sipariş Numarası: " . $order->order_number;
+                        $message->title = "Sipariş Taşınıyor";
+                        $message->severity = "success";
+                        $returnResponse = response()->json([
+                            "status" => false,
+                            "message" => "Sipariş Kabul Edildi"
+                        ]);
+                    }
+                    broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
+                    return $returnResponse;
                 } else {
                     return response()->json([
                         "status" => false,
@@ -248,7 +267,6 @@ class OrdersController extends \App\Http\Controllers\Controller
     {
         $order = Orders::find($orderId);
         if ($order && $order->status == "transporting" && $order->courier_id == auth()->user()->id) {
-            //TODO: Sipariş Teslim Edildiğine Dair Bilgilendirme Mesajları Gönderilecek
             $order->status = "delivered";
             $order->delivered_at = now();
             $lastLocation = OrderLocations::where('order_id', $order->id)->orderBy('created_at', 'desc')->first();
@@ -257,16 +275,24 @@ class OrdersController extends \App\Http\Controllers\Controller
                 "longitude" => $lastLocation->longitude,
             ]);
             if ($order->save()) {
+
                 $message = (object)[
                     "title" => "Sipariş Teslim Edildi",
                     "message" => "Siparişiniz Başarıyla Teslim Edildi",
                     "severity" => "success"
                 ];
                 broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
-                return response()->json([
-                    "status" => true,
-                    "message" => "Sipariş Başarıyla Teslim Edildi"
-                ]);
+                if ($order->deliverOrder()) {
+                    return response()->json([
+                        "status" => true,
+                        "message" => "Sipariş Başarıyla Teslim Edildi"
+                    ]);
+                } else {
+                    return response()->json([
+                        "status" => false,
+                        "message" => "Sipariş Teslim Edildi İlgili Firmaya Bildirim Yapılmadı " . $order->marketplace
+                    ]);
+                }
             } else {
                 return response()->json([
                     "status" => false,
@@ -296,6 +322,21 @@ class OrdersController extends \App\Http\Controllers\Controller
         return $statuses[$key] ?? 'Bilinmeyen Durum';
     }
 
+    public function getCancelReasonCodeForTrendyol($key)
+    {
+        $cancelReasons = [
+            'wrongAddress' => 601,
+            'notInAddress' => 602,
+            'addressMismatch' => 607,
+            'accident' => 641,
+            'heavyTraffic' => 642,
+            'productDamaged' => 647,
+            'tireBust' => 645,
+            // Diğer nedenler burada
+        ];
+        return $cancelReasons[$key] ?? null;
+    }
+
     public function emergencyAction(Request $request, $orderId): \Illuminate\Http\JsonResponse
     {
         $order = Orders::find($orderId);
@@ -317,10 +358,13 @@ class OrdersController extends \App\Http\Controllers\Controller
                             "message" => "Siparişiniz Kurye Tarafından İptal Edildi. İptal Sebebi: " . $this->getStatusMessage($request->reason),
                             "severity" => "error"
                         ];
+                        if ($order->marketplace !== "web") {
+                            $message->message = "Siparişiniz Kurye Tarafından İptal Edildi İlgili Firmaya Bildirim Yapılmadı." . $order->marketplace . ". İptal Sebebi: " . $this->getStatusMessage($request->reason);
+                        }
                         broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
                         return response()->json([
                             "status" => true,
-                            "message" => "Sipariş İptal Edildi.İptal Sebebi: " . $this->getStatusMessage($request->reason)
+                            "message" => $message->message
                         ]);
                     } else {
                         return response()->json([

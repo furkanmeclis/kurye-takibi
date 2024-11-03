@@ -131,6 +131,7 @@ const CreateOrderPage = ({auth, csrfToken, visible, setVisible}: {
             }, csrfToken)
                 .then((response) => {
                     if (response.status) {
+                        setVisible(false);
                         toast.current?.show({severity: 'success', summary: 'Başarılı', detail: response.message});
                         resetForm();
                     } else {

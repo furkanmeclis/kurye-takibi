@@ -38,7 +38,7 @@ class OrdersScheduleHelper
             }
         }
         if (count($messages) > 0) {
-            Log::channel('orders')->info('Trendyol Orders Fetching .'.date("d.m.Y H:i:s"), $messages);
+            Log::info("Order Scheduling Response [".date("d.m.Y H:i:s")."]: " . json_encode($messages));
         }
         return $messages;
     }
