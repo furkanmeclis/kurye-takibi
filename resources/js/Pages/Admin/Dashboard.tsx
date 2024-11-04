@@ -3,33 +3,57 @@ import React, {useContext, useEffect, useState} from 'react';
 import {Button} from 'primereact/button';
 import {Chart} from 'primereact/chart';
 import {Dropdown, DropdownChangeEvent} from 'primereact/dropdown';
-import {Avatar} from 'primereact/avatar';
-import {AvatarGroup} from 'primereact/avatargroup';
 import {ChartData, ChartOptions} from 'chart.js';
-import {ProductService} from '@/demo/service/ProductService';
 import {LayoutContext} from '@/layout/context/layoutcontext';
-import {TabView, TabPanel} from 'primereact/tabview';
-import {Tag} from 'primereact/tag';
 import {Demo} from '@/types/demo';
-import {ProgressBar} from 'primereact/progressbar';
 import MainLayout from "@/Layouts/MainLayout";
 import PageContainer from "@/PageContainer";
 import {Head} from "@inertiajs/react";
+import {getAdminStatics} from "@/helpers/Admin/account";
+import {Message} from "primereact/message";
 
-let revenueChartData: ChartData;
 let overviewChartData: ChartData;
 
-function Dashboard({auth, csrfToken, errors}: {
+function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
     auth?: any,
     csrfToken?: string,
-    errors?: any
+    errors?: any,
+    courierIsTransporting?: boolean
 }) {
+
     const {layoutConfig} = useContext(LayoutContext);
     const [products, setProducts] = useState<Demo.Product[]>([]);
     const [ordersOptions, setOrdersOptions] = useState<ChartOptions | null>(null);
     const [revenueChartOptions, setRevenueChartOptions] = useState<ChartOptions | null>(null);
     const [selectedOverviewWeek, setSelectedOverviewWeek] = useState<any>(null);
-
+    const [loading, setLoading] = useState<boolean>(false);
+    const [statics, setStatics] = useState<any>({
+        users: {
+            businesses: 0,
+            customers: 0,
+            couriers: 0
+        },
+        orders: {
+            count: 0,
+            graph: {
+                thisWeek: [],
+                lastWeek: []
+            }
+        }
+    });
+    const getStaticData = () => {
+        setLoading(true);
+        getAdminStatics(csrfToken).then((response: any) => {
+            if (response.status) {
+                setStatics(response.statics);
+                overviewChartData.datasets[0].data = response.statics.orders.graph.thisWeek;
+                overviewChartData = {...overviewChartData};
+            }
+        })
+    }
+    useEffect(() => {
+        getStaticData();
+    }, [])
     const overviewWeeks: object[] = [
         {name: 'Bu Hafta', code: '0'},
         {name: 'Geçen Hafta', code: '1'}
@@ -39,26 +63,11 @@ function Dashboard({auth, csrfToken, errors}: {
     };
     const changeOverviewWeek = (e: DropdownChangeEvent) => {
         setSelectedOverviewWeek(e.value);
-        const dataSet1 = [
-            91,
-            70,
-            56,
-            86,
-            64,
-        ];
-        const dataSet2 = [
-            52,
-            70,
-            55,
-            68,
-            79,
-            56,
-            74
-        ];
         if (e.value.code === '1') {
-            overviewChartData.datasets[0].data = dataSet2;
+            overviewChartData.datasets[0].data = statics.orders.graph.lastWeek;
+
         } else {
-            overviewChartData.datasets[0].data = dataSet1;
+            overviewChartData.datasets[0].data = statics.orders.graph.thisWeek;
         }
         overviewChartData = {...overviewChartData};
     };
@@ -66,72 +75,28 @@ function Dashboard({auth, csrfToken, errors}: {
     const getOverviewChartData = (): any => {
         const documentStyle = getComputedStyle(document.documentElement);
         const primaryColor = documentStyle.getPropertyValue('--primary-color');
-        const primaryColor300 = documentStyle.getPropertyValue('--primary-200');
+        const primaryColor300 = documentStyle.getPropertyValue('--primary-600');
 
         return {
             labels: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
             datasets: [
                 {
                     label: 'Sipariş Adedi',
-                    data: [
-                        70,
-                        68,
-                        72,
-                        56,
-                        68,
-                        90,
-                        68
-                    ],
-                    backgroundColor: ['#007bff'],
+                    data: [],
+                    backgroundColor: [primaryColor],
                     hoverBackgroundColor: [primaryColor300],
                     fill: true,
                     borderRadius: '3',
                     borderSkipped: 'top bottom',
-                    barPercentage: 0.25
+                    barPercentage: 0.5
                 }
-            ]
+            ],
         };
     };
-    const getRevenueChartData = () => {
-        const documentStyle = getComputedStyle(document.documentElement);
-        const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-        const borderColor = documentStyle.getPropertyValue('--surface-border');
-        return {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [
-                {
-                    data: [11, 17, 30, 60, 88, 92],
-                    borderColor: 'rgba(25, 146, 212, 0.5)',
-                    pointBorderColor: 'transparent',
-                    pointBackgroundColor: 'transparent',
-                    fill: false,
-                    tension: 0.4
-                },
-                {
-                    data: [11, 19, 39, 59, 69, 71],
-                    borderColor: 'rgba(25, 146, 212, 0.5)',
-                    pointBorderColor: 'transparent',
-                    pointBackgroundColor: 'transparent',
-                    fill: false,
-                    tension: 0.4
-                },
-                {
-                    data: [11, 17, 21, 30, 47, 83],
-                    backgroundColor: 'rgba(25, 146, 212, 0.2)',
-                    borderColor: 'rgba(25, 146, 212, 0.5)',
-                    pointBorderColor: 'transparent',
-                    pointBackgroundColor: 'transparent',
-                    fill: true,
-                    tension: 0.4
-                }
-            ]
-        };
-    };
+
+
     const setSvg = (path: any) => {
         return `/demo/images/dashboard/${path}` + '.svg';
-    };
-    const dynamicBackground = () => {
-        return 'rgba(227, 248, 255, 0.1)';
     };
 
     useEffect(() => {
@@ -139,12 +104,10 @@ function Dashboard({auth, csrfToken, errors}: {
     }, []);
 
     useEffect(() => {
-        ProductService.getProductsSmall().then((data) => setProducts(data));
         const documentStyle = getComputedStyle(document.documentElement);
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
         const borderColor = documentStyle.getPropertyValue('--surface-border');
         overviewChartData = getOverviewChartData();
-        revenueChartData = getRevenueChartData();
         setOrdersOptions({
             plugins: {
                 legend: {
@@ -183,49 +146,24 @@ function Dashboard({auth, csrfToken, errors}: {
                 }
             }
         });
-        setRevenueChartOptions({
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    grid: {
-                        color: borderColor
-                    },
-                    max: 100,
-                    min: 0,
-                    ticks: {
-                        color: textColorSecondary
-                    }
-                },
-                x: {
-                    grid: {
-                        color: borderColor
-                    },
-                    ticks: {
-                        color: textColorSecondary
-                    }
-                }
-            }
-        });
     }, [layoutConfig]);
 
     return (
-        <PageContainer auth={auth} csrfToken={csrfToken} errors={errors}>
+        <PageContainer auth={auth} csrfToken={csrfToken} errors={errors} courierIsTransporting={courierIsTransporting}>
             <MainLayout>
-                <Head title="İşletme Anasayfa"/>
+                <Head title="Admin Anasayfa"/>
                 <div className="grid">
+                    <div className="col-12">
+                        <Message severity="info" text="Admin Anasayfasına Hoşgeldiniz! Veriler Son 14 Güne Ait Verilerdir." className={"w-full tw-justify-start"}/>
+                    </div>
                     <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">
-                                <i className="pi pi-users text-6xl text-blue-500"></i>
+                                <i className="pi pi-shop text-6xl text-blue-500"></i>
                                 <div className="ml-3">
-                                    <span className="text-blue-500 block white-space-nowrap">TOPLAM MÜŞTERİ</span>
-                                    <span className="text-blue-500 block text-4xl font-bold">3882</span>
+                                    <span
+                                        className="text-blue-500 block white-space-nowrap">İşletme Sayısı</span>
+                                    <span className="text-blue-500 block text-4xl font-bold">{statics.users.businesses} İşletme</span>
                                 </div>
                             </div>
                             <img src={setSvg('users')} className="w-full" alt="users"/>
@@ -234,196 +172,113 @@ function Dashboard({auth, csrfToken, errors}: {
                     <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">
-                                <i className="pi pi-map text-6xl text-orange-500"></i>
-                                <div className="ml-3">
-                                    <span className="text-orange-500 block white-space-nowrap">TOPLAM SİPARİŞ</span>
-                                    <span className="text-orange-500 block text-4xl font-bold">532</span>
-                                </div>
-                            </div>
-                            <img src={setSvg('locations')} className="w-full" alt="locations"/>
-                        </div>
-                    </div>
-                    <div className="col-12 lg:col-6 xl:col-3">
-                        <div className="card p-0 overflow-hidden flex flex-column">
-                            <div className="flex align-items-center p-3">
-                                <i className="pi pi-directions text-6xl text-green-500"></i>
+                                <i className="pi pi-car text-6xl text-green-500"></i>
                                 <div className="ml-3">
                                     <span
-                                        className="text-green-500 block white-space-nowrap">ORTALAMA TESLİM SÜRESİ</span>
-                                    <span className="text-green-500 block text-4xl font-bold">25dk</span>
+                                        className="text-green-500 block white-space-nowrap">Kurye Sayısı</span>
+                                    <span
+                                        className="text-green-500 block text-4xl font-bold">{statics.users.couriers} Kurye</span>
                                 </div>
                             </div>
                             <img src={setSvg('rate')} className="w-full" alt="conversion"/>
                         </div>
                     </div>
                     <div className="col-12 lg:col-6 xl:col-3">
+                        <div className="card p-0 overflow-hidden flex flex-column">
+                            <div className="flex align-items-center p-3">
+                                <i className="pi pi-users text-6xl text-orange-500"></i>
+                                <div className="ml-3">
+                                    <span className="text-orange-500 block white-space-nowrap">Müşteri Sayısı</span>
+                                    <span className="text-orange-500 block text-4xl font-bold">{statics.users.customers} Müşteri</span>
+                                </div>
+                            </div>
+                            <img src={setSvg('locations')} className="w-full" alt="locations"/>
+                        </div>
+                    </div>
+                    <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card h-full p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">
-                                <i className="pi pi-comments text-6xl text-purple-500"></i>
+                                <i className="pi pi-box text-6xl text-purple-500"></i>
                                 <div className="ml-3">
-                                    <span className="text-purple-500 block white-space-nowrap">KURYE BEKLEYEN SİPARİŞ ADEDİ</span>
-                                    <span className="text-purple-500 block text-4xl font-bold">5</span>
+                                    <span className="text-purple-500 block white-space-nowrap">Teslim Edilen Sipariş Adedi</span>
+                                    <span className="text-purple-500 block text-4xl font-bold">{statics.orders.count}</span>
                                 </div>
                             </div>
                             <img src={setSvg('interactions')} className="w-full mt-auto" alt="interactions"/>
                         </div>
                     </div>
 
-                    <div className="col-12 xl:col-6">
+                    <div className="col-12">
                         <div className="card h-full">
                             <div className="flex justify-content-between align-items-center mb-3">
                                 <h5>Günlük Sipariş Grafiği</h5>
-                                <Dropdown options={overviewWeeks} value={selectedOverviewWeek}
-                                          onChange={changeOverviewWeek}
-                                          optionLabel="name"></Dropdown>
+                                <div>
+
+                                    <Dropdown
+                                        options={overviewWeeks}
+                                        value={selectedOverviewWeek}
+                                        onChange={changeOverviewWeek}
+                                        optionLabel="name"
+                                    />
+                                    <Button
+                                        icon={"pi pi-cloud-download"}
+                                        tooltip={"PNG olarak kaydet"}
+                                        tooltipOptions={{position: 'top'}}
+                                        className={"ml-2"}
+                                        severity={"secondary"}
+                                        outlined
+                                        onClick={() => {
+                                            const element = document.querySelector('.graph canvas') as any;
+                                            const canvas = document.createElement('canvas');
+                                            canvas.width = element.width;
+                                            canvas.height = element.height;
+                                            const context = canvas.getContext('2d');
+                                            if (context) {
+                                                context.fillStyle = 'white';
+                                                context.drawImage(element, 0, 0);
+                                                const a = document.createElement('a');
+                                                a.href = canvas.toDataURL('image/png');
+                                                let downloadNameRandom = Math.random().toString(36).substring(7);
+                                                a.download = `siparis-grafigi-${downloadNameRandom}.png`;
+                                                a.click();
+                                            }
+                                        }}
+                                    /><Button
+                                    icon={"pi pi-print"}
+                                    tooltip={"Yazdır"}
+                                    tooltipOptions={{position: 'top'}}
+                                    className={"ml-2"}
+                                    severity={"secondary"}
+                                    outlined
+                                    onClick={async () => {
+                                        // only print the chart
+                                        const element = document.querySelector('.graph canvas') as any;
+                                        const canvas = document.createElement('canvas');
+                                        canvas.width = element.width;
+                                        canvas.height = element.height;
+                                        canvas.style.backgroundColor = '#000';
+                                        const context = canvas.getContext('2d');
+                                        if (context) {
+                                            context.drawImage(element, 0, 0);
+                                            const image = new Image();
+                                            image.src = canvas.toDataURL('image/png', 1);
+                                            // wait image to load
+                                            await new Promise((resolve) => {
+                                                image.onload = resolve;
+                                            });
+                                            const w = window.open("");
+                                            w?.document.write(image.outerHTML);
+                                            await w?.print();
+                                            w?.close();
+                                        }
+                                    }}
+                                />
+                                </div>
                             </div>
                             <div className="graph">
                                 <Chart type="bar" height="400px" data={overviewChartData}
                                        options={ordersOptions as ChartOptions}></Chart>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="col-12 lg:col-6 xl:col-3">
-                        <div className="card h-full">
-                            <h5>Son Müşteriler</h5>
-                            <ul className="list-none p-0 m-0">
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="BÇ" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(101, 214, 173, 0.1)',
-                                                color: '#27AB83',
-                                                border: '1px solid #65D6AD'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Behzat Ç</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="AA" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Adile Aydın</span>
-
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="ECD" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(94, 208, 250, 0.1)',
-                                                color: '#1992D4',
-                                                border: '1px solid #5ED0FA'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Emir Can Değril</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="MÇ" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Mehmet Ç</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="FM" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(94, 208, 250, 0.1)',
-                                                color: '#1992D4',
-                                                border: '1px solid #5ED0FA'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Furkan Mesal</span>
-                                    </div>
-                                </li>
-                                <li className="mb-4 flex align-items-center">
-                                    <Avatar label="MD" size="large" shape="circle" className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Mehmet Duran</span>
-                                    </div>
-                                </li>
-
-                            </ul>
-                            <Button type="button" className="w-full mt-3" label="Hepsini Görüntüle"
-                                    icon="pi pi-arrow-right"
-                                    iconPos="right"></Button>
-                        </div>
-                    </div>
-
-                    <div className="col-12 lg:col-6 xl:col-3">
-                        <div className="card">
-                            <div className="text-center mb-5">
-                                <img src={setSvg('completion-graph')} alt="graph" className="w-full"/>
-                            </div>
-
-                            <ul className="list-none p-0 m-0">
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-user-edit" size="large" shape="circle"
-                                            className="text-base font-bold" style={{
-                                        backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                        color: '#DE911D',
-                                        border: '1px solid #FADB5F'
-                                    }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Add your personal information</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">Go Profile Edit</span>
-                                    </div>
-                                </li>
-
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-send" size="large" shape="circle"
-                                            className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Verify your phone</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">Send Verification SMS</span>
-                                    </div>
-                                </li>
-
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-video" size="large" shape="circle"
-                                            className="text-base font-bold"
-                                            style={{
-                                                backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                                color: '#DE911D',
-                                                border: '1px solid #FADB5F'
-                                            }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Verify your Face ID</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">Upload Pictures</span>
-                                    </div>
-                                </li>
-
-                                <li className="mb-4 flex align-items-center justify-content-start">
-                                    <Avatar icon="pi pi-briefcase" size="large" shape="circle"
-                                            className="text-base font-bold" style={{
-                                        backgroundColor: 'rgba(250, 219, 95, 0.1)',
-                                        color: '#DE911D',
-                                        border: '1px solid #FADB5F'
-                                    }}></Avatar>
-                                    <div className="ml-3">
-                                        <span className="block">Give permissions for personal data</span>
-                                        <span className="text-blue-500 hover:underline cursor-pointer block font-bold">View Agreement</span>
-                                    </div>
-                                </li>
-                            </ul>
                         </div>
                     </div>
                 </div>

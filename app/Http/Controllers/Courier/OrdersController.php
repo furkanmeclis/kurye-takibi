@@ -282,7 +282,7 @@ class OrdersController extends \App\Http\Controllers\Controller
                     "severity" => "success"
                 ];
                 broadcast(new OrderEvent($order->business_id, $message, true, false))->toOthers();
-                if ($order->deliverOrder()) {
+                if ($order->deliveryOrder()) {
                     return response()->json([
                         "status" => true,
                         "message" => "Sipariş Başarıyla Teslim Edildi"

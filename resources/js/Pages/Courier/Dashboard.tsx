@@ -19,6 +19,7 @@ import {Skeleton} from "primereact/skeleton";
 import CourierOrdersWidget from "@/components/CourierNearbyOrdersWidget";
 import {getCourierStatics} from "@/helpers/Courier/account";
 import CourierPastOrdersWidget from "@/components/CourierPastOrdersWidget";
+import {Message} from "primereact/message";
 
 let overviewChartData: ChartData;
 
@@ -192,6 +193,9 @@ function Dashboard({auth, csrfToken, errors, courierIsTransporting = false}: {
             <MainLayout>
                 <Head title="Kurye Anasayfa"/>
                 <div className="grid">
+                    <div className="col-12">
+                        <Message severity="info" text="Kurye Anasayfasına Hoşgeldiniz! Veriler Son 14 Güne Ait Verilerdir." className={"w-full tw-justify-start"}/>
+                    </div>
                     <div className="col-12 lg:col-6 xl:col-3">
                         <div className="card p-0 overflow-hidden flex flex-column">
                             <div className="flex align-items-center p-3">

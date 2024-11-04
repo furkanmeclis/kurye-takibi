@@ -8,7 +8,7 @@
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- begin:Theme Styles -->
-    <link id="theme-link" href="/theme/theme-light/yellow/theme.css" rel="stylesheet"/>
+    <link id="theme-link" href="/theme/theme-light/custom/theme.css" rel="stylesheet"/>
     <!-- end:Theme Styles -->
     <!-- begin:Theme Scripts -->
     @routes

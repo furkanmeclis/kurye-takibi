@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::prefix('admin')->name("admin.")->middleware("only:admin")->group(function () {
+        Route::post('/statics', [\App\Http\Controllers\Admin\ProfileController::class, 'getStatics'])->name("getStatics");
         Route::prefix('/couriers')->name("couriers.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\CouriersController::class, 'index'])->name('index');
             Route::get('/wait-approval', [\App\Http\Controllers\Admin\CouriersController::class, 'waitApproval'])->name('waitApproval');

@@ -619,4 +619,41 @@ class Orders extends Model
         }
     }
 
+    public static function getAdminOrderStatics($days): object
+    {
+        $startDate = Carbon::now()->subDays($days);
+        $orders = self::where('status', 'delivered')
+            ->where('updated_at', '>=', $startDate)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        $ordersCount = count($orders);
+        $daysArray = [
+            "monday" => 0,
+            "tuesday" => 0,
+            "wednesday" => 0,
+            "thursday" => 0,
+            "friday" => 0,
+            "saturday" => 0,
+            "sunday" => 0,
+        ];
+        $weekOfYear = Carbon::now()->weekOfYear;
+        $thisWeekCounts = [...$daysArray];
+        $lastWeekCounts = [...$daysArray];
+        foreach ($orders as $order) {
+            $day = strtolower(Carbon::parse($order->updated_at)->format("l"));
+            $week = Carbon::parse($order->updated_at)->weekOfYear;
+            if ($week == $weekOfYear) {
+                $thisWeekCounts[$day]++;
+            } elseif ($week == $weekOfYear - 1) {
+                $lastWeekCounts[$day]++;
+            }
+        }
+        return (object)[
+            "count" => $ordersCount,
+            "graph" => [
+                "thisWeek" => array_values($thisWeekCounts),
+                "lastWeek" => array_values($lastWeekCounts),
+            ]
+        ];
+    }
 }
