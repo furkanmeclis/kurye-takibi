@@ -34,6 +34,7 @@
         "axios": "^1.7.6",
         "chart.js": "^4.4.4",
         "formik": "^2.4.6",
+        "html2canvas": "^1.4.1",
         "leaflet": "^1.9.4",
         "primeflex": "3.3.0",
         "primeicons": "^7.0.0",

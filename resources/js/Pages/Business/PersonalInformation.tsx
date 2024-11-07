@@ -18,6 +18,7 @@ import {Steps} from "primereact/steps";
 import {Message} from "primereact/message";
 import {LayoutContext} from "@/layout/context/layoutcontext";
 import {getLocation, getSectors} from "@/helpers/globalHelper";
+import {Head} from "@inertiajs/react";
 
 interface State {
     plaka_kodu: string;
@@ -118,7 +119,10 @@ const PersonalInformation = ({
         latitude: Yup.string().required("Konum Bilgisi Gereklidir Lütfen Konum Ekleyiniz").min(3, "Lütfen Konum Ekleyiniz"),
         identity: Yup.string().when('billing', {
             is: 'individual',
-            then: () => Yup.string().required('Kimlik numarası zorunludur').max(11, 'Kimlik numarası 11 karakter olmalıdır').min(11, 'Kimlik numarası 11 karakter olmalıdır'),
+            then: () => Yup.string()
+                .required('Kimlik numarası zorunludur')
+                .matches(/^\d+$/, 'Kimlik numarası sadece rakamlardan oluşmalıdır')
+                .length(11, 'Kimlik numarası 11 karakter olmalıdır'),
             otherwise: () => Yup.string().nullable(),
         }),
         birth_date: Yup.string().when('billing', {
@@ -133,7 +137,10 @@ const PersonalInformation = ({
         }),
         tax_number: Yup.string().when('billing', {
             is: 'company',
-            then: () => Yup.string().required('Vergi numarası zorunludur').max(10, 'Vergi numarası 10 karakter olmalıdır').min(10, 'Vergi numarası 10 karakter olmalıdır'),
+            then: () => Yup.string()
+                .required('Vergi numarası zorunludur')
+                .matches(/^\d+$/, 'Vergi numarası sadece rakamlardan oluşmalıdır')
+                .length(10, 'Vergi numarası 10 karakter olmalıdır'),
             otherwise: () => Yup.string().nullable(),
         }),
         tax_address: Yup.string().when('billing', {
@@ -314,7 +321,7 @@ const PersonalInformation = ({
                 };
                 if (details.city !== null) {
                     resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                    if (details.state !== null && resetData.selectedCity?.ilceler !== null) {
+                    if (details.state !== null && resetData.selectedCity?.ilceler !== null && resetData.selectedCity?.ilceler !== undefined) {
                         resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
                     } else {
                         resetData.selectedState = resetData.selectedCity.ilceler[0];
@@ -365,6 +372,7 @@ const PersonalInformation = ({
 
     return (
         <div className={"card"}>
+            <Head title={"Profil"}/>
             <Toast ref={toast}/>
             {!profilePage && <span
                 className="text-900 text-xl font-bold mb-4 block">Profilinizi Tamamlayın</span>}
@@ -702,7 +710,7 @@ const PersonalInformation = ({
                                 'p-invalid': !!errors.sector,
                             })}
                                       filter virtualScrollerOptions={{itemSize: 38}}
-                                      emptyMessage={"Şehir Bulunamadı"} emptyFilterMessage={"Şehir Bulunamadı"}/>
+                                      emptyMessage={"Sektör Bulunamadı"} emptyFilterMessage={"Sektör Bulunamadı"}/>
                         </div>
                         <div className="field mb-4 col-12  p-input-icon-right">
                             <label htmlFor="address" className={classNames("font-medium text-900", {
@@ -819,7 +827,6 @@ const PersonalInformation = ({
                                 <InputText id="tax_number"
                                            autoComplete={"off"}
                                            name={"tax_number"}
-                                           type={"number"}
                                            tooltip={errors.tax_number}
                                            tooltipOptions={{
                                                position: 'top',

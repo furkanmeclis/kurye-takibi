@@ -96,24 +96,18 @@ class ProfileController extends Controller
 
     public function getPersonalInformation(): \Illuminate\Http\JsonResponse
     {
-        $user = auth()->user();
-        $businessDetails = BusinessDetails::where('business_id', $user->id)->first();
-        if (!$businessDetails) {
-            $businessDetails = new BusinessDetails();
-            $businessDetails->name = $user->name;
-            $businessDetails->email = $user->email;
-            $businessDetails->phone = $user->phone;
-            $businessDetails->business_id = $user->id;
-            $businessDetails->completed = 0;
-            $businessDetails->approved = 0;
-            $businessDetails->save();
+        $businessDetails = BusinessDetails::findOrCreateBusinessDetails();
+        if ($businessDetails) {
+            return response()->json([
+                "status" => true,
+                "details" => $businessDetails,
+            ]);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Bilgileriniz getirilirken bir hata oluştu.",
+            ]);
         }
-
-        return response()->json([
-            "status" => true,
-            "details" => $businessDetails,
-            "courier" => $user,
-        ]);
     }
 
     public function getStatics(): \Illuminate\Http\JsonResponse

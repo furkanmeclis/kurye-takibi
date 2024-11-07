@@ -1,5 +1,5 @@
 import {InputText} from 'primereact/inputtext';
-import {forwardRef, useContext, useImperativeHandle, useRef, useEffect, useState} from 'react';
+import {forwardRef, useContext, useImperativeHandle, useRef, useEffect, useState, useMemo} from 'react';
 import {LayoutContext} from './context/layoutcontext';
 import type {AppTopbarRef} from '@/types';
 import {Ripple} from 'primereact/ripple';
@@ -11,6 +11,7 @@ import RestauranSettingsSidebar from "@/components/RestauranSettingsSidebar";
 import FastAddOrder from "@/components/FastAddOrder";
 import {Tag} from "primereact/tag";
 import {getRoleTag} from "@/helpers/globalHelper";
+
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const {onMenuToggle, layoutConfig, tabs, closeTab, auth, csrfToken} = useContext(LayoutContext);
     const [searchActive, setSearchActive] = useState<boolean | null>(false);
@@ -34,7 +35,10 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const deactivateSearch = () => {
         setSearchActive(false);
     };
-
+    const visibleBusinessButtons = useMemo(() => {
+        // @ts-ignore
+        return auth?.profile_completed === 1 && auth?.profile_approved === 1 && auth?.user?.role === "business";
+    }, [auth]);
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current
     }));
@@ -68,9 +72,10 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             <Link href={route("dashboard")} className="app-logo">
                 <img alt="app logo" src={logo()}/>
             </Link>
-            {auth?.user?.role === "business" && <>
+            {visibleBusinessButtons && <>
                 <RestauranSettingsSidebar csrfToken={csrfToken} visible={visible} setVisible={setVisible}/>
-                <FastAddOrder visible={visibleFastAddOrder} setVisible={setVisibleFastAddOrder} auth={auth} csrfToken={csrfToken}/>
+                <FastAddOrder visible={visibleFastAddOrder} setVisible={setVisibleFastAddOrder} auth={auth}
+                              csrfToken={csrfToken}/>
             </>}
             <button ref={menubuttonRef} className="topbar-menubutton p-link" type="button" onClick={onMenuButtonClick}>
                 <span></span>
@@ -89,7 +94,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                 })}
                 {/*{!tabs || (tabs.length === 0 && <li className="topbar-menu-empty">v1.0</li>)}*/}
             </ul>
-            {auth?.user?.role === "business" && <div
+            { visibleBusinessButtons && <div
                 className={classNames('topbar-search')}
             >
                 <Button
@@ -149,7 +154,8 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                             <span className="profile-job">
                                 <Tag
                                     // @ts-ignore
-                                    value={getRoleTag(auth?.user?.role).label} severity={getRoleTag(auth?.user?.role).severity}/>
+                                    value={getRoleTag(auth?.user?.role).label}
+                                    severity={getRoleTag(auth?.user?.role).severity}/>
                             </span>
                         </span>
                         <i className="pi pi-angle-down"></i>

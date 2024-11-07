@@ -18,7 +18,7 @@ class Integrations extends Model
             $integration = new Integrations();
             $integration->business_id = $businessId;
             $integration->save();
-            return $integration;
+            return self::where('business_id', $businessId)->first();
         }
     }
 

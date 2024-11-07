@@ -13,12 +13,7 @@ import {OverlayPanel} from "primereact/overlaypanel";
 import {Checkbox} from "primereact/checkbox";
 import {useLocalStorage} from "primereact/hooks";
 import {confirmPopup} from "primereact/confirmpopup";
-import {
-    destroyOrder,
-    getOrders, listTrendyolOrders,
-    subscribeUpdateOrder,
-    updateOrderStatus
-} from "@/helpers/Business/orders";
+import {destroyOrder, getOrders, listTrendyolOrders, updateOrderStatus} from "@/helpers/Business/orders";
 import {getOrderStatuses, listenOrderEvents} from "@/helpers/globalHelper"
 import {Tag} from "primereact/tag";
 import {Dropdown} from "primereact/dropdown";
@@ -26,8 +21,9 @@ import {InputText} from "primereact/inputtext";
 import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {classNames} from "primereact/utils";
 import trendyolSvg from "@/icons/trendyol.svg";
-import yemeksepetiSvg from "@/icons/yemeksepeti.svg";
-import getirSvg from "@/icons/getir.svg";
+import {Dialog} from "primereact/dialog";
+import {useReactToPrint} from "react-to-print";
+import html2canvas from "html2canvas";
 
 interface AllCouriersProps {
     auth?: any,
@@ -45,12 +41,21 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
     const [selectedOrders, setSelectedOrders] = useState([] as any[]);
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "phone", "created_at", "actions"], "BusinessesOrdersAllTableColumns");
     const [error, setError] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [visiblePrintDialog, setVisiblePrintDialog] = useState(false);
+    const printPageRef = useRef(null);
+    const reactToPrint = useReactToPrint({
+        contentRef: printPageRef,
+    });
     const cancelOrderRef = useRef<OverlayPanel>(null);
     const [expandedRows, setExpandedRows] = useState([]);
     const [cancelOrderState, setCancelOrderState] = useState({
         orderId: 0,
         reason: ""
     } as any);
+    const logo = () => {
+        return '/layout/images/logo-dark.png';
+    };
     const getOrdersAll = () => {
         setLoading(true);
         getOrders(csrfToken).then(data => {
@@ -116,26 +121,6 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
         });
     }
     const openOrder = (id: number) => {
-        setLoading(true);
-        updateOrderStatus(id, "opened", csrfToken)
-            .then(({status, message}) => {
-                if (status) {
-                    getOrdersAll();
-                    toast.current?.show({
-                        severity: "success",
-                        summary: "Başarılı",
-                        detail: message
-                    });
-                } else {
-                    toast.current?.show({severity: "error", summary: "Hata", detail: message});
-                }
-            })
-            .catch(error => {
-                toast.current?.show({severity: "error", summary: "Hata", detail: error.message});
-            })
-            .finally(() => setLoading(false))
-    }
-    const finishPrepare = (id: number) => {
         setLoading(true);
         updateOrderStatus(id, "opened", csrfToken)
             .then(({status, message}) => {
@@ -398,6 +383,19 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                             router.visit(route('business.orders.show', rowData.id))
                         }}
                     />
+                    <Button
+                        size={"small"}
+                        icon={"pi pi-print"}
+                        tooltip={"Yazdır"}
+                        loading={loading}
+                        tooltipOptions={{
+                            position: "top"
+                        }}
+                        onClick={() => {
+                            setSelectedOrder(rowData);
+                            setVisiblePrintDialog(true);
+                        }}
+                    />
                     {rowData.status === "draft" && <Button
                         size={"small"}
                         icon={"pi pi-trash"}
@@ -584,6 +582,174 @@ const AllOrdersPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                     })}
                 </DataTable>
             </div>
+            <Dialog
+                style={{width: '300px'}} resizable={false}
+                className="mx-3 sm:mx-0 w-full md:w-8 lg:w-6 p-fluid" contentClassName={"px-0"} modal
+                draggable={false}
+                onHide={() => setVisiblePrintDialog(false)} visible={visiblePrintDialog} header={"Sipariş Yazdır"}
+                footer={<>
+                    <Button size={"small"} icon={"pi pi-times"} severity={"secondary"} label={"Kapat"} onClick={() => {
+                        setVisiblePrintDialog(false);
+                        setSelectedOrder(null);
+                    }}/>
+                    <Button size={"small"} icon={"pi pi-cloud-download"} severity={"success"} label={"Kaydet"} onClick={async () => {
+                        if (printPageRef.current) {
+                            const canvas = await html2canvas(printPageRef.current);
+                            const dataUrl = canvas.toDataURL('image/png');
+                            const link = document.createElement('a');
+                            // @ts-ignore
+                            link.download = selectedOrder.order_number + '.png';
+                            link.href = dataUrl;
+                            link.click();
+                        }
+                    }}/>
+                    <Button
+                        size={"small"}
+                        icon={"pi pi-clipboard"}
+                        severity={"info"}
+                        label={"Panoya Kopyala"}
+                        onClick={async () => {
+                            if (printPageRef.current) {
+                                const canvas = await html2canvas(printPageRef.current);
+                                const dataUrl = canvas.toDataURL('image/png');
+
+                                // Base64 verisini blob'a çevir
+                                const blob = await (await fetch(dataUrl)).blob();
+
+                                // Resmi dosya olarak kopyalamak için ClipboardItem oluştur
+                                const item = new ClipboardItem({"image/png": blob});
+
+                                // Resmi panoya kopyala
+                                try {
+                                    await navigator.clipboard.write([item]);
+                                    toast.current?.show({
+                                        severity: "success",
+                                        summary: "Başarılı",
+                                        detail: "Panoya kopyalandı."
+                                    });
+                                } catch (err) {
+                                    toast.current?.show({
+                                        severity: "error",
+                                        summary: "Hata",
+                                        detail: "Panoya kopyalanamadı."
+                                    });
+                                }
+                            }
+                        }}
+                    />
+
+                    <Button size={"small"} icon={"pi pi-print"} label={"Yazdır"} onClick={() => {
+                        reactToPrint();
+                    }}/>
+                </>}
+            >
+                {selectedOrder !== null &&
+                    <div ref={printPageRef} className={"tw-font-sans tw-rounded tw-w-[148mm] mx-auto tw-select-none"}
+                         id={"orderNoticePrint"}>
+                        <div
+                            className="tw-flex tw-items-center tw-justify-between tw-border-orange-500 tw-px-8 tw-py-4">
+                            <span className="tw-w-1/4 border-1 border-primary-500"/>
+                            <h1 className="tw-text-lg tw-font-semibold tw-text-orange-500">
+                                414 EXPRESS SİPARİŞ BİLGİ FİŞİ
+                            </h1>
+                            <span className="tw-w-1/5 border-1 border-primary-500"/>
+                        </div>
+                        <div className="tw-relative min-h-[40rem] h-full tw-px-10">
+                            <div
+                                className="tw-absolute tw-inset-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
+                                <img
+                                    src={logo()}
+                                    alt="Arka Plan Görseli"
+                                    className="tw-h-auto tw-select-none tw-w-full tw-object-cover tw-opacity-5"
+                                />
+                            </div>
+                            <div className="tw-flex tw-justify-between border-bottom-1 tw-border-gray-200 tw-py-2">
+                                <div>
+                                    <p className="tw-font-semibold">Sipariş Numarası</p>
+                                    <p
+                                        // @ts-ignore
+                                        className="tw-font-normal">{selectedOrder?.order_number}</p>
+                                </div>
+                                <div className="tw-text-right">
+                                    <p className="tw-font-semibold">Son Değişiklik Tarihi</p>
+                                    <p
+                                        // @ts-ignore
+                                        className="tw-font-normal">{new Date(selectedOrder?.updated_at).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div className="tw-flex tw-justify-between border-bottom-1 tw-border-gray-200 tw-py-2">
+                                <div>
+                                    <p className="tw-font-semibold">Müşteri Adı Soyadı</p>
+                                    <p
+                                        // @ts-ignore
+                                        className="tw-font-normal">{selectedOrder.customer.name}</p>
+                                </div>
+                                <div className="tw-text-right">
+                                    <p className="tw-font-semibold">Müşteri Telefon Numarası</p>
+                                    <p className="tw-font-normal"
+                                        // @ts-ignore
+                                    >0{selectedOrder.address.phone} {selectedOrder.marketplace === "trendyol" ? <span
+                                        // @ts-ignore
+                                        className={"text-primary font-bold"}>{JSON.parse(selectedOrder.marketplace_order_details).orderNumber}</span> : ""}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="tw-flex border-bottom-1 tw-border-gray-200 tw-py-2">
+                                <div>
+                                    <p className="tw-font-semibold">Müşteri Sipariş Notu</p>
+                                    <p
+                                        // @ts-ignore
+                                        className="tw-font-normal">{selectedOrder.customer_note}</p>
+                                </div>
+                            </div>
+                            <div className="tw-flex border-bottom-1 tw-border-gray-200 tw-py-2">
+                                <div>
+                                    <p className="tw-font-semibold">Müşteri Adresi</p>
+                                    <p
+                                        // @ts-ignore
+                                        className="tw-font-normal"> {selectedOrder.address.address}  </p>
+                                </div>
+                            </div>
+                            <div className="tw-flex border-bottom-1 tw-border-gray-200 tw-py-2">
+                                <div>
+                                    <p className="tw-font-semibold">Müşteri Adres Notu</p>
+                                    <p
+                                        // @ts-ignore
+                                        className="tw-font-normal"> {selectedOrder.address.notes} </p>
+                                </div>
+                            </div>
+                            {
+                                // @ts-ignore
+                                selectedOrder.marketplace === "trendyol" &&
+                                <div className="tw-flex tw-py-2 tw-w-full">
+                                    <div className="tw-flex-1">
+                                        <p className="tw-font-semibold">Ürünler</p>
+                                        <ul className="tw-my-2 tw-grid tw-grid-cols-2 tw-gap-4 tw-w-full tw-list-none p-0">
+                                            {
+                                                // @ts-ignore
+                                                JSON.parse(selectedOrder.marketplace_order_details).lines.map((line: any, index: number) => {
+                                                    return <li key={index}
+                                                               className="tw-rounded bg-primary-100 tw-p-2 font-semibold text-black">- {line.name}</li>
+                                                })}
+
+                                        </ul>
+                                    </div>
+                                </div>}
+                        </div>
+                        <div
+                            className="tw-flex tw-items-center tw-justify-between tw-border-orange-500 tw-px-8 tw-py-4">
+                            <span className="tw-w-1/3 border-1 border-primary-500"/>
+                            <div className="tw-flex tw-items-center tw-space-x-2">
+                                <img
+                                    src={logo()}
+                                    alt="Logo"
+                                    className="tw-w-full tw-px-4 tw-max-h-20"
+                                />
+                            </div>
+                            <span className="tw-w-1/3 border-1 border-primary-500"/>
+                        </div>
+                    </div>}
+            </Dialog>
         </MainLayout>
     </PageContainer>
 }

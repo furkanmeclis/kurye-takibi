@@ -30,21 +30,47 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
     const [loading, setLoading] = useState<boolean>(false);
     const [lastSync, setLastSync] = useLocalStorage<any>(null, 'businessRestaurantInfoLastSyncDate');
     const [trendyolRestaurant, setTrendyolRestaurant] = useLocalStorage<any>(false, "businessRestaurantInfoTrendyolSettings");
-    const [getirRestaurant, setGetirRestaurant] = useLocalStorage<any>(false, "businessRestaurantInfoGetirSettings");
-    const [yemeksepetiRestaurant, setYemesepetiRestaurant] = useLocalStorage<any>(false, "businessRestaurantInfoYemeksepetiSettings");
-    const syncData = () => {
-        setLoading(true);
-        getTrendyolRestaurantInfo(csrfToken).then((response) => {
+    const [integrations, setIntegrations] = useLocalStorage<any>({
+        trendyol: false,
+        getir: false,
+        yemeksepeti: false
+    }, "businessIntegrationsList");
+    const getTrendyolRestaurant = () => {
+        if (integrations.trendyol) {
+            setLoading(true);
+            getTrendyolRestaurantInfo(csrfToken).then((response) => {
+                if (response.status) {
+                    setTrendyolRestaurant(response.data);
+                    setLastSync(new Date().toISOString());
+                } else {
+                    setTrendyolRestaurant(false);
+                    toast.current?.show({severity: 'error', summary: 'Hata', detail: response.message});
+                }
+            }).finally(() => {
+                setLoading(false);
+            });
+        }
+    }
+    const syncData = async () => {
+        getIntegrations(csrfToken).then(async (response) => {
             if (response.status) {
-                setTrendyolRestaurant(response.data);
-                setLastSync(new Date().toISOString());
+                let saveObject = {
+                    trendyol: response.data.trendyol ? true : false,
+                    getir: response.data.getir ? true : false,
+                    yemeksepeti: response.data.yemeksepeti ? true : false
+                };
+                setIntegrations(saveObject);
+                if (saveObject.trendyol) {
+                    getTrendyolRestaurant();
+                }
             } else {
-                setTrendyolRestaurant(false);
-                toast.current?.show({severity: 'error', summary: 'Hata', detail: response.message});
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Hata',
+                    detail: response.message
+                });
             }
-        }).finally(() => {
-            setLoading(false);
-        });
+        }).finally(() => setLoading(false));
     }
     useEffect(() => {
         if (lastSync && new Date().getTime() - new Date(lastSync).getTime() > 300000) {
@@ -81,12 +107,12 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
         </button>}
     >
         <Toast ref={toast}/>
-        {!getirRestaurant && !trendyolRestaurant && !yemeksepetiRestaurant && <Message
+        {!integrations.trendyol && !integrations.yemeksepeti && !integrations.yemeksepeti && <Message
             severity={"warn"}
             text={"Listelenecek restoran ayarı bulunamadı."}
             className={"w-full"}
         />}
-        <Accordion
+        {integrations.trendyol && <Accordion
             activeIndex={activeIndex}
             onTabChange={(e) => {
                 setActiveIndex(e.index);
@@ -138,7 +164,7 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
                                     setSubmitting(false);
                                 })
                             }}>
-                            {(props) => (<form onSubmit={props.handleSubmit} >
+                            {(props) => (<form onSubmit={props.handleSubmit}>
                                 <div className="font-semibold mb-2">Varsayılan Paket Ücreti</div>
                                 <InputNumber
                                     id="defaultPackagePrice"
@@ -325,7 +351,7 @@ const RestauranSettingsSidebar = ({csrfToken, visible, setVisible}: {
                     </div>
                 </AccordionTab>}
 
-        </Accordion>
+        </Accordion>}
 
     </Sidebar>
 }

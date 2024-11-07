@@ -212,7 +212,7 @@ const PersonalInformation = ({
                 delete formData?.tax_office;
             }
             setLoading(true);
-            savePersonalInformation(formData,csrfToken).then((response) => {
+            savePersonalInformation(formData, csrfToken).then((response) => {
                 if (response.status) {
                     let newData = response.details;
                     let resetData = {
@@ -305,9 +305,9 @@ const PersonalInformation = ({
                 };
                 if (details.city !== null) {
                     resetData.selectedCity = cities.find((city) => city.il_adi === details.city) as City;
-                    if (details.state !== null && resetData.selectedCity?.ilceler !== null) {
-                        resetData.selectedState = resetData.selectedCity.ilceler.find((state) => state.ilce_adi === details.state) as State;
-                    }else{
+                    if (details.state !== null && resetData.selectedCity?.ilceler !== null && resetData.selectedCity?.ilceler !== undefined) {
+                        resetData.selectedState = resetData.selectedCity?.ilceler.find((state) => state.ilce_adi === details.state) as State;
+                    } else {
                         resetData.selectedState = resetData.selectedCity.ilceler[0];
                         resetData.state = resetData.selectedCity.ilceler[0].ilce_adi;
                     }
@@ -740,6 +740,7 @@ const PersonalInformation = ({
                                            autoComplete={"off"}
                                            name={"tax_number"}
                                            type={"number"}
+
                                            tooltip={errors.tax_number}
                                            tooltipOptions={{
                                                position: 'top',
