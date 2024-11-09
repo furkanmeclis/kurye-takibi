@@ -22,7 +22,6 @@ class Orders extends Model
         return $this->belongsTo(BusinessDetails::class, 'business_id', 'business_id');
     }
 
-
     public static function getNearbyOrders($lat, $lon, $limit = false): Collection
     {
         $radius = 10;
@@ -252,7 +251,6 @@ class Orders extends Model
         return "W{$businessId}-{$dayOfYear}-{$orderCountToday}";
     }
 
-
     /**
      * @throws \Exception
      */
@@ -341,7 +339,7 @@ class Orders extends Model
                 $newOrder->customer_id = $customer->id;
                 $newOrder->address_id = $address->id;
                 $newOrder->customer_note = $order->customerNote;
-                $newOrder->order_number = "T".$business->id."-".$order->orderNumber;
+                $newOrder->order_number = "T" . $business->id . "-" . $order->orderNumber;
                 $newOrder->start_location = json_encode([
                     "latitude" => $businessDetails->latitude,
                     "longitude" => $businessDetails->longitude
@@ -443,7 +441,6 @@ class Orders extends Model
         );
     }
 
-
     /**
      * @throws \Exception
      */
@@ -541,11 +538,11 @@ class Orders extends Model
      */
     public function finishPrepare(): bool
     {
-        if($this->marketplace == "trendyol") {
+        if ($this->marketplace == "trendyol") {
             $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
             if ($trendyol->status) {
                 $res = $trendyol->client->finishPrepareOrder($this->marketplace_order_id);
-                if($res) {
+                if ($res) {
                     $this->status = "opened";
                     return $this->save();
                 } else {
@@ -554,7 +551,7 @@ class Orders extends Model
             } else {
                 return false;
             }
-        } elseif($this->marketplace == "web"){
+        } elseif ($this->marketplace == "web") {
             $this->status = "opened";
             return $this->save();
         } else {
@@ -568,11 +565,11 @@ class Orders extends Model
      */
     public function startTransporting(): bool
     {
-        if($this->marketplace == "trendyol") {
+        if ($this->marketplace == "trendyol") {
             $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
             if ($trendyol->status) {
                 $res = $trendyol->client->shipOrder($this->marketplace_order_id);
-                if($res) {
+                if ($res) {
                     $this->courier_accepted_at = Carbon::now();
                     $this->status = "transporting";
                     return $this->save();
@@ -582,7 +579,7 @@ class Orders extends Model
             } else {
                 return false;
             }
-        } elseif($this->marketplace == "web"){
+        } elseif ($this->marketplace == "web") {
             $this->status = "transporting";
             $this->courier_accepted_at = Carbon::now();
             return $this->save();
@@ -596,11 +593,11 @@ class Orders extends Model
      */
     public function deliveryOrder(): bool
     {
-        if($this->marketplace == "trendyol") {
+        if ($this->marketplace == "trendyol") {
             $trendyol = IntegrationHelper::getTrendyolClient($this->business_id);
             if ($trendyol->status) {
                 $res = $trendyol->client->deliverOrder($this->marketplace_order_id);
-                if($res) {
+                if ($res) {
                     $this->delivered_at = Carbon::now();
                     $this->status = "delivered";
                     return $this->save();
@@ -610,7 +607,7 @@ class Orders extends Model
             } else {
                 return false;
             }
-        } elseif($this->marketplace == "web"){
+        } elseif ($this->marketplace == "web") {
             $this->status = "delivered";
             $this->delivered_at = Carbon::now();
             return $this->save();
@@ -655,5 +652,167 @@ class Orders extends Model
                 "lastWeek" => array_values($lastWeekCounts),
             ]
         ];
+    }
+
+    public static function createBusinessExportData($orders, $startDate, $endDate): array
+    {
+        $statuses = [
+            'draft' => [
+                'label' => 'Taslak',
+                'severity' => 'secondary'
+            ],
+            'preparing' => [
+                'label' => 'Hazırlanıyor',
+                'severity' => 'warning'
+            ],
+            'opened' => [
+                'label' => 'Açık',
+                'severity' => 'warning'
+            ],
+            'transporting' => [
+                'label' => 'Taşımada',
+                'severity' => 'info'
+            ],
+            'delivered' => [
+                'label' => 'Teslim Edildi',
+                'severity' => 'success'
+            ],
+            'canceled' => [
+                'label' => 'İptal Edildi',
+                'severity' => 'danger'
+            ],
+            'deleted' => [
+                'label' => 'Silindi',
+                'severity' => 'danger'
+            ],
+        ];
+        $business = User::find($orders[0]->business_id);
+        $data = [[]];
+        $totalPrice = 0;
+        foreach ($orders as $order) {
+            $customer = Customers::find($order->customer_id);
+            $data[] = (object)[
+                "orderNumber" => $order->order_number,
+                "businessName" => $business->name,
+                "businessPhone" => $business->phone,
+                "customerName" => $customer->name,
+                "customerPhone" => $customer->phone,
+                "courierName" => $order->courier_id ? User::find($order->courier_id)->name : "Kurye Atanmadı",
+                "status" => $statuses[$order->status]['label'] ?? "Bilinmeyen Durum",
+                "price" => $order->price . " ₺",
+                "marketplace" => $order->marketplace,
+                "createdAt" => $order->created_at->format("d.m.Y H:i:s"),
+                "updatedAt" => $order->updated_at->format("d.m.Y H:i:s"),
+            ];
+            $totalPrice += $order->price;
+        }
+        $data[0] = (object)[
+            "orderNumber" => "Tarih Aralığı",
+            "businessName" => $startDate . " - " . $endDate,
+            "businessPhone" => "",
+            "customerName" => "",
+            "customerPhone" => "",
+            "courierName" => "",
+            "status" => "",
+            "price" => "",
+            "marketplace" => "",
+            "createdAt" => "Oluşturulma Tarihi",
+            "updatedAt" => date("d.m.Y H:i:s"),
+        ];
+        $data[] = (object)[
+            "orderNumber" => "Toplam",
+            "businessName" => "",
+            "businessPhone" => "",
+            "customerName" => "",
+            "customerPhone" => "",
+            "courierName" => "",
+            "status" => "",
+            "price" => $totalPrice . " ₺",
+            "marketplace" => "",
+            "createdAt" => "Oluşturulma Tarihi",
+            "updatedAt" => date("d.m.Y H:i:s"),
+        ];
+        return ($data);
+    }
+    public static function createCourierExportData($orders, $startDate, $endDate): array
+    {
+        $statuses = [
+            'draft' => [
+                'label' => 'Taslak',
+                'severity' => 'secondary'
+            ],
+            'preparing' => [
+                'label' => 'Hazırlanıyor',
+                'severity' => 'warning'
+            ],
+            'opened' => [
+                'label' => 'Açık',
+                'severity' => 'warning'
+            ],
+            'transporting' => [
+                'label' => 'Taşımada',
+                'severity' => 'info'
+            ],
+            'delivered' => [
+                'label' => 'Teslim Edildi',
+                'severity' => 'success'
+            ],
+            'canceled' => [
+                'label' => 'İptal Edildi',
+                'severity' => 'danger'
+            ],
+            'deleted' => [
+                'label' => 'Silindi',
+                'severity' => 'danger'
+            ],
+        ];
+        $courier = User::find($orders[0]->courier_id);
+        $data = [[]];
+        $totalPrice = 0;
+        foreach ($orders as $order) {
+            $business = User::find($order->business_id);
+            $customer = Customers::find($order->customer_id);
+            $data[] = (object)[
+                "orderNumber" => $order->order_number,
+                "courierName" => $courier->name,
+                "businessName" => $business->name,
+                "businessPhone" => $business->phone,
+                "customerName" => $customer->name,
+                "customerPhone" => $customer->phone,
+                "status" => $statuses[$order->status]['label'] ?? "Bilinmeyen Durum",
+                "price" => $order->price . " ₺",
+                "marketplace" => $order->marketplace,
+                "createdAt" => $order->created_at->format("d.m.Y H:i:s"),
+                "updatedAt" => $order->updated_at->format("d.m.Y H:i:s"),
+            ];
+            $totalPrice += $order->price;
+        }
+        $data[0] = (object)[
+            "orderNumber" => "Tarih Aralığı",
+            "businessName" => $startDate . " - " . $endDate,
+            "businessPhone" => "",
+            "customerName" => "",
+            "customerPhone" => "",
+            "courierName" => "",
+            "status" => "",
+            "price" => "",
+            "marketplace" => "",
+            "createdAt" => "Oluşturulma Tarihi",
+            "updatedAt" => date("d.m.Y H:i:s"),
+        ];
+        $data[] = (object)[
+            "orderNumber" => "Toplam",
+            "businessName" => "",
+            "businessPhone" => "",
+            "customerName" => "",
+            "customerPhone" => "",
+            "courierName" => "",
+            "status" => "",
+            "price" => $totalPrice . " ₺",
+            "marketplace" => "",
+            "createdAt" => "Oluşturulma Tarihi",
+            "updatedAt" => date("d.m.Y H:i:s"),
+        ];
+        return ($data);
     }
 }

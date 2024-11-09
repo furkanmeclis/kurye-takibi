@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/multiple-approve-courier', [\App\Http\Controllers\Admin\CouriersController::class, 'multipleApprove'])->name('multipleApprove');
             Route::delete('/destroy-courier/{id}', [\App\Http\Controllers\Admin\CouriersController::class, 'destroy'])->name('destroy');
             Route::post('/multiple-destroy-courier', [\App\Http\Controllers\Admin\CouriersController::class, 'multipleDestroy'])->name('multipleDestroy');
+            Route::post("/export-orders-report/{id}",[\App\Http\Controllers\Admin\CouriersController::class, 'exportOrdersReport'])->name("exportOrdersReport");
         });
         Route::prefix('/businesses')->name("businesses.")->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('index');
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/multiple-approve-business', [\App\Http\Controllers\Admin\BusinessesController::class, 'multipleApprove'])->name('multipleApprove');
             Route::delete('/destroy-business/{id}', [\App\Http\Controllers\Admin\BusinessesController::class, 'destroy'])->name('destroy');
             Route::post('/multiple-destroy-business', [\App\Http\Controllers\Admin\BusinessesController::class, 'multipleDestroy'])->name('multipleDestroy');
+            Route::post("/export-orders-report/{id}",[\App\Http\Controllers\Admin\BusinessesController::class, 'exportOrdersReport'])->name("exportOrdersReport");
         });
         Route::prefix('/orders')->name("orders.")->group(function () {
             Route::get('/cancellation-requests', [\App\Http\Controllers\Admin\OrdersController::class, 'cancellationRequests'])->name('cancellationRequests');

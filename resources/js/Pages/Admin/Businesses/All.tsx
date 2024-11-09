@@ -9,7 +9,7 @@ import {
     destroyBusiness as destroyBusinessFunc,
     multipleDestroyBusiness as multipleDestroyBusinessFunc,
     approveBusiness as approveBusinessFunc,
-    multipleApproveBusiness as multipleApproveBusinessFunc
+    multipleApproveBusiness as multipleApproveBusinessFunc, exportOrdersReport
 } from "@/helpers/Admin/businesses";
 import {DataTable} from "primereact/datatable";
 import {Column, ColumnProps} from "primereact/column";
@@ -23,7 +23,8 @@ import {TriStateCheckbox} from "primereact/tristatecheckbox";
 import {classNames} from "primereact/utils";
 import {Dialog} from "primereact/dialog";
 import {useReactToPrint} from "react-to-print";
-import {getDetailKeysTranslation, getDetailsValueTranslation} from "@/helpers/globalHelper";
+import {getCurrentMonthStartAndEnd, getDetailKeysTranslation, getDetailsValueTranslation} from "@/helpers/globalHelper";
+import {Calendar} from "primereact/calendar";
 
 interface AllCouriersProps {
     auth?: any,
@@ -36,17 +37,20 @@ interface AllCouriersProps {
 }
 
 const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
+    const [dates, setDates] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [businesses, setBusinesses] = useState([]);
     const [selectedBusinesses, setSelectedBusinesses] = useState([] as any[]);
     const [selectedColumns, setSelectedColumns] = useLocalStorage(["name", "email", "phone", "created_at", "actions"], "adminBusinessesApprovedColumns");
     const [error, setError] = useState(null);
     const [visiblePrint, setVisiblePrint] = useState(false);
+    const [visibleExport, setVisibleExport] = useState(false);
     const [selectedBusiness, setSelectedBusiness] = useState(null);
-    const contentRef  = React.useRef(null);
+    const contentRef = React.useRef(null);
     const reactToPrint = useReactToPrint({
         contentRef
-    });const getValuesForDetails = (courier: any) => {
+    });
+    const getValuesForDetails = (courier: any) => {
         let returnData = [] as {
             label: string,
             value: any
@@ -92,6 +96,7 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
             // @ts-ignore
             toast.current?.show({severity: flash?.type ?? "info", summary: flash.title, detail: flash.message ?? ""});
         }
+        setDates(getCurrentMonthStartAndEnd())
     }, []);
     const deleteCourier = (event: any, id: number) => {
         confirmPopup({
@@ -296,6 +301,16 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                             }}
 
                     />
+                    <Button size={"small"} icon={"pi pi-file-export"} severity={"info"} tooltip={"Sipariş Çıktısı Al"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => {
+                                setDates(getCurrentMonthStartAndEnd());
+                                setSelectedBusiness(rowData)
+                                setVisibleExport(true);
+                            }}
+                    />
                     <Button visible={!rowData.activated} size={"small"} icon={"pi pi-check-circle"} severity={"success"}
                             tooltip={"Aktifleştir"}
                             tooltipOptions={{
@@ -472,11 +487,13 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                 style={{width: '50vw'}} resizable={false}
                 className="mx-3 sm:mx-0 w-full md:w-8 lg:w-6 p-fluid" modal
             >
-                <div >
-                    <dl ref={contentRef} className="tw-max-w-md tw-text-gray-900 tw-divide-y tw-divide-gray-300 tw-print:tw-text-black tw-print:tw-divide-gray-400">
+                <div>
+                    <dl ref={contentRef}
+                        className="tw-max-w-md tw-text-gray-900 tw-divide-y tw-divide-gray-300 tw-print:tw-text-black tw-print:tw-divide-gray-400">
 
                         {getValuesForDetails(selectedBusiness).map((item: any, index: any) => (
-                            <div key={index} className="tw-flex tw-flex-col tw-pb-3 tw-mb-1 tw-print:tw-pb-2 tw-print:tw-mb-2 tw-border-b tw-border-gray-300">
+                            <div key={index}
+                                 className="tw-flex tw-flex-col tw-pb-3 tw-mb-1 tw-print:tw-pb-2 tw-print:tw-mb-2 tw-border-b tw-border-gray-300">
                                 <dt className="tw-mb-1 tw-text-gray-600 tw-print:tw-text-gray-800 tw-text-sm">
                                     {item.label}
                                 </dt>
@@ -487,6 +504,82 @@ const AllBusinessPage = ({auth, csrfToken, flash}: AllCouriersProps) => {
                         ))}
                     </dl>
                 </div>
+            </Dialog>
+            <Dialog
+                header={"Sipariş Raporu İndir"}
+                draggable={false}
+                footer={<div className={"gap-2"}>
+                    <Button size={"small"} icon={"pi pi-times"} label={"Kapat"} severity={"danger"}
+                            tooltip={"Kapat"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => setVisibleExport(false)}
+                    />
+                    <Button size={"small"} icon={"pi pi-file-excel"} label={"Excel"} severity={"info"}
+                            tooltip={"Excel Çıktı Al"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => {
+                                if (dates.length > 0) {
+                                    if (dates[0] !== null && dates[1] !== null) {
+                                        let startDate = new Date(dates[0] ?? new Date()).getTime();
+                                        let endDate = new Date(dates[1] ?? new Date()).getTime();
+                                        // @ts-ignore
+                                        exportOrdersReport(selectedBusiness.id, startDate, endDate, 'xlsx', csrfToken, toast?.current, () => {
+                                            setVisibleExport(false);
+                                        })
+                                    }
+                                }
+                            }}
+                    />
+                    <Button size={"small"} icon={"pi pi-file-pdf"} label={"PDF"} severity={"success"}
+                            tooltip={"PDF Çıktı Al"}
+                            tooltipOptions={{
+                                position: "top"
+                            }}
+                            onClick={() => {
+                                if (dates.length > 0) {
+                                    if (dates[0] !== null && dates[1] !== null) {
+                                        let startDate = new Date(dates[0] ?? new Date()).getTime();
+                                        let endDate = new Date(dates[1] ?? new Date()).getTime();
+                                        // @ts-ignore
+                                        exportOrdersReport(selectedBusiness.id, startDate, endDate, 'pdf', csrfToken, toast?.current, () => {
+                                            setVisibleExport(false);
+                                        })
+                                    }
+                                }
+                            }}
+                    />
+                </div>}
+                onHide={() => setVisibleExport(false)} visible={visibleExport}
+                style={{width: '50vw'}} resizable={false}
+                className="mx-3 sm:mx-0 w-full md:w-8 lg:w-6 p-fluid" modal
+            >
+                {selectedBusiness !== null && <>
+                    <p>
+                        <b
+                            // @ts-ignore
+                        >{selectedBusiness.name}</b> Adlı İşletmenin Tarih Bazlı Sipariş Çıktısını Almak İçin Tarih
+                        Aralığını Seçiniz
+                    </p>
+                    <hr/>
+                    <Calendar
+                        value={dates}
+                        inline
+                        // @ts-ignore
+                        onChange={(e) => {
+                            setDates(e.value)
+                        }}
+                        selectionMode="range" readOnlyInput
+                    />
+                    <hr/>
+                    <p>
+                        Seçilen Tarihler
+                        : <b>{dates !== null && new Date(dates[0] ?? new Date()).toLocaleDateString()} - {dates !== null && new Date(dates[1] ?? new Date()).toLocaleDateString()}</b>
+                    </p>
+                </>}
             </Dialog>
         </MainLayout>
     </PageContainer>

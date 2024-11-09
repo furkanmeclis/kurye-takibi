@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Models\CustomerAddresses;
 use App\Models\Customers;
+use App\Models\Orders;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -211,6 +212,12 @@ class CustomersController
                     "message" => "Müşteri bulunamadı."
                 ]);
             }
+            if($customer->isMappedRecord()){
+                return response()->json([
+                    "status" => false,
+                    "message" => "Müşteri Daha Önce Sipariş ile ilişkilendirilmiş."
+                ]);
+            }
             if ($customer->delete()) {
                 return response()->json([
                     "status" => true,
@@ -238,6 +245,12 @@ class CustomersController
     {
         $customers = Customers::where('business_id', auth()->user()->id)->whereIn('id', $request->ids);
         if ($customers) {
+            if(Orders::whereIn('customer_id', $request->ids)->exists()){
+                return response()->json([
+                    "status" => false,
+                    "message" => "Seçilen Müşterilerden biri daha önce sipariş ile ilişkilendirilmiş.İşlem Gerçekleştirilemedi."
+                ]);
+            }
             $customers->delete();
             return response()->json([
                 "status" => true,
@@ -393,6 +406,12 @@ class CustomersController
                 return response()->json([
                     "status" => false,
                     "message" => "Adres bulunamadı."
+                ]);
+            }
+            if($address->isMappedRecord()){
+                return response()->json([
+                    "status" => false,
+                    "message" => "Adres Daha Önce Sipaş ile ilişkilendirilmiş."
                 ]);
             }
             if ($address->delete()) {

@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\BusinessOrdersExport;
 use App\Http\Controllers\Controller;
 use App\Models\BusinessDetails;
 use App\Models\CourierDetails;
+use App\Models\Orders;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BusinessesController extends Controller
 {
@@ -114,7 +118,7 @@ class BusinessesController extends Controller
 
     public function getWaitApprovalBusinesses(): \Illuminate\Http\JsonResponse
     {
-        $businesses = BusinessDetails::where("approved", 0)->where("completed",1)->orderBy("created_at", "desc")->get()->map(function ($details) {
+        $businesses = BusinessDetails::where("approved", 0)->where("completed", 1)->orderBy("created_at", "desc")->get()->map(function ($details) {
             $details->business = User::where("id", $details->business_id)->first();
             return $details;
         });
@@ -130,6 +134,7 @@ class BusinessesController extends Controller
             ]);
         }
     }
+
     public function showDetails($id): \Illuminate\Http\JsonResponse
     {
         $business = User::where('role', 'business')->where('id', $id)->first();
@@ -280,6 +285,7 @@ class BusinessesController extends Controller
             ]);
         }
     }
+
     public function multipleApprove(Request $request): \Illuminate\Http\JsonResponse
     {
         $businesses = User::where('role', 'business')->whereIn('id', $request->ids);
@@ -337,6 +343,32 @@ class BusinessesController extends Controller
                 "status" => false,
                 "message" => "Seçilen İşletmeler Silinemedi."
             ]);
+        }
+    }
+
+    public function exportOrdersReport(Request $request, $businessId): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+    {
+        $business = User::find($businessId);
+        if ($business) {
+            $startDate = Carbon::createFromTimestampMs($request->startDate);
+            $endDate = Carbon::createFromTimestampMs($request->endDate);
+            $orders = Orders::where("business_id", $business->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+            if($orders->isEmpty()) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Belirtilen Tarih Aralığında Sipariş Bulunamadı."
+                ], 404);
+            }
+            $excelData = Orders::createBusinessExportData($orders, $startDate->format("d.m.Y"), $endDate->format("d.m.Y"));
+            $exportType = $request->exportType == "xlsx" ? \Maatwebsite\Excel\Excel::XLSX : \Maatwebsite\Excel\Excel::MPDF;
+            return Excel::download(new BusinessOrdersExport($excelData), 'orders.xlsx', $exportType);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "İşletme Bulunamadı"
+            ], 404);
         }
     }
 }

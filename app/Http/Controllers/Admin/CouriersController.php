@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\BusinessOrdersExport;
+use App\Exports\CourierOrdersExport;
 use App\Models\CourierDetails;
+use App\Models\Orders;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CouriersController extends \App\Http\Controllers\Controller
 {
@@ -332,6 +337,31 @@ class CouriersController extends \App\Http\Controllers\Controller
                 "status" => false,
                 "message" => "Seçilen Kuryeler Silinemedi."
             ]);
+        }
+    }
+    public function exportOrdersReport(Request $request, $courierId): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+    {
+        $courier = User::find($courierId);
+        if ($courier) {
+            $startDate = Carbon::createFromTimestampMs($request->startDate)->startOfDay();
+            $endDate = Carbon::createFromTimestampMs($request->endDate)->endOfDay();
+            $orders = Orders::where("courier_id", $courier->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+            if($orders->isEmpty()) {
+                return response()->json([
+                    "status" => false,
+                    "message" => "Belirtilen Tarih Aralığında Sipariş Bulunamadı."
+                ], 404);
+            }
+            $excelData = Orders::createCourierExportData($orders, $startDate->format("d.m.Y"), $endDate->format("d.m.Y"));
+            $exportType = $request->exportType == "xlsx" ? \Maatwebsite\Excel\Excel::XLSX : \Maatwebsite\Excel\Excel::MPDF;
+            return Excel::download(new CourierOrdersExport($excelData), 'orders.xlsx', $exportType);
+        } else {
+            return response()->json([
+                "status" => false,
+                "message" => "Kurye Bulunamadı"
+            ], 404);
         }
     }
 }

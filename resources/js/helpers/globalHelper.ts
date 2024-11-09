@@ -332,3 +332,12 @@ export const getSectors = () => {
         "Bahçe ve Çiçek Düzenleme",
     ];
 }
+export const getCurrentMonthStartAndEnd = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+    return [start, end];
+}

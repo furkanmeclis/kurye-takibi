@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class CustomerAddresses extends Model
 {
     use HasFactory;
+
+    public function isMappedRecord()
+    {
+        return Orders::where('address_id', $this->id)->exists();
+    }
 }
